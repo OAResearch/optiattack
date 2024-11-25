@@ -5,3 +5,4 @@ httpx
 uvicorn
 pillow
 python-multipart
+numpy
