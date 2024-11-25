@@ -7,3 +7,4 @@ pillow
 python-multipart
 numpy
 pytest-cov
+requests

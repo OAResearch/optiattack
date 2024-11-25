@@ -46,12 +46,11 @@ def test_info_nut_endpoint(setup_test_app):
     response = setup_test_app.get(constants.INFO_NUT_PATH)
     assert response.status_code == 200
     assert response.json()["is_running"] is False
-# FastAPI uygulamasını doğrudan alıyoruz.
+
 app = process_image.app
 client = TestClient(app)
 
 def test_new_action_endpoint():
-    # Mock bir resim oluşturup yükleyelim.
     image_data = BytesIO()
     image = Image.new("RGB", (100, 100), color="red")
     image.save(image_data, format="JPEG")
