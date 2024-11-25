@@ -4,7 +4,9 @@ import logging
 class RemoteController:
 
     def __init__(self, config):
-        base_url = f"http://{config["NUT_HOST"]}:{config["NUT_PORT"]}{config["NUT_BASE_PATH"]}"
+
+        # python 3.10 is not supported nested f-string. So, we need to use config['NUT_PORT'] instead of config["NUT_PORT"]
+        base_url = f"http://{config['NUT_HOST']}:{config['NUT_PORT']}{config['NUT_BASE_PATH']}"
         self.NUT_ENDPOINTS = {
             "info": f"{base_url}/infoNUT",
             "run": f"{base_url}/runNUT",
