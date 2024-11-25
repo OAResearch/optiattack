@@ -1,9 +1,15 @@
+import base64
+import io
+
+import numpy as np
 import uvicorn
+from PIL import Image
 from fastapi import FastAPI, File, UploadFile
 from functools import wraps
 import threading
 
-from client import constants
+# from client import constants
+import constants
 
 # State dictionary to track method call counts
 state = {
@@ -32,19 +38,16 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = cons
 
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            # Increment the call count for the method
             return await func(*args, **kwargs)
 
         @app.get(f"/")
         async def test():
             return {"message": "Hello, FastAPI is running!"}
 
-        # Register GET endpoint
         @app.get(f"{constants.INFO_NUT_PATH}")
         async def get_nut_state():
             return state
 
-        # Register POST endpoint
         @app.post(f"{constants.RUN_NUT_PATH}")
         async def run_nut():
             state["is_running"] = True
@@ -61,10 +64,11 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = cons
             return state
 
         @app.post(f"{constants.NEW_ACTION}")
-        async def new_action(file: UploadFile = File(...)):
-            return await func(file)
+        async def new_action(image: UploadFile = File(...)):
+            img_content = await image.read()
+            base64_img = base64.b64encode(img_content)
+            return func(base64_img)
 
-        # Start FastAPI server in a separate thread
         def start_server():
             uvicorn.run(app, host=host, port=port)
 
