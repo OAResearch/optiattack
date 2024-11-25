@@ -1,9 +1,12 @@
 from io import BytesIO
 
+import pytest
 from PIL import Image
+from starlette.testclient import TestClient
 
 from client import constants
 from client.optiattack_client import collect_info
+from core.config import Config
 from core.remote.remote_controller import RemoteController
 
 PROCESS_IMAGE_RESPONSE = {
@@ -17,13 +20,11 @@ PROCESS_IMAGE_RESPONSE = {
 def process_image(encoded_image: bytes):
     return PROCESS_IMAGE_RESPONSE
 
-config = {
-    "NUT_HOST": constants.DEFAULT_CONTROLLER_HOST,
-    "NUT_PORT": constants.DEFAULT_CONTROLLER_PORT,
-    "NUT_BASE_PATH": constants.BASE_PATH
-}
 
-remote = RemoteController(config)
+
+config = Config([])
+remote = RemoteController()
+
 
 def test_get_info_nut():
     response = remote.get_nut_info()

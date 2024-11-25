@@ -1,6 +1,12 @@
-# Configuration
+# Configuration Parameters
 
-## premature_stop
+## nut_host
 
-- **Description**: Max amount of time the search is going to wait since last improvement.
+- **Default Value**: localhost
+- **Description**: Host address for the NUT. Default is 'localhost'.
+
+## nut_port
+
+- **Default Value**: 38000
+- **Description**: Port number for the NUT. Default is 38000.
 
