@@ -6,3 +6,4 @@ uvicorn
 pillow
 python-multipart
 numpy
+pytest-cov
