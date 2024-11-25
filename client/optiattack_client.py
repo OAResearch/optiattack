@@ -8,8 +8,10 @@ from fastapi import FastAPI, File, UploadFile
 from functools import wraps
 import threading
 
-# from client import constants
-import constants
+try:
+    from client import constants
+except ImportError:
+    import constants
 
 # State dictionary to track method call counts
 state = {
@@ -21,6 +23,7 @@ state = {
     "info_nut": constants.INFO_NUT_PATH,
     "new_action": constants.NEW_ACTION,
 }
+app = FastAPI()
 
 def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = constants.DEFAULT_CONTROLLER_PORT):
     """
@@ -32,7 +35,6 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = cons
         host (str): Host where the FastAPI app will run.
         port (int): Port where the FastAPI app will run.
     """
-    app = FastAPI()
 
     def decorator(func):
 
@@ -72,6 +74,7 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = cons
         def start_server():
             uvicorn.run(app, host=host, port=port)
 
+        wrapper.app = app
         threading.Thread(target=start_server, daemon=True).start()
 
         return wrapper
