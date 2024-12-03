@@ -56,10 +56,11 @@ class RemoteController:
             logging.error("Connection Error")
             return {"error": "Connection Error"}
 
-    def new_action(self, file):
+    def new_action(self, image_array):
         try:
             logging.info("Sending new action")
-            return self.connection.post(self.NUT_ENDPOINTS["newAction"], files=file).json()
+            json_data = image_array.tolist()
+            return self.connection.post(self.NUT_ENDPOINTS["newAction"], json={"image": json_data}).json()
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
             return {"error": "Connection Error"}
