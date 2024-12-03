@@ -16,7 +16,7 @@ PROCESS_IMAGE_RESPONSE = {
 }
 
 @collect_info(host=constants.DEFAULT_CONTROLLER_HOST, port=constants.DEFAULT_CONTROLLER_PORT)
-def process_image(encoded_image: bytes):
+def process_image(image_array: np.ndarray):
     return PROCESS_IMAGE_RESPONSE
 
 
@@ -58,11 +58,9 @@ def test_new_action_endpoint():
     image_data.seek(0)
 
     matrix = np.array(image)
-    binary_data = matrix.tobytes()
-    body = {"request": binary_data}
-    headers = {'Content-Type': 'application/octet-stream'}
+    body = {"image": matrix.tolist()}
 
-    response = client.post(constants.NEW_ACTION, data=body, headers=headers)
+    response = client.post(constants.NEW_ACTION, json=body)
 
     assert response.status_code == 200
     assert response.json() == PROCESS_IMAGE_RESPONSE
