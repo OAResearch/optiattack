@@ -4,9 +4,11 @@ import io
 import numpy as np
 import uvicorn
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, Request
 from functools import wraps
 import threading
+
+from pydantic import BaseModel
 
 try:
     from client import constants
@@ -24,6 +26,9 @@ state = {
     "new_action": constants.NEW_ACTION,
 }
 app = FastAPI()
+
+class MatrixModel(BaseModel):
+    image: list[list[list[int]]]
 
 def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = constants.DEFAULT_CONTROLLER_PORT):
     """
@@ -66,10 +71,10 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = cons
             return state
 
         @app.post(f"{constants.NEW_ACTION}")
-        async def new_action(image: UploadFile = File(...)):
-            img_content = await image.read()
-            base64_img = base64.b64encode(img_content)
-            return func(base64_img)
+        async def new_action(data: MatrixModel):
+            array_data = np.array(data.image)
+
+            return func(array_data)
 
         def start_server():
             uvicorn.run(app, host=host, port=port)

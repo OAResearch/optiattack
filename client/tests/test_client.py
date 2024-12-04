@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from PIL import Image
 from fastapi.testclient import TestClient
@@ -15,7 +16,7 @@ PROCESS_IMAGE_RESPONSE = {
 }
 
 @collect_info(host=constants.DEFAULT_CONTROLLER_HOST, port=constants.DEFAULT_CONTROLLER_PORT)
-def process_image(encoded_image: bytes):
+def process_image(image_array: np.ndarray):
     return PROCESS_IMAGE_RESPONSE
 
 
@@ -56,9 +57,10 @@ def test_new_action_endpoint():
     image.save(image_data, format="JPEG")
     image_data.seek(0)
 
-    # Dosya yükleme için senkron istemciyi kullanıyoruz.
-    files = {"image": ("test.jpg", image_data, "image/jpeg")}
-    response = client.post(constants.NEW_ACTION, files=files)
+    matrix = np.array(image)
+    body = {"image": matrix.tolist()}
+
+    response = client.post(constants.NEW_ACTION, json=body)
 
     assert response.status_code == 200
     assert response.json() == PROCESS_IMAGE_RESPONSE

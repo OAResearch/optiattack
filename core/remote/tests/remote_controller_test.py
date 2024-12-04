@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import numpy as np
 import pytest
 from PIL import Image
 from starlette.testclient import TestClient
@@ -44,9 +45,9 @@ def test_new_action():
     image.save(image_data, format="JPEG")
     image_data.seek(0)
 
-    file = {"image": ("test.jpg", image_data, "image/jpeg")}
+    image_array = np.array(image)
 
-    response = remote.new_action(file)
+    response = remote.new_action(image_array)
     assert response["prediction"] == PROCESS_IMAGE_RESPONSE["prediction"]
     image.close()
 
