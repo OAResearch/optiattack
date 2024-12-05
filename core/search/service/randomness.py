@@ -1,16 +1,15 @@
 """A module for generating random numbers and performing various random operations."""
 import sys
-from typing import List, Any, Optional
+from typing import List, Optional
 
 import numpy as np
-from dependency_injector.providers import Configuration
 
 
 class Randomness:
 
     """A class to generate random numbers and perform various random operations."""
 
-    def __init__(self, config:Configuration):
+    def __init__(self, config):
         """Initializes the Randomness object and sets the random seed."""
         self.random = np.random
         self.update_seed(config.get("seed"))
@@ -27,7 +26,7 @@ class Randomness:
         else:
             self.random.seed(seed)
 
-    def next_float(self, min_value:float=0.0, max_value:float=1.0):
+    def next_float(self, min_value: float = 0.0, max_value: float = 1.0):
         """
         Generates a random float value between specified bounds.
 
@@ -44,7 +43,7 @@ class Randomness:
 
         return self.random.uniform(min_value, max_value)
 
-    def next_bool(self, value:float):
+    def next_bool(self, value: float):
         """
         Generates a boolean value based on a probability.
 
@@ -59,7 +58,7 @@ class Randomness:
         """
         return self.random.rand() < value
 
-    def next_int(self, min_value:int=0, max_value:int=sys.maxsize):
+    def next_int(self, min_value: int = 0, max_value: int = sys.maxsize):
         """
         Generates a random integer between specified bounds.
 
@@ -77,7 +76,7 @@ class Randomness:
 
         return self.random.randint(min_value, max_value)
 
-    def random_choice(self, max_size:int, selection_probs:Optional[List]=None):
+    def random_choice(self, max_size: int, selection_probs: Optional[List] = None):
         """
         Returns a random choice from a range or based on a probability distribution.
 
@@ -96,7 +95,7 @@ class Randomness:
             return self.random.choice(max_size)
         return self.random.choice(max_size, p=selection_probs)
 
-    def random_gaussian(self, mean:float, std:float):
+    def random_gaussian(self, mean: float, std: float):
         """
         Generates a random float value from a Gaussian distribution.
 
