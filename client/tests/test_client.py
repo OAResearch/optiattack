@@ -15,14 +15,16 @@ PROCESS_IMAGE_RESPONSE = {
     ]
 }
 
-@collect_info(host=constants.DEFAULT_CONTROLLER_HOST, port=constants.DEFAULT_CONTROLLER_PORT)
+
+@collect_info(host=constants.DEFAULT_CONTROLLER_HOST,
+              port=constants.DEFAULT_CONTROLLER_PORT)
 def process_image(image_array: np.ndarray):
     return PROCESS_IMAGE_RESPONSE
 
 
 @pytest.fixture(scope="module")
 def setup_test_app():
-    client = TestClient(process_image.app)  # Decorator içindeki `app`'e erişiyoruz.
+    client = TestClient(process_image.app)
     return client
 
 
@@ -48,8 +50,10 @@ def test_info_nut_endpoint(setup_test_app):
     assert response.status_code == 200
     assert response.json()["is_running"] is False
 
+
 app = process_image.app
 client = TestClient(app)
+
 
 def test_new_action_endpoint():
     image_data = BytesIO()

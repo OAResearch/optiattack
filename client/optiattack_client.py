@@ -1,10 +1,7 @@
-import base64
-import io
-
 import numpy as np
 import uvicorn
-from PIL import Image
-from fastapi import FastAPI, Request
+
+from fastapi import FastAPI
 from functools import wraps
 import threading
 
@@ -27,10 +24,13 @@ state = {
 }
 app = FastAPI()
 
+
 class MatrixModel(BaseModel):
     image: list[list[list[int]]]
 
-def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = constants.DEFAULT_CONTROLLER_PORT):
+
+def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
+                 port: int = constants.DEFAULT_CONTROLLER_PORT):
     """
     Decorator generator that:
     - Tracks method calls.
@@ -47,7 +47,7 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST, port: int = cons
         async def wrapper(*args, **kwargs):
             return await func(*args, **kwargs)
 
-        @app.get(f"/")
+        @app.get("/")
         async def test():
             return {"message": "Hello, FastAPI is running!"}
 
