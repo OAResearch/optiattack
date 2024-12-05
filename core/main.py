@@ -1,3 +1,5 @@
+"""starting point of the application."""
+
 from io import BytesIO
 
 import numpy as np
@@ -10,6 +12,9 @@ from core.search.service.randomness import Randomness
 
 
 class OptiAttack:
+
+    """Main class of the application."""
+
     @inject
     def __init__(self,
                  randomness: Randomness = Provide[BaseModule.randomness],
@@ -17,12 +22,14 @@ class OptiAttack:
                  remote_controller:
                  RemoteController = Provide[BaseModule.remote_controller]
                  ):
+        """Initialize the application."""
         self.randomness = randomness
         self.config = config
         self.remote_controller = remote_controller
         self.__name__ = "OptiAttack"
 
     def run(self):
+        """Run the application."""
         print("Running application")
 
         image_data = BytesIO()
@@ -38,6 +45,9 @@ class OptiAttack:
 
 
 if __name__ == "__main__":
+
+    """Main entry point of the application."""
+
     container = BaseModule()
     config_parser = container.config_parser()
     parsed_args = config_parser.parse_args()

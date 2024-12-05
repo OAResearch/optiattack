@@ -1,3 +1,5 @@
+"""remote_controller.py - RemoteController class to interact with the NUT server."""
+
 import requests
 import logging
 
@@ -6,8 +8,10 @@ from client import constants
 
 class RemoteController:
 
-    def __init__(self, config):
+    """RemoteController class to interact with the NUT server."""
 
+    def __init__(self, config):
+        """Initialize the RemoteController class."""
         # python 3.10 is not supported nested f-string. So,
         # we need to use config['NUT_PORT'] instead of config["NUT_PORT"]
         base_url = (f"http://{config.get('nut_host')}:"
@@ -24,6 +28,7 @@ class RemoteController:
         self.connection = requests.Session()
 
     def get_nut_info(self):
+        """Get NUT info."""
         try:
             logging.info("Getting NUT info")
             return self.connection.get(self.NUT_ENDPOINTS["info"]).json()
@@ -32,6 +37,7 @@ class RemoteController:
             return {"error": "Connection Error"}
 
     def run_nut(self):
+        """Run NUT."""
         try:
             logging.info("Running NUT")
             return self.connection.post(self.NUT_ENDPOINTS["run"]).json()
@@ -40,6 +46,7 @@ class RemoteController:
             return {"error": "Connection Error"}
 
     def stop_nut(self):
+        """Stop NUT."""
         try:
             logging.info("Stopping NUT")
             return self.connection.post(self.NUT_ENDPOINTS["stop"]).json()
@@ -48,6 +55,7 @@ class RemoteController:
             return {"error": "Connection Error"}
 
     def get_test_results(self):
+        """Get test results."""
         # TODO: Not implemented and tested
         try:
             logging.info("Getting test results")
@@ -58,6 +66,7 @@ class RemoteController:
             return {"error": "Connection Error"}
 
     def new_action(self, image_array):
+        """Send new action."""
         try:
             logging.info("Sending new action")
             json_data = image_array.tolist()
