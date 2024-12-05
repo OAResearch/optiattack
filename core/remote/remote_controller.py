@@ -2,16 +2,15 @@ import requests
 import logging
 
 from client import constants
-from core.config import Config
+from core.config_parser import ConfigParser
 
 
 class RemoteController:
 
-    def __init__(self):
-        config = Config()
+    def __init__(self, config):
 
         # python 3.10 is not supported nested f-string. So, we need to use config['NUT_PORT'] instead of config["NUT_PORT"]
-        base_url = f"http://{config.default_params()['nut_host']}:{config.default_params()['nut_port']}{constants.BASE_PATH}"
+        base_url = f"http://{config.get('nut_host')}:{config.get('nut_port')}{constants.BASE_PATH}"
         self.NUT_ENDPOINTS = {
             "info": f"{base_url}/infoNUT",
             "run": f"{base_url}/runNUT",

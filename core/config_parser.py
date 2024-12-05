@@ -3,12 +3,12 @@ import argparse
 import inspect
 from typing import Any
 
-from core.utils.decorators import singleton, Cfg
+from core.utils.decorators import Cfg
 
 
-@singleton
-class Config:
-    def __init__(self, args=None):
+# @singleton
+class ConfigParser:
+    def __init__(self):
         self.parser = argparse.ArgumentParser(description="Application Configuration")
         self._args = None
         self._defaults = {}
@@ -20,7 +20,7 @@ class Config:
                 self.add_param(name, obj(), obj.cfg_description)
 
         # Parse arguments
-        self.parse_args(args)
+        # self.parse_args(args)
 
     def add_param(self, name: str, default: Any, description: str, **kwargs):
         """
@@ -33,17 +33,22 @@ class Config:
         # Add argument to the parser
         self.parser.add_argument(f"--{name}", default=default, help=description, **kwargs)
 
-    def parse_args(self, args):
-        """
-        Parse command-line arguments and update defaults.
-        """
-        if self._args is None:
-            # Parse arguments
-            self._args = vars(self.parser.parse_args(args))
-            # Update defaults with command-line arguments
-            for key, value in self._args.items():
-                self._defaults[key] = value
-        return self._args
+    def parse_args(self):
+        args = self.parser.parse_args()
+        self.validate_args(args)
+        return vars(args)
+
+    # def parse_args(self, args):
+    #     """
+    #     Parse command-line arguments and update defaults.
+    #     """
+    #     if self._args is None:
+    #         # Parse arguments
+    #         self._args = vars(self.parser.parse_args(args))
+    #         # Update defaults with command-line arguments
+    #         for key, value in self._args.items():
+    #             self._defaults[key] = value
+    #     return self._args
 
     def to_markdown(self, output_file: str = "config.md"):
         """
@@ -63,6 +68,11 @@ class Config:
         """
         return self._defaults
 
+    @staticmethod
+    def validate_args(args):
+        # Validate arguments
+        pass
+
     # Define parameters using Cfg decorator
     @Cfg("Host address for the NUT. Default is 'localhost'.")
     def nut_host(self):
@@ -71,3 +81,7 @@ class Config:
     @Cfg("Port number for the NUT. Default is 38000.")
     def nut_port(self):
         return 38000
+
+    @Cfg("Seed number for the random number generator. Negative values mean use the system time.")
+    def seed(self):
+        return -1
