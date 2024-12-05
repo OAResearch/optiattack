@@ -3,12 +3,11 @@ from io import BytesIO
 import numpy as np
 import pytest
 from PIL import Image
-from starlette.testclient import TestClient
 
 from client import constants
 from client.optiattack_client import collect_info
-from core.config_parser import Config
-from core.remote.remote_controller import RemoteController
+from core.main import OptiAttack
+from core.problem.base_module import BaseModule
 
 PROCESS_IMAGE_RESPONSE = {
         "prediction": [
@@ -22,24 +21,32 @@ def process_image(encoded_image: bytes):
     return PROCESS_IMAGE_RESPONSE
 
 
+@pytest.fixture
+def app():
+    container = BaseModule()
+    container.unwire()
+    container.config.override({"seed": 42, "nut_host": constants.DEFAULT_CONTROLLER_HOST, "nut_port": constants.DEFAULT_CONTROLLER_PORT})
 
-config = Config([])
-remote = RemoteController()
+    app = OptiAttack(
+        config=container.config(),
+        remote_controller=container.remote_controller(),
+    )
+    yield app
 
+def test_get_info_nut(app):
 
-def test_get_info_nut():
-    response = remote.get_nut_info()
+    response = app.remote_controller.get_nut_info()
     assert response["is_running"] is False
 
-def test_run_nut():
-    response = remote.run_nut()
+def test_run_nut(app):
+    response = app.remote_controller.run_nut()
     assert response["is_running"] is True
 
-def test_stop_nut():
-    response = remote.stop_nut()
+def test_stop_nut(app):
+    response = app.remote_controller.stop_nut()
     assert response["is_running"] is False
 
-def test_new_action():
+def test_new_action(app):
     image_data = BytesIO()
     image = Image.new("RGB", (100, 100), color="red")
     image.save(image_data, format="JPEG")
@@ -47,7 +54,7 @@ def test_new_action():
 
     image_array = np.array(image)
 
-    response = remote.new_action(image_array)
+    response = app.remote_controller.new_action(image_array)
     assert response["prediction"] == PROCESS_IMAGE_RESPONSE["prediction"]
     image.close()
 

@@ -8,7 +8,7 @@ from core.utils.decorators import Cfg
 
 # @singleton
 class ConfigParser:
-    def __init__(self, args=None):
+    def __init__(self):
         self.parser = argparse.ArgumentParser(description="Application Configuration")
         self._args = None
         self._defaults = {}
