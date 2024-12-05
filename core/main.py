@@ -2,24 +2,48 @@ from io import BytesIO
 
 import numpy as np
 from PIL import Image
+from dependency_injector.wiring import inject, Provide
 
+from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
+from core.search.service.randomness import Randomness
 
-controller = RemoteController()
 
-controller.run_nut()
-image_data = BytesIO()
-image = Image.new("RGB", (224, 224), color="red")
-image.save(image_data, format="JPEG")
-image_data.seek(0)
+class OptiAttack:
+    @inject
+    def __init__(self,
+                 randomness: Randomness = Provide[BaseModule.randomness],
+                 config: dict = Provide[BaseModule.config],
+                 remote_controller: RemoteController = Provide[BaseModule.remote_controller]
+                 ):
+        self.randomness = randomness
+        self.config = config
+        self.remote_controller = remote_controller
+        self.__name__ = "OptiAttack"
 
-image_array = np.array(image)
+    def run(self):
+        print("Running application")
 
-for i in range(100):
-    res = controller.new_action(image_array)
-    print(f"Action {i} completed")
+        image_data = BytesIO()
+        image = Image.new("RGB", (224, 224), color="red")
+        image.save(image_data, format="JPEG")
+        image_data.seek(0)
 
-print("All actions completed")
-controller.stop_nut()
+        image_array = np.array(image)
+
+        for i in range(100):
+            res = self.remote_controller.new_action(image_array)
+            print(f"Action {i} completed")
+
+
+if __name__ == "__main__":
+    container = BaseModule()
+    config_parser = container.config_parser()
+    parsed_args = config_parser.parse_args()
+    container.config.override(parsed_args)
+
+    app = OptiAttack()
+    container.wire(modules=[app])
+    app.run()
 
 

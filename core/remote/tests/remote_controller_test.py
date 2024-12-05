@@ -7,7 +7,7 @@ from starlette.testclient import TestClient
 
 from client import constants
 from client.optiattack_client import collect_info
-from core.config import Config
+from core.config_parser import Config
 from core.remote.remote_controller import RemoteController
 
 PROCESS_IMAGE_RESPONSE = {
