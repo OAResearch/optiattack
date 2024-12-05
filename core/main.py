@@ -46,8 +46,6 @@ class OptiAttack:
 
 if __name__ == "__main__":
 
-    """Main entry point of the application."""
-
     container = BaseModule()
     config_parser = container.config_parser()
     parsed_args = config_parser.parse_args()

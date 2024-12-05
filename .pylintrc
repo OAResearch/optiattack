@@ -17,7 +17,6 @@ min-similarity-lines=5
 [TYPECHECK]
 ignore-mixin-members=yes
 # ignored-classes=
-zope=no
 # generated-members=providedBy,implementedBy,rawDataReceived
 
 [DESIGN]
@@ -29,9 +28,6 @@ max-locals=20
 
 # Maximum number of return / yield for function / method body
 max-returns=10
-
-# Maximum number of branch for function / method body
-max-branchs=10
 
 # Maximum number of statements in function / method body
 max-statements=60

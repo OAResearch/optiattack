@@ -1,7 +1,7 @@
 """Custom decorator to add descriptions to configuration parameters."""
 
 
-def Cfg(description: str):
+def cfg(description: str):
     """Decorate to add descriptions to configuration parameters."""
 
     def decorator(func):

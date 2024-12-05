@@ -3,7 +3,7 @@ import argparse
 import inspect
 from typing import Any
 
-from core.utils.decorators import Cfg
+from core.utils.decorators import cfg
 
 
 class ConfigParser:
@@ -74,17 +74,17 @@ class ConfigParser:
         pass
 
     # Define parameters using Cfg decorator
-    @Cfg("Host address for the NUT. Default is 'localhost'.")
+    @cfg("Host address for the NUT. Default is 'localhost'.")
     def nut_host(self):
         """Host address for the NUT."""
         return "localhost"
 
-    @Cfg("Port number for the NUT. Default is 38000.")
+    @cfg("Port number for the NUT. Default is 38000.")
     def nut_port(self):
         """Port number for the NUT."""
         return 38000
 
-    @Cfg("Seed number for the random number generator. "
+    @cfg("Seed number for the random number generator. "
          "Negative values mean use the system time.")
     def seed(self):
         """Seed number for the random number generator."""

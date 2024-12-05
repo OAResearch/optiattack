@@ -1,7 +1,7 @@
 """remote_controller.py - RemoteController class to interact with the NUT server."""
 
-import requests
 import logging
+import requests
 
 from client import constants
 
