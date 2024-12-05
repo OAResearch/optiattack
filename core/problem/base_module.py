@@ -1,5 +1,4 @@
 from dependency_injector import containers, providers
-from dependency_injector.wiring import Provide, inject
 
 from core.config_parser import ConfigParser
 from core.remote.remote_controller import RemoteController

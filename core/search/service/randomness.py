@@ -34,7 +34,6 @@ class Randomness:
             return self.random.randint(min_value, 1)
         return self.random.randint(min_value, max_value)
 
-
     def random_choice(self, max_size, selection_probs=None):
         if selection_probs is None:
             return self.random.choice(max_size)

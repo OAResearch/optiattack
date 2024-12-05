@@ -14,7 +14,8 @@ class OptiAttack:
     def __init__(self,
                  randomness: Randomness = Provide[BaseModule.randomness],
                  config: dict = Provide[BaseModule.config],
-                 remote_controller: RemoteController = Provide[BaseModule.remote_controller]
+                 remote_controller:
+                 RemoteController = Provide[BaseModule.remote_controller]
                  ):
         self.randomness = randomness
         self.config = config
@@ -32,7 +33,7 @@ class OptiAttack:
         image_array = np.array(image)
 
         for i in range(100):
-            res = self.remote_controller.new_action(image_array)
+            self.remote_controller.new_action(image_array)
             print(f"Action {i} completed")
 
 
@@ -45,5 +46,3 @@ if __name__ == "__main__":
     app = OptiAttack()
     container.wire(modules=[app])
     app.run()
-
-

@@ -6,10 +6,10 @@ from typing import Any
 from core.utils.decorators import Cfg
 
 
-# @singleton
 class ConfigParser:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(description="Application Configuration")
+        self.parser = argparse.ArgumentParser(
+            description="Application Configuration")
         self._args = None
         self._defaults = {}
         self._descriptions = {}
@@ -31,7 +31,10 @@ class ConfigParser:
         self._descriptions[name] = description
 
         # Add argument to the parser
-        self.parser.add_argument(f"--{name}", default=default, help=description, **kwargs)
+        self.parser.add_argument(f"--{name}",
+                                 default=default,
+                                 help=description,
+                                 **kwargs)
 
     def parse_args(self):
         args = self.parser.parse_args()
@@ -52,12 +55,14 @@ class ConfigParser:
 
     def to_markdown(self, output_file: str = "config.md"):
         """
-        Export configuration parameters and their descriptions to a Markdown file.
+        Export configuration parameters and
+        their descriptions to a Markdown file.
         """
-        with open(output_file, "w") as f:
+        with (open(output_file, "w") as f):
             f.write("# Configuration Parameters\n\n")
             for name, default in self._defaults.items():
-                description = self._descriptions.get(name, "No description provided.")
+                description = self._descriptions.get(
+                    name, "No description provided.")
                 f.write(f"## {name}\n\n")
                 f.write(f"- **Default Value**: {default}\n")
                 f.write(f"- **Description**: {description}\n\n")
@@ -82,6 +87,7 @@ class ConfigParser:
     def nut_port(self):
         return 38000
 
-    @Cfg("Seed number for the random number generator. Negative values mean use the system time.")
+    @Cfg("Seed number for the random number generator. "
+         "Negative values mean use the system time.")
     def seed(self):
         return -1
