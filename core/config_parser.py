@@ -55,7 +55,7 @@ class ConfigParser:
 
     def to_markdown(self, output_file: str = "config.md"):
         """Export configuration parameters to a Markdown file."""
-        with (open(output_file, "w") as f):
+        with open(output_file, "w") as f:
             f.write("# Configuration Parameters\n\n")
             for name, default in self._defaults.items():
                 description = self._descriptions.get(
@@ -89,3 +89,18 @@ class ConfigParser:
     def seed(self):
         """Seed number for the random number generator."""
         return -1
+
+    @cfg("Path to the input image.")
+    def input_image(self):
+        """Path to the input image."""
+        return "../tests/test_img.jpeg"
+
+    @cfg("Image width in pixels. Should be same as the model input size.")
+    def image_width(self):
+        """Image width in pixels."""
+        return 224
+
+    @cfg("Image height in pixels. Should be same as the model input size.")
+    def image_height(self):
+        """Image height in pixels."""
+        return 224
