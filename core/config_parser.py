@@ -104,3 +104,21 @@ class ConfigParser:
     def image_height(self):
         """Image height in pixels."""
         return 224
+
+    class StoppingCriterion:
+
+        """Stopping criterion for the search."""
+
+        INDIVIDUAL_EVALUATIONS = "individual_evaluations"
+        TIME = "time"
+
+    @cfg("Stopping criterion for the search. "
+         "Options: 'action_evaluations', 'individual_evaluations', 'time'.")
+    def stopping_criterion(self):
+        """Stopping criterion for the search."""
+        return ConfigParser.StoppingCriterion.TIME
+
+    @cfg("Maximum number of evaluations for the search.")
+    def max_evaluations(self):
+        """Maximum number of evaluations for the search."""
+        return 1000

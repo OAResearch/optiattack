@@ -6,6 +6,7 @@ from dependency_injector import containers, providers
 from core.config_parser import ConfigParser
 from core.remote.remote_controller import RemoteController
 from core.search.service.randomness import Randomness
+from core.search.service.search_time_controller import SearchTimeController
 
 
 def configure_logger():
@@ -30,3 +31,4 @@ class BaseModule(containers.DeclarativeContainer):
     randomness = providers.Singleton(Randomness, config=config)
     remote_controller = providers.Singleton(RemoteController, config=config)
     logger = providers.Singleton(configure_logger)
+    search_time_controller = providers.Singleton(SearchTimeController, config=config)

@@ -6,6 +6,7 @@ from dependency_injector.wiring import inject, Provide
 from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
 from core.search.service.randomness import Randomness
+from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
 
 
@@ -19,14 +20,17 @@ class OptiAttack:
                  config: dict = Provide[BaseModule.config],
                  remote_controller:
                  RemoteController = Provide[BaseModule.remote_controller],
-                 logger: Logger = Provide[BaseModule.logger]
+                 logger: Logger = Provide[BaseModule.logger],
+                 search_time_controller: SearchTimeController = Provide[BaseModule.search_time_controller]
                  ):
         """Initialize the application."""
+        self.__name__ = "OptiAttack"
+
         self.randomness = randomness
         self.config = config
         self.remote_controller = remote_controller
         self.logger = logger
-        self.__name__ = "OptiAttack"
+        self.search_time_controller = search_time_controller
 
         self.image = None
 
