@@ -12,7 +12,7 @@ class SearchStatusUpdater(SearchListener):
 
     """Class responsible for updating the search status on the console."""
 
-    def __init__(self, search_time_controller: SearchTimeController, config: ConfigParser, archive: Archive):
+    def __init__(self, search_time_controller: SearchTimeController, config, archive: Archive):
         """Initialize the search status updater."""
         self.search_time_controller = search_time_controller
         self.config = config
