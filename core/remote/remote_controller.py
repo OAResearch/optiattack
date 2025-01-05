@@ -10,7 +10,7 @@ class RemoteController:
 
     """RemoteController class to interact with the NUT server."""
 
-    def __init__(self, config):
+    def __init__(self, config, search_time_controller):
         """Initialize the RemoteController class."""
         # python 3.10 is not supported nested f-string. So,
         # we need to use config['NUT_PORT'] instead of config["NUT_PORT"]
@@ -26,6 +26,7 @@ class RemoteController:
 
         # Create a session to keep the connection alive
         self.connection = requests.Session()
+        self.search_time_controller = search_time_controller
 
     def get_nut_info(self):
         """Get NUT info."""
@@ -34,16 +35,18 @@ class RemoteController:
             return self.connection.get(self.NUT_ENDPOINTS["info"]).json()
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
-            return {"error": "Connection Error"}
+            raise ConnectionError("Connection Error")
 
-    def run_nut(self):
+    def run_nut(self, image_array):
         """Run NUT."""
         try:
-            logging.info("Running NUT")
-            return self.connection.post(self.NUT_ENDPOINTS["run"]).json()
+            logging.info("Running NUT. Sending image to NUT for testing...")
+            json_data = image_array.tolist()
+            return self.connection.post(self.NUT_ENDPOINTS["run"],
+                                        json={"image": json_data}).json()
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
-            return {"error": "Connection Error"}
+            raise ConnectionError("Connection Error")
 
     def stop_nut(self):
         """Stop NUT."""
@@ -52,7 +55,7 @@ class RemoteController:
             return self.connection.post(self.NUT_ENDPOINTS["stop"]).json()
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
-            return {"error": "Connection Error"}
+            raise ConnectionError("Connection Error")
 
     def get_test_results(self):
         """Get test results."""
@@ -63,15 +66,16 @@ class RemoteController:
                     .json())
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
-            return {"error": "Connection Error"}
+            raise ConnectionError("Connection Error")
 
     def new_action(self, image_array):
         """Send new action."""
         try:
             logging.info("Sending new action")
             json_data = image_array.tolist()
+            self.search_time_controller.new_individual_evaluation()
             return self.connection.post(self.NUT_ENDPOINTS["newAction"],
                                         json={"image": json_data}).json()
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
-            return {"error": "Connection Error"}
+            raise ConnectionError("Connection Error")
