@@ -116,9 +116,14 @@ class ConfigParser:
          "Options: 'action_evaluations', 'individual_evaluations', 'time'.")
     def stopping_criterion(self):
         """Stopping criterion for the search."""
-        return ConfigParser.StoppingCriterion.TIME
+        return ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS
 
     @cfg("Maximum number of evaluations for the search.")
     def max_evaluations(self):
         """Maximum number of evaluations for the search."""
-        return 1000
+        return 100
+
+    @cfg("Show progress of the search.")
+    def show_progress(self):
+        """Show progress of the search."""
+        return True

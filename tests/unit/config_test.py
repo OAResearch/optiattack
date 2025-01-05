@@ -1,5 +1,4 @@
 import pytest
-from dependency_injector.providers import Configuration
 
 from core.main import OptiAttack
 from core.problem.base_module import BaseModule

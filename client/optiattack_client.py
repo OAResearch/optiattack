@@ -56,10 +56,14 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
             return state
 
         @app.post(f"{constants.RUN_NUT_PATH}")
-        async def run_nut():
+        async def run_nut(data: MatrixModel):
             state["is_running"] = True
             state["controller_host"] = host
             state["controller_port"] = port
+            array_data = np.array(data.image)
+            func(array_data)
+
+            state["test_result"] = func(array_data)
 
             return state
 

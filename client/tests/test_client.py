@@ -33,12 +33,6 @@ def test_fastapi_server(setup_test_app):
     assert response.status_code == 200
 
 
-def test_run_nut_endpoint(setup_test_app):
-    response = setup_test_app.post(constants.RUN_NUT_PATH)
-    assert response.status_code == 200
-    assert response.json()["is_running"] is True
-
-
 def test_stop_nut_endpoint(setup_test_app):
     response = setup_test_app.post(constants.STOP_NUT_PATH)
     assert response.status_code == 200
@@ -55,11 +49,27 @@ app = process_image.app
 client = TestClient(app)
 
 
-def test_new_action_endpoint():
+def get_test_image():
     image_data = BytesIO()
     image = Image.new("RGB", (100, 100), color="red")
     image.save(image_data, format="JPEG")
     image_data.seek(0)
+    return image
+
+
+def test_run_nut_endpoint(setup_test_app):
+    image = get_test_image()
+
+    matrix = np.array(image)
+    body = {"image": matrix.tolist()}
+
+    response = setup_test_app.post(constants.RUN_NUT_PATH, json=body)
+    assert response.status_code == 200
+    assert response.json()["is_running"] is True
+
+
+def test_new_action_endpoint():
+    image = get_test_image()
 
     matrix = np.array(image)
     body = {"image": matrix.tolist()}

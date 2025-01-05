@@ -2,7 +2,6 @@ import pytest
 
 from core.main import OptiAttack
 from core.problem.base_module import BaseModule
-from core.search.service.randomness import Randomness
 
 
 @pytest.fixture

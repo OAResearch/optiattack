@@ -5,6 +5,8 @@ from dependency_injector.wiring import inject, Provide
 
 from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
+from core.search.service.archive import Archive
+from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
@@ -21,7 +23,9 @@ class OptiAttack:
                  remote_controller:
                  RemoteController = Provide[BaseModule.remote_controller],
                  logger: Logger = Provide[BaseModule.logger],
-                 search_time_controller: SearchTimeController = Provide[BaseModule.search_time_controller]
+                 search_time_controller: SearchTimeController = Provide[BaseModule.search_time_controller],
+                 archive: Archive = Provide[BaseModule.archive],
+                 search_status_updater: SearchStatusUpdater = Provide[BaseModule.search_status_updater]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -31,6 +35,8 @@ class OptiAttack:
         self.remote_controller = remote_controller
         self.logger = logger
         self.search_time_controller = search_time_controller
+        self.archive = archive
+        self.search_status_updater = search_status_updater
 
         self.image = None
 
@@ -49,22 +55,28 @@ class OptiAttack:
             error_message = (f"Image file not found: "
                              f"{self.config.get('input_image')}")
             self.logger.error(error_message)
-            raise FileNotFoundError(f"Image file not found: {self.config.get('input_image')}")
+            quit()
         except Exception as e:
             error_message = f"Error reading image file: {e}"
             self.logger.error(error_message)
-            raise Exception(error_message)
+            quit()
 
         self.logger.info("Image loaded successfully")
 
         self.logger.info("Sending image to remote controller for testing")
         try:
-            self.remote_controller.new_action(self.image.array)
+            nut_info = self.remote_controller.run_nut(self.image.array)
+            self.logger.info(f"Connected to NUT: http://{nut_info['controller_host']}:{nut_info['controller_port']}")
+        except ConnectionError:
+            error_message = ("Connection error with remote controller. "
+                             "Please check the remote controller or network under test.")
+            self.logger.error(error_message)
+            quit()
         except Exception as e:
             error_message = (f"Error sending image to remote controller: {e}. "
                              f"Please check the remote controller or network under test.")
             self.logger.error(error_message)
-            raise Exception(error_message)
+            quit()
 
         self.logger.info("Image sent to remote controller successfully. Ready to run application")
 
@@ -72,9 +84,18 @@ class OptiAttack:
         """Run the application."""
         self.logger.info("Running application")
 
-        for i in range(100):
-            self.remote_controller.new_action(self.image.array)
-            self.logger.info(f"Action {i} sent to remote controller")
+        self.search_time_controller.start_search()
+
+        while self.search_time_controller.should_continue_search():
+            ei = SearchTimeController.measure_time_millis(
+                self.log_execution_time,
+                lambda: self.remote_controller.new_action(self.image.array)
+            )
+            self.archive.add_archive_if_needed(ei)
+
+    def log_execution_time(self, t: int, ind):
+        """Log the execution time and update the individual's execution time."""
+        self.search_time_controller.report_executed_individual_time(t, 1)
 
 
 if __name__ == "__main__":

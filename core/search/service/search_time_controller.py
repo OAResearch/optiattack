@@ -2,8 +2,11 @@
 
 import logging
 import time
+from collections import deque
+from typing import Tuple, TypeVar, Callable
 
 from core.config_parser import ConfigParser
+from core.utils.incremental_average import IncrementalAverage
 
 
 class SearchTimeController:
@@ -18,6 +21,25 @@ class SearchTimeController:
         self.last_action_improvement_timestamp = 0
         self.start_time = 0
         self.search_started = False
+        self.average_test_time_ms = IncrementalAverage()
+        self.executed_individual_time: deque[Tuple[int, int]] = deque(maxlen=100)
+
+        self.listeners = []
+
+    # Generic type for the function return value
+    T = TypeVar("T")
+
+    @staticmethod
+    def measure_time_millis(logging_function: Callable[[int, T], None], function: Callable[[], T]) -> T:
+        """Measure the execution time of a function and log the result using the provided logging function."""
+        start_time = int(time.time() * 1000)  # Current time in milliseconds
+        result = function()  # Execute the function
+        elapsed_time = int(time.time() * 1000) - start_time  # Calculate elapsed time in milliseconds
+
+        # Call the logging function with the elapsed time and result
+        logging_function(elapsed_time, result)
+
+        return result
 
     def start_search(self):
         """Start the search time controller"""
@@ -28,6 +50,13 @@ class SearchTimeController:
     def new_individual_evaluation(self):
         """Update the number of evaluated individuals."""
         self.evaluated_individuals += 1
+
+        for listener in self.listeners:
+            listener.new_action_evaluated()
+
+    def new_action_improvement(self):
+        """Update the timestamp of the last action improvement."""
+        self.last_action_improvement_timestamp = int(time.time() * 1000)
 
     def get_elapsed_seconds(self):
         """Get the elapsed time in seconds."""
@@ -54,3 +83,35 @@ class SearchTimeController:
     def should_continue_search(self):
         """Check if the search should continue."""
         return self.percentage_used_budget() < 1.0
+
+    def add_listener(self, listener):
+        """Add a listener to the search time controller."""
+        self.listeners.append(listener)
+
+    def report_executed_individual_time(self, ms: int, n_actions: int):
+        """Report the execution time of an individual test and the number of actions."""
+        # if not self.recording:
+        #     return
+
+        # Add the new data to the queue (automatically removes oldest if maxlen is exceeded)
+        self.executed_individual_time.append((ms, n_actions))
+
+        # Update the incremental averages
+        self.average_test_time_ms.add_value(ms)
+
+    def compute_executed_individual_time_statistics(self) -> Tuple[float, float]:
+        """Compute the average execution time and average number of actions for the last 100 tests."""
+        if not self.executed_individual_time:
+            return 0.0, 0.0
+
+        # Calculate the average execution time and average number of actions
+        avg_ms = sum(ms for ms, _ in self.executed_individual_time) / len(self.executed_individual_time)
+        avg_actions = sum(actions for _, actions in self.executed_individual_time) / len(self.executed_individual_time)
+
+        return avg_ms, avg_actions
+
+    def get_seconds_since_last_improvement(self) -> int:
+        """Getter for the seconds since last improvement"""
+        current_time_ms = int(time.time() * 1000)
+        elapsed_time_seconds = (current_time_ms - self.last_action_improvement_timestamp) / 1000.0
+        return int(elapsed_time_seconds)
