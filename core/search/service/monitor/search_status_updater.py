@@ -2,7 +2,6 @@
 import sys
 import time
 
-from core.config_parser import ConfigParser
 from core.search.service.archive import Archive
 from core.search.service.monitor.search_listener import SearchListener
 from core.search.service.search_time_controller import SearchTimeController
