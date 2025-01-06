@@ -43,7 +43,7 @@ class Action:
         self.noise = np.sum(np.abs(self.color() - current_value))
         return self.noise
 
-    def __eq__(self, o: object) -> bool:
+    def __eq__(self, o: 'Action') -> bool:
         """Compares two Action objects for equality based on their location and color."""
         return self.location == o.location and all(self.color() == o.color())
 
