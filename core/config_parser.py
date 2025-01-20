@@ -84,6 +84,11 @@ class ConfigParser:
         """Port number for the NUT."""
         return 38000
 
+    @cfg("Base endpoint for the NUT. Default is '/api/v1'.")
+    def base_endpoint(self):
+        """Base endpoint for the NUT."""
+        return "/api/v1"
+
     @cfg("Seed number for the random number generator. "
          "Negative values mean use the system time.")
     def seed(self):
@@ -113,7 +118,7 @@ class ConfigParser:
         TIME = "time"
 
     @cfg("Stopping criterion for the search. "
-         "Options: 'action_evaluations', 'individual_evaluations', 'time'.")
+         "Options: 'individual_evaluations' or 'time'.")
     def stopping_criterion(self):
         """Stopping criterion for the search."""
         return ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS
