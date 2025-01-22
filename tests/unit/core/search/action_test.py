@@ -38,4 +38,13 @@ class TestAction:
     def test_color(self, action):
         """Test the color method."""
         expected_color = np.array([100, 150, 200])
-        assert np.array_equal(action.color(), expected_color)
+        assert np.array_equal(action.get_color(), expected_color)
+
+    def test_set_color(self, action):
+        """Test the set_color method."""
+        new_color = np.array([50, 100, 150])
+        action.set_color(new_color)
+        assert np.array_equal(action.get_color(), new_color)
+        assert action.red == 50
+        assert action.green == 100
+        assert action.blue == 150

@@ -132,3 +132,8 @@ class ConfigParser:
     def show_progress(self):
         """Show progress of the search."""
         return True
+
+    @cfg("Sigma value for the gaussian noise.")
+    def mutation_sigma(self):
+        """Sigma value for the gaussian noise."""
+        return 50
