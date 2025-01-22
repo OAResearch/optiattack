@@ -28,3 +28,10 @@ class Individual:
     def size(self):
         """Get the number of actions in the individual."""
         return len(self.actions)
+
+    def copy(self):
+        """Copy the individual."""
+        new_individual = Individual()
+        for action in self.actions:
+            new_individual.add_action(action.copy())
+        return new_individual

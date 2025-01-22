@@ -28,9 +28,13 @@ class Action:
         """Returns the location of the action as a tuple (x, y)."""
         return self.location
 
-    def color(self):
+    def get_color(self):
         """Returns the RGB color of the action as a NumPy array [red, green, blue]."""
         return np.array([self.red, self.green, self.blue])
+
+    def set_color(self, color):
+        """Sets the RGB color of the action to the provided color."""
+        self.red, self.green, self.blue = color
 
     def calculate_noise(self, current_value):
         """
@@ -40,15 +44,22 @@ class Action:
         action's color and a provided current_value.
         """
 
-        self.noise = np.sum(np.abs(self.color() - current_value))
+        self.noise = np.sum(np.abs(self.get_color() - current_value))
         return self.noise
 
     def __eq__(self, o: object) -> bool:
         """Compares two Action objects for equality based on their location and color."""
         if not isinstance(o, Action):
             return False
-        return self.location == o.location and all(self.color() == o.color())
+        return self.location == o.location and all(self.get_color() == o.get_color())
 
     def __str__(self) -> str:
         """Returns a string representation of the action, including its location and color."""
-        return f"Action at {self.location} with color {self.color()}"
+        return f"Action at {self.location} with color {self.get_color()}"
+
+    def copy(self):
+        """Returns a copy of the action."""
+        action = Action(self.location, self.red, self.green, self.blue)
+        action.set_parent(self.parent)
+        action.noise = self.noise
+        return action
