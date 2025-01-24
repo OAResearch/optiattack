@@ -3,12 +3,14 @@
 import logging
 import requests
 
+from core.utils.nut_request import NutRequest
+
 
 class RemoteController:
 
     """RemoteController class to interact with the NUT server."""
 
-    def __init__(self, config, search_time_controller):
+    def __init__(self, config, stc):
         """Initialize the RemoteController class."""
         # python 3.10 is not supported nested f-string. So,
         # we need to use config['NUT_PORT'] instead of config["NUT_PORT"]
@@ -24,7 +26,7 @@ class RemoteController:
 
         # Create a session to keep the connection alive
         self.connection = requests.Session()
-        self.search_time_controller = search_time_controller
+        self.stc = stc
 
     def get_nut_info(self):
         """Get NUT info."""
@@ -71,9 +73,12 @@ class RemoteController:
         try:
             logging.info("Sending new action")
             json_data = image_array.tolist()
-            self.search_time_controller.new_individual_evaluation()
-            return self.connection.post(self.NUT_ENDPOINTS["newAction"],
-                                        json={"image": json_data}).json()
+            self.stc.new_individual_evaluation()
+            response = self.connection.post(self.NUT_ENDPOINTS["newAction"],
+                                            json={"image": json_data}).json()
+            nut_request = NutRequest(response)
+            return nut_request
+
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
             raise ConnectionError("Connection Error")

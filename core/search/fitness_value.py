@@ -15,14 +15,14 @@ class FitnessValue:
     and execution time in milliseconds.
     """
 
-    def __init__(self):
+    def __init__(self, value):
         """Initializes FitnessValue with default fitness_value=0 and execution_time_ms=0."""
-        self.fitness_value = 0
+        self.value = value
         self.execution_time_ms = 0
 
-    def set_fitness_value(self, fitness_value):
+    def set_fitness_value(self, value):
         """Sets the fitness value to the provided integer."""
-        self.fitness_value = fitness_value
+        self.value = value
 
     def set_execution_time_ms(self, execution_time_ms):
         """Sets the execution time in milliseconds to the provided integer."""

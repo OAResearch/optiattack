@@ -6,7 +6,9 @@ from dependency_injector import containers, providers
 from core.config_parser import ConfigParser
 from core.remote.remote_controller import RemoteController
 from core.search.service.archive import Archive
+from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 
@@ -32,14 +34,17 @@ class BaseModule(containers.DeclarativeContainer):
     config_parser = providers.Singleton(ConfigParser)
     randomness = providers.Singleton(Randomness, config=config)
     logger = providers.Singleton(configure_logger)
-    search_time_controller = providers.Singleton(SearchTimeController, config=config)
+    stc = providers.Singleton(SearchTimeController, config=config)
     remote_controller = providers.Singleton(RemoteController,
                                             config=config,
-                                            search_time_controller=search_time_controller)
+                                            stc=stc)
     archive = providers.Singleton(Archive,
-                                  search_time_controller=search_time_controller,
-                                  randomness=randomness)
+                                  stc=stc,
+                                  randomness=randomness,
+                                  config=config)
     search_status_updater = providers.Singleton(SearchStatusUpdater,
-                                                search_time_controller=search_time_controller,
+                                                stc=stc,
                                                 config=config,
                                                 archive=archive)
+    ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller)
+    mutator = providers.Singleton(StandardMutator, randomness=randomness, stc=stc, config=config)

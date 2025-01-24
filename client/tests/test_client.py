@@ -9,7 +9,7 @@ from client import constants
 from client.optiattack_client import collect_info
 
 PROCESS_IMAGE_RESPONSE = {
-    "prediction": [
+    "predictions": [
         {"label": "zebra", "score": 0.99},
         {"label": "horse", "score": 0.01},
     ]

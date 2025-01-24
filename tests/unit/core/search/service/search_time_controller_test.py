@@ -7,7 +7,7 @@ import pytest
 from core.config_parser import ConfigParser
 from core.main import OptiAttack
 from core.problem.base_module import BaseModule
-from core.search.service.search_time_controller import SearchTimeController
+from core.search.service.stc import SearchTimeController
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def get_app(container, config_setting=None):
     app = OptiAttack(
         config=container.config(),
         randomness=container.randomness(),
-        search_time_controller=container.search_time_controller(),
+        stc=container.stc(),
     )
     assert app.config.get("stopping_criterion") == config_setting.get("stopping_criterion")
     assert app.config.get("max_evaluations") == config_setting.get("max_evaluations")
@@ -35,11 +35,11 @@ def test_individual_evaluations(container):
                    "max_evaluations": 100,
                    "seed": 42})
 
-    app.search_time_controller.start_search()
+    app.stc.start_search()
     for i in range(100):
-        app.search_time_controller.new_individual_evaluation()
+        app.stc.new_individual_evaluation()
 
-    assert app.search_time_controller.should_continue_search() is False
+    assert app.stc.should_continue_search() is False
 
 
 def test_time(container):
@@ -48,10 +48,10 @@ def test_time(container):
                    "max_evaluations": 10,
                    "seed": 42})
 
-    app.search_time_controller.start_search()
+    app.stc.start_search()
     sleep(10)
-    assert app.search_time_controller.percentage_used_budget() >= 1.0
-    assert app.search_time_controller.should_continue_search() is False
+    assert app.stc.percentage_used_budget() >= 1.0
+    assert app.stc.should_continue_search() is False
 
 @pytest.fixture
 def search_time_controller():

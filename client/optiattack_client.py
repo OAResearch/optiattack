@@ -61,9 +61,8 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
             state["controller_host"] = host
             state["controller_port"] = port
             array_data = np.array(data.image)
-            func(array_data)
 
-            state["test_result"] = func(array_data)
+            state["predictions"] = func(array_data)["predictions"]
 
             return state
 
