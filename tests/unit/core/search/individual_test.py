@@ -1,7 +1,11 @@
+from array import array
+
+import numpy as np
 import pytest
 
 from core.search.action import Action
 from core.search.individual import Individual
+from core.utils.images import ProcessedImage
 
 
 @pytest.fixture
@@ -91,3 +95,63 @@ def test_add_action_with_different_actions(individual):
     assert individual.add_action(action2) is True
     assert individual.size() == 2
     assert individual.get_actions() == [action1, action2]
+
+def test_get_action_image_no_actions(individual):
+    # Create a mock image with a 3x3 array
+    image_array = np.zeros((3, 3, 3), dtype=np.uint8)  # 3x3 RGB image
+    image = ProcessedImage(array=image_array, original=None, resized=None)
+
+    # Call the function
+    result = individual.get_action_image(image)
+
+    # Assert that the image is unchanged
+    assert np.array_equal(result, image_array)
+
+def test_get_action_image_with_actions(individual):
+    # Create a mock image with a 3x3 array
+    image_array = np.zeros((3, 3, 3), dtype=np.uint8)  # 3x3 RGB image
+    image = ProcessedImage(array=image_array, original=None, resized=None)
+
+    action1 = Action((1, 1), 255, 255, 255)  # White pixel at (1, 1)
+    action2 = Action((0, 0), 255, 0, 0)  # Red pixel at (0, 0)
+
+    # Create an individual with actions
+    individual.add_action(action1)
+    individual.add_action(action2)
+
+    # Call the function
+    result = individual.get_action_image(image)
+
+    # Expected result: image with modified pixels
+    expected_image = image_array.copy()
+    expected_image[1, 1] = [255, 255, 255]  # Pixel at (1, 1) is white
+    expected_image[0, 0] = [255, 0, 0]  # Pixel at (0, 0) is red
+
+    # Assert that the image is modified correctly
+    assert np.array_equal(result, expected_image)
+
+def test_get_action_image_multiple_actions_same_location(individual):
+    # Create a mock image with a 3x3 array
+    image_array = np.zeros((3, 3, 3), dtype=np.uint8)  # 3x3 RGB image
+    image = ProcessedImage(array=image_array, original=None, resized=None)
+
+    # Create actions with the same location
+    action1 = Action((1, 1), 255, 255, 255)  # White pixel at (1, 1)
+    action2 = Action((1, 1), 0, 0, 255)  # Blue pixel at (1, 1)
+
+    # Create an individual with actions
+    individual.add_action(action1)
+    individual.add_action(action2)
+
+    assert individual.get_actions() == [action1, action2]
+    assert individual.size() == 2
+
+    # Call the function
+    result = individual.get_action_image(image)
+
+    # Expected result: the last action should overwrite the previous one
+    expected_image = image_array.copy()
+    expected_image[1, 1] = [0, 0, 255]  # Pixel at (1, 1) is blue
+
+    # Assert that the image is modified correctly
+    assert np.array_equal(result, expected_image)

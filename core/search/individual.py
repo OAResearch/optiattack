@@ -1,4 +1,5 @@
 """Individual search functions."""
+from core.utils.images import ProcessedImage
 
 
 class Individual:
@@ -35,3 +36,11 @@ class Individual:
         for action in self.actions:
             new_individual.add_action(action.copy())
         return new_individual
+
+    def get_action_image(self, image: ProcessedImage):
+        """Get the image."""
+        action_image = image.array.copy()
+        for action in self.actions:
+            x, y = action.get_location()
+            action_image[y, x] = action.get_color()
+        return action_image

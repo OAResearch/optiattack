@@ -10,7 +10,7 @@ from core.main import OptiAttack
 from core.problem.base_module import BaseModule
 
 PROCESS_IMAGE_RESPONSE = {
-        "prediction": [
+        "predictions": [
             {"label": "zebra", "score": 0.99},
             {"label": "horse", "score": 0.01},
         ]
@@ -55,7 +55,7 @@ def test_new_action(app):
     image_array = np.array(image)
 
     response = app.remote_controller.new_action(image_array)
-    assert response["prediction"] == PROCESS_IMAGE_RESPONSE["prediction"]
+    assert response["predictions"] == PROCESS_IMAGE_RESPONSE["predictions"]
     image.close()
 
 def test_get_test_results():

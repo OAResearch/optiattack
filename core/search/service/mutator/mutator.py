@@ -11,11 +11,11 @@ class Mutator:
     """Mutator class is the base class for all mutators. It provides the basic structure for all mutators."""
 
     def __init__(self, randomness: Randomness,
-                 time: SearchTimeController,
+                 stc: SearchTimeController,
                  config: dict):
         """Initializes the mutator with the randomness, time controller, and configuration."""
         self.randomness = randomness
-        self.time = time
+        self.stc = stc
         self.config = config
 
     def mutate(self, individual: Individual):

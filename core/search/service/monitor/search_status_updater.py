@@ -11,9 +11,9 @@ class SearchStatusUpdater(SearchListener):
 
     """Class responsible for updating the search status on the console."""
 
-    def __init__(self, search_time_controller: SearchTimeController, config, archive: Archive):
+    def __init__(self, stc: SearchTimeController, config, archive: Archive):
         """Initialize the search status updater."""
-        self.search_time_controller = search_time_controller
+        self.stc = stc
         self.config = config
         self.archive = archive
         self.passed = "-1"
@@ -25,7 +25,7 @@ class SearchStatusUpdater(SearchListener):
         self.out = sys.stdout
 
         if self.config.get("show_progress") is True:
-            self.search_time_controller.add_listener(self)
+            self.stc.add_listener(self)
 
     @staticmethod
     def erase_line():
@@ -45,8 +45,8 @@ class SearchStatusUpdater(SearchListener):
 
     def new_action_evaluated(self):
         """Update the search status on the console."""
-        percentage_int = int(self.search_time_controller.percentage_used_budget() * 100)
-        current = "{:.3f}".format(self.search_time_controller.percentage_used_budget() * 100)
+        percentage_int = int(self.stc.percentage_used_budget() * 100)
+        current = "{:.3f}".format(self.stc.percentage_used_budget() * 100)
 
         if self.first:
             print()
@@ -64,15 +64,16 @@ class SearchStatusUpdater(SearchListener):
                 self.last_coverage_computation = percentage_int
                 self.coverage = self.archive.number_of_population()
 
-            avg_time_and_size = self.search_time_controller.compute_executed_individual_time_statistics()
+            avg_time_and_size = self.stc.compute_executed_individual_time_statistics()
             avg_time = "{:.1f}".format(avg_time_and_size[0])
             avg_size = "{:.1f}".format(avg_time_and_size[1])
 
-            since_last = self.search_time_controller.get_seconds_since_last_improvement()
+            since_last = self.stc.get_seconds_since_last_improvement()
 
             self.up_line_and_erase()
             self.up_line_and_erase()
             print(f"* Consumed search budget: {current}%")
             print(f"* Archive size: {self.coverage}; "
                   f"time per test: {avg_time}ms ({avg_size} actions); "
-                  f"since last improvement: {since_last}s")
+                  f"since last improvement: {since_last}s; "
+                  f"fitness: {self.archive.populations[-1].fitness.value if self.archive.populations else 0}")
