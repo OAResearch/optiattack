@@ -1,3 +1,5 @@
+import base64
+
 import numpy as np
 import uvicorn
 
@@ -26,7 +28,7 @@ app = FastAPI()
 
 
 class MatrixModel(BaseModel):
-    image: list[list[list[int]]]
+    image: str
 
 
 def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
@@ -60,7 +62,8 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
             state["is_running"] = True
             state["controller_host"] = host
             state["controller_port"] = port
-            array_data = np.array(data.image)
+            image_base64 = base64.b64decode(data.image)
+            array_data = np.fromstring(image_base64, np.uint8)
 
             state["predictions"] = func(array_data)["predictions"]
 
@@ -75,7 +78,8 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
 
         @app.post(f"{constants.NEW_ACTION}")
         async def new_action(data: MatrixModel):
-            array_data = np.array(data.image)
+            image_base64 = base64.b64decode(data.image)
+            array_data = np.fromstring(image_base64, np.uint8)
 
             return func(array_data)
 
