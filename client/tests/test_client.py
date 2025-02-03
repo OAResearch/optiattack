@@ -3,6 +3,7 @@ import pytest
 from PIL import Image
 from fastapi.testclient import TestClient
 from io import BytesIO
+import base64
 
 
 from client import constants
@@ -60,8 +61,8 @@ def get_test_image():
 def test_run_nut_endpoint(setup_test_app):
     image = get_test_image()
 
-    matrix = np.array(image)
-    body = {"image": matrix.tolist()}
+    json_data = base64.b64encode(np.array(image)).decode()
+    body = {"image": json_data}
 
     response = setup_test_app.post(constants.RUN_NUT_PATH, json=body)
     assert response.status_code == 200
@@ -71,8 +72,8 @@ def test_run_nut_endpoint(setup_test_app):
 def test_new_action_endpoint():
     image = get_test_image()
 
-    matrix = np.array(image)
-    body = {"image": matrix.tolist()}
+    json_data = base64.b64encode(np.array(image)).decode()
+    body = {"image": json_data}
 
     response = client.post(constants.NEW_ACTION, json=body)
 

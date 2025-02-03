@@ -1,5 +1,5 @@
 """remote_controller.py - RemoteController class to interact with the NUT server."""
-
+import base64
 import logging
 import requests
 
@@ -41,7 +41,7 @@ class RemoteController:
         """Run NUT."""
         try:
             logging.info("Running NUT. Sending image to NUT for testing...")
-            json_data = image_array.tolist()
+            json_data = base64.b64encode(image_array).decode()
             return self.connection.post(self.NUT_ENDPOINTS["run"],
                                         json={"image": json_data}).json()
         except requests.exceptions.ConnectionError:
@@ -72,7 +72,7 @@ class RemoteController:
         """Send new action."""
         try:
             logging.info("Sending new action")
-            json_data = image_array.tolist()
+            json_data = base64.b64encode(image_array).decode()
             self.stc.new_individual_evaluation()
             response = self.connection.post(self.NUT_ENDPOINTS["newAction"],
                                             json={"image": json_data}).json()
