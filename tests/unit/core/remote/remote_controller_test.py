@@ -6,7 +6,7 @@ from PIL import Image
 
 from client import constants
 from client.optiattack_client import collect_info
-from core.main import OptiAttack
+from main import OptiAttack
 from core.problem.base_module import BaseModule
 
 PROCESS_IMAGE_RESPONSE = {

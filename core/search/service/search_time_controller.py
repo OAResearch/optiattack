@@ -6,6 +6,7 @@ from collections import deque
 from typing import Tuple, TypeVar, Callable
 
 from core.config_parser import ConfigParser
+from core.search.fitness_value import FitnessValue
 from core.utils.incremental_average import IncrementalAverage
 
 
@@ -23,7 +24,7 @@ class SearchTimeController:
         self.search_started = False
         self.average_test_time_ms = IncrementalAverage()
         self.executed_individual_time: deque[Tuple[int, int]] = deque(maxlen=100)
-        self.current_fitness_value = 1.0
+        self.current_fitness_value = FitnessValue(1.0)
 
         self.listeners = []
 
@@ -45,6 +46,10 @@ class SearchTimeController:
     def get_current_fitness(self):
         """Get the best individual found so far."""
         return self.current_fitness_value
+
+    def get_current_fitness_value(self):
+        """Get the best individual found so far."""
+        return self.current_fitness_value.value
 
     def set_current_fitness(self, value):
         """Set the best individual found so far."""
@@ -91,7 +96,7 @@ class SearchTimeController:
 
     def should_continue_search(self):
         """Check if the search should continue."""
-        return self.percentage_used_budget() < 1.0 and self.get_current_fitness() > 0.0
+        return self.percentage_used_budget() < 1.0 and self.get_current_fitness_value() > 0.0
 
     def add_listener(self, listener):
         """Add a listener to the search time controller."""

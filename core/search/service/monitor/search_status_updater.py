@@ -76,4 +76,4 @@ class SearchStatusUpdater(SearchListener):
             print(f"* Action size: {self.action_size}; "
                   f"time per test: {avg_time}ms ({avg_size} actions); "
                   f"since last improvement: {since_last}s; "
-                  f"fitness: {self.stc.get_current_fitness()}")
+                  f"fitness: {self.stc.get_current_fitness_value()}")

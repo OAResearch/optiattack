@@ -99,7 +99,7 @@ class ConfigParser:
     @cfg("Path to the input image.")
     def input_image(self):
         """Path to the input image."""
-        return "../tests/test_img.jpeg"
+        return "./tests/test_img.jpeg"
 
     @cfg("Image width in pixels. Should be same as the model input size.")
     def image_width(self):
@@ -138,3 +138,33 @@ class ConfigParser:
     def mutation_sigma(self):
         """Sigma value for the gaussian noise."""
         return 50
+
+    @cfg("Snapshot interval for the search.")
+    def snapshot_interval(self):
+        """Snapshot interval for the search. If set -1 no snapshots are saved."""
+        return 20
+
+    @cfg("Path to the output directory.")
+    def output_dir(self):
+        """Path to the output directory."""
+        return "./output"
+
+    @cfg("Write the statistics to a file.")
+    def write_statistics(self):
+        """Write the results to a file."""
+        return True
+
+    @cfg("Save the generated images.")
+    def save_images(self):
+        """Save the generated images."""
+        return True
+
+    @cfg("Experiment label.")
+    def experiment_label(self):
+        """Experiment label."""
+        return "experiment"
+
+    @cfg("Show plots.")
+    def show_plots(self):
+        """Show plots."""
+        return True
