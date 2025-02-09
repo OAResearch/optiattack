@@ -33,6 +33,7 @@ class ConfigParser:
         self.parser.add_argument(f"--{name}",
                                  default=default,
                                  help=description,
+                                 type=type(default),
                                  **kwargs)
 
     def parse_args(self):
@@ -126,7 +127,7 @@ class ConfigParser:
     @cfg("Maximum number of evaluations for the search.")
     def max_evaluations(self):
         """Maximum number of evaluations for the search."""
-        return 100
+        return 1000
 
     @cfg("Show progress of the search.")
     def show_progress(self):

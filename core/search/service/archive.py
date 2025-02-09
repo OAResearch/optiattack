@@ -3,6 +3,8 @@
 from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.individual import Individual
+from core.search.service.randomness import Randomness
+from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import ProcessedImage
 from core.utils.nut_request import NutRequest
 
@@ -11,7 +13,7 @@ class Archive:
 
     """Base class for the archives used in the search service."""
 
-    def __init__(self, stc, randomness, config):
+    def __init__(self, stc: SearchTimeController, randomness: Randomness, config: dict):
         """Initialize the archive."""
 
         self.original_predication_results = None
@@ -28,9 +30,10 @@ class Archive:
         """Clean the populations list."""
         self.populations = []
 
-    def add_archive_if_needed(self, individual):
+    def add_archive_if_needed(self, individual: EvaluatedIndividual):
         """Add an individual to the archive if it is better than the current best solution."""
-        if self.randomness.next_bool(0.5):
+        if self.stc.get_current_fitness() > individual.fitness.value:
+            self.stc.set_current_fitness(individual.fitness.value)
             self.populations.append(individual)
             self.stc.new_action_improvement()
 
@@ -71,6 +74,20 @@ class Archive:
     def get_image(self):
         """Get the image."""
         return self.image
+
+    def get_actions(self):
+        """Get the actions of the archive."""
+        actions = [ei.individual.get_actions() for ei in self.populations]
+        return [action for sublist in actions for action in sublist]
+
+    def get_mutated_image(self):
+        """Get mutated image. This image contains the actions of the archive."""
+        action_image = self.image.array.copy()
+        actions = self.get_actions()
+        for action in actions:
+            x, y = action.get_location()
+            action_image[y, x] = action.get_color()
+        return action_image
 
     def set_original_prediction_results(self, results):
         """Set the original prediction results."""

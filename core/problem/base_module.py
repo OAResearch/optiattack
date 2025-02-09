@@ -46,5 +46,5 @@ class BaseModule(containers.DeclarativeContainer):
                                                 stc=stc,
                                                 config=config,
                                                 archive=archive)
-    ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller)
+    ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc)
     mutator = providers.Singleton(StandardMutator, randomness=randomness, stc=stc, config=config)

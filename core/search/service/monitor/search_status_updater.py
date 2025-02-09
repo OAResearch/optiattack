@@ -19,7 +19,7 @@ class SearchStatusUpdater(SearchListener):
         self.passed = "-1"
         self.last_update_ms = 0
         self.last_coverage_computation = 0
-        self.coverage = 0
+        self.action_size = 0
         self.utf8 = 'utf-8'
         self.first = True
         self.out = sys.stdout
@@ -62,7 +62,7 @@ class SearchStatusUpdater(SearchListener):
 
             if percentage_int - self.last_coverage_computation > 0:
                 self.last_coverage_computation = percentage_int
-                self.coverage = self.archive.number_of_population()
+                self.action_size = self.archive.get_actions().__len__()
 
             avg_time_and_size = self.stc.compute_executed_individual_time_statistics()
             avg_time = "{:.1f}".format(avg_time_and_size[0])
@@ -73,7 +73,7 @@ class SearchStatusUpdater(SearchListener):
             self.up_line_and_erase()
             self.up_line_and_erase()
             print(f"* Consumed search budget: {current}%")
-            print(f"* Archive size: {self.coverage}; "
+            print(f"* Action size: {self.action_size}; "
                   f"time per test: {avg_time}ms ({avg_size} actions); "
                   f"since last improvement: {since_last}s; "
-                  f"fitness: {self.archive.populations[-1].fitness.value if self.archive.populations else 0}")
+                  f"fitness: {self.stc.get_current_fitness()}")
