@@ -17,10 +17,9 @@ class Archive:
         """Initialize the archive."""
 
         self.original_predication_results = None
-        self.populations: [EvaluatedIndividual] = []
+        self.populations: list[EvaluatedIndividual] = []
         self.sampling_counter = 0
-        self.last_improvement = []
-        self.last_chosen = []
+        self.last_chosen: list[EvaluatedIndividual] = []
         self.stc = stc
         self.randomness = randomness
         self.config = config
