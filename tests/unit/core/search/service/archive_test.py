@@ -15,6 +15,8 @@ from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import ProcessedImage
 from core.utils.nut_request import NutRequest
 from core.search.service.archive import Archive
+from tests.unit.core.search.individual_test import individual
+
 
 # Fixture for the Archive instance
 @pytest.fixture
@@ -36,7 +38,7 @@ def test_add_archive_if_needed_with_better_fitness(archive):
     individual = MagicMock(spec=EvaluatedIndividual)
     individual.fitness = MagicMock(spec=FitnessValue)
     individual.fitness.value = 0.5
-    archive.stc.get_current_fitness.return_value = 0.6
+    archive.stc.get_current_fitness_value.return_value = 0.6
 
     archive.add_archive_if_needed(individual)
 
@@ -50,7 +52,7 @@ def test_add_archive_if_needed_with_worse_fitness(archive):
     individual = MagicMock(spec=EvaluatedIndividual)
     individual.fitness = MagicMock(spec=FitnessValue)
     individual.fitness.value = 0.7
-    archive.stc.get_current_fitness.return_value = 0.6
+    archive.stc.get_current_fitness_value.return_value = 0.6
 
     archive.add_archive_if_needed(individual)
 
@@ -145,3 +147,37 @@ def test_get_mutated_image(archive):
     # Assert that the image was mutated correctly
     assert all(mutated_image[0][0] == [255, 255, 255])
     assert all(mutated_image[1][1] == [128, 128, 128])
+
+def test_archive_extract(archive):
+    # Mock the actions
+    action1 = MagicMock(spec=Action)
+    action1.get_location.return_value = (0, 0)
+    action1.get_color.return_value = np.array([255, 255, 255])
+
+    action2 = MagicMock(spec=Action)
+    action2.get_location.return_value = (1, 1)
+    action2.get_color.return_value = np.array([128, 128, 128])
+
+    action3 = MagicMock(spec=Action)
+    action3.get_location.return_value = (0, 0)
+    action3.get_color.return_value = np.array([42, 42, 42])
+
+    ei1 = MagicMock(spec=EvaluatedIndividual)
+    ei1.individual = MagicMock(spec=Individual)
+    ei1.individual.get_actions.return_value = [action1]
+
+    ei2 = MagicMock(spec=EvaluatedIndividual)
+    ei2.individual = MagicMock(spec=Individual)
+    ei2.individual.get_actions.return_value = [action2]
+
+    ei3 = MagicMock(spec=EvaluatedIndividual)
+    ei3.individual = MagicMock(spec=Individual)
+    ei3.individual.get_actions.return_value = [action3]
+
+    archive.populations = [ei1, ei2, ei3]
+
+    # Extract the solution
+    solution = archive.extract_solution()
+    assert solution.actions == [action2, action3]
+
+

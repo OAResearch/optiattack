@@ -5,6 +5,7 @@ from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.individual import Individual
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
+from core.search.solution import Solution
 from core.utils.images import ProcessedImage
 from core.utils.nut_request import NutRequest
 
@@ -31,8 +32,8 @@ class Archive:
 
     def add_archive_if_needed(self, individual: EvaluatedIndividual):
         """Add an individual to the archive if it is better than the current best solution."""
-        if self.stc.get_current_fitness() > individual.fitness.value:
-            self.stc.set_current_fitness(individual.fitness.value)
+        if self.stc.get_current_fitness_value() > individual.fitness.value:
+            self.stc.set_current_fitness(individual.fitness)
             self.populations.append(individual)
             self.stc.new_action_improvement()
 
@@ -95,3 +96,15 @@ class Archive:
     def get_original_prediction_results(self):
         """Get the original prediction results."""
         return self.original_predication_results
+
+    def extract_solution(self):
+        """Extract the solution from the archive."""
+        actions = self.get_actions().copy()
+
+        for action in actions:
+            location = action.get_location()
+            number_of_locations = len([a for a in actions if a.get_location() == location])
+            if number_of_locations > 1:
+                actions.remove(action)
+
+        return Solution(actions, self.stc.get_current_fitness())

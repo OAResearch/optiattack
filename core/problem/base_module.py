@@ -8,6 +8,7 @@ from core.remote.remote_controller import RemoteController
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
@@ -48,3 +49,4 @@ class BaseModule(containers.DeclarativeContainer):
                                                 archive=archive)
     ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc)
     mutator = providers.Singleton(StandardMutator, randomness=randomness, stc=stc, config=config)
+    statistics = providers.Singleton(Statistics, stc=stc, archive=archive, config=config)

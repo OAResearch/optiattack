@@ -29,4 +29,4 @@ class FitnessFunction:
         original_result = self.archive.get_original_prediction_results()
         fitness_value = result.max_score.value - result.second_max_score.value \
             if result.max_score.label == original_result.max_score.label else 0
-        return FitnessValue(fitness_value)
+        return FitnessValue(fitness_value, result.predictions)
