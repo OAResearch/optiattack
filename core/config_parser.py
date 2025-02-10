@@ -142,7 +142,7 @@ class ConfigParser:
     @cfg("Snapshot interval for the search.")
     def snapshot_interval(self):
         """Snapshot interval for the search. If set -1 no snapshots are saved."""
-        return 20
+        return 5
 
     @cfg("Path to the output directory.")
     def output_dir(self):

@@ -24,7 +24,7 @@ class SearchTimeController:
         self.search_started = False
         self.average_test_time_ms = IncrementalAverage()
         self.executed_individual_time: deque[Tuple[int, int]] = deque(maxlen=100)
-        self.current_fitness_value = FitnessValue(1.0)
+        self.current_fitness_value = FitnessValue(1.0, {})
 
         self.listeners = []
 
@@ -68,6 +68,10 @@ class SearchTimeController:
         for listener in self.listeners:
             listener.new_action_evaluated()
 
+    def get_evaluated_individuals(self):
+        """Get the number of evaluated individuals."""
+        return self.evaluated_individuals
+
     def new_action_improvement(self):
         """Update the timestamp of the last action improvement."""
         self.last_action_improvement_timestamp = int(time.time() * 1000)
@@ -86,7 +90,7 @@ class SearchTimeController:
             return 0.0
 
         if self.config.get('stopping_criterion') == ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS:
-            return self.evaluated_individuals / self.config.get('max_evaluations')
+            return self.get_evaluated_individuals() / self.config.get('max_evaluations')
 
         elif self.config.get('stopping_criterion') == ConfigParser.StoppingCriterion.TIME:
             return self.get_elapsed_seconds() / self.config.get('max_evaluations')
