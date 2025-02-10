@@ -15,7 +15,7 @@ class FitnessValue:
     and execution time in milliseconds.
     """
 
-    def __init__(self, value: float, predictions: list=None):
+    def __init__(self, value: float, predictions: list):
         """Initializes FitnessValue with default fitness_value=0 and execution_time_ms=0."""
         self.value = value
         self.execution_time_ms = 0
