@@ -30,7 +30,8 @@ class OptiAttack:
                  archive: Archive = Provide[BaseModule.archive],
                  search_status_updater: SearchStatusUpdater = Provide[BaseModule.search_status_updater],
                  ff=Provide[BaseModule.ff],
-                 mutator=Provide[BaseModule.mutator]
+                 mutator=Provide[BaseModule.mutator],
+                 statistics=Provide[BaseModule.statistics]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -44,6 +45,7 @@ class OptiAttack:
         self.search_status_updater = search_status_updater
         self.ff = ff
         self.mutator = mutator
+        self.statistics = statistics
 
     def startup(self):
         """Prepare the application."""
@@ -106,6 +108,8 @@ class OptiAttack:
             )
             ei = EvaluatedIndividual(individual, fitness_value)
             self.archive.add_archive_if_needed(ei)
+        self.statistics.write_statistics()
+        self.logger.info("Search finished")
 
     def log_execution_time(self, t: int, ind: FitnessValue):
         """Log the execution time and update the individual's execution time."""

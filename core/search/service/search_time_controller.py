@@ -6,6 +6,7 @@ from collections import deque
 from typing import Tuple, TypeVar, Callable
 
 from core.config_parser import ConfigParser
+from core.search.fitness_value import FitnessValue
 from core.utils.incremental_average import IncrementalAverage
 
 
@@ -23,6 +24,7 @@ class SearchTimeController:
         self.search_started = False
         self.average_test_time_ms = IncrementalAverage()
         self.executed_individual_time: deque[Tuple[int, int]] = deque(maxlen=100)
+        self.current_fitness_value = FitnessValue(1.0, {})
 
         self.listeners = []
 
@@ -41,6 +43,18 @@ class SearchTimeController:
 
         return result
 
+    def get_current_fitness(self):
+        """Get the best individual found so far."""
+        return self.current_fitness_value
+
+    def get_current_fitness_value(self):
+        """Get the best individual found so far."""
+        return self.current_fitness_value.value
+
+    def set_current_fitness(self, value):
+        """Set the best individual found so far."""
+        self.current_fitness_value = value
+
     def start_search(self):
         """Start the search time controller"""
         self.start_time = time.time()
@@ -53,6 +67,10 @@ class SearchTimeController:
 
         for listener in self.listeners:
             listener.new_action_evaluated()
+
+    def get_evaluated_individuals(self):
+        """Get the number of evaluated individuals."""
+        return self.evaluated_individuals
 
     def new_action_improvement(self):
         """Update the timestamp of the last action improvement."""
@@ -72,7 +90,7 @@ class SearchTimeController:
             return 0.0
 
         if self.config.get('stopping_criterion') == ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS:
-            return self.evaluated_individuals / self.config.get('max_evaluations')
+            return self.get_evaluated_individuals() / self.config.get('max_evaluations')
 
         elif self.config.get('stopping_criterion') == ConfigParser.StoppingCriterion.TIME:
             return self.get_elapsed_seconds() / self.config.get('max_evaluations')
@@ -82,7 +100,7 @@ class SearchTimeController:
 
     def should_continue_search(self):
         """Check if the search should continue."""
-        return self.percentage_used_budget() < 1.0
+        return self.percentage_used_budget() < 1.0 and self.get_current_fitness_value() > 0.0
 
     def add_listener(self, listener):
         """Add a listener to the search time controller."""

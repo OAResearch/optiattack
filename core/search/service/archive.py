@@ -3,6 +3,9 @@
 from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.individual import Individual
+from core.search.service.randomness import Randomness
+from core.search.service.search_time_controller import SearchTimeController
+from core.search.solution import Solution
 from core.utils.images import ProcessedImage
 from core.utils.nut_request import NutRequest
 
@@ -11,14 +14,13 @@ class Archive:
 
     """Base class for the archives used in the search service."""
 
-    def __init__(self, stc, randomness, config):
+    def __init__(self, stc: SearchTimeController, randomness: Randomness, config: dict):
         """Initialize the archive."""
 
         self.original_predication_results = None
-        self.populations: [EvaluatedIndividual] = []
+        self.populations: list[EvaluatedIndividual] = []
         self.sampling_counter = 0
-        self.last_improvement = []
-        self.last_chosen = []
+        self.last_chosen: list[EvaluatedIndividual] = []
         self.stc = stc
         self.randomness = randomness
         self.config = config
@@ -28,9 +30,10 @@ class Archive:
         """Clean the populations list."""
         self.populations = []
 
-    def add_archive_if_needed(self, individual):
+    def add_archive_if_needed(self, individual: EvaluatedIndividual):
         """Add an individual to the archive if it is better than the current best solution."""
-        if self.randomness.next_bool(0.5):
+        if self.stc.get_current_fitness_value() > individual.fitness.value:
+            self.stc.set_current_fitness(individual.fitness)
             self.populations.append(individual)
             self.stc.new_action_improvement()
 
@@ -72,6 +75,20 @@ class Archive:
         """Get the image."""
         return self.image
 
+    def get_actions(self):
+        """Get the actions of the archive."""
+        actions = [ei.individual.get_actions() for ei in self.populations]
+        return [action for sublist in actions for action in sublist]
+
+    def get_mutated_image(self):
+        """Get mutated image. This image contains the actions of the archive."""
+        action_image = self.image.array.copy()
+        actions = self.get_actions()
+        for action in actions:
+            x, y = action.get_location()
+            action_image[y, x] = action.get_color()
+        return action_image
+
     def set_original_prediction_results(self, results):
         """Set the original prediction results."""
         self.original_predication_results = NutRequest(results)
@@ -79,3 +96,15 @@ class Archive:
     def get_original_prediction_results(self):
         """Get the original prediction results."""
         return self.original_predication_results
+
+    def extract_solution(self):
+        """Extract the solution from the archive."""
+        actions = self.get_actions().copy()
+
+        for action in actions:
+            location = action.get_location()
+            number_of_locations = len([a for a in actions if a.get_location() == location])
+            if number_of_locations > 1:
+                actions.remove(action)
+
+        return Solution(actions, self.stc.get_current_fitness())

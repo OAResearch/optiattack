@@ -1,6 +1,6 @@
 import pytest
 
-from core.main import OptiAttack
+from main import OptiAttack
 from core.problem.base_module import BaseModule
 
 
