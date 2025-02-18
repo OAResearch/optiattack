@@ -124,7 +124,11 @@ if __name__ == "__main__":
     parsed_args = config_parser.parse_args()
     container.config.override(parsed_args)
 
-    app = OptiAttack()
-    container.wire(modules=[app])
-    app.startup()
-    app.run()
+    if parsed_args.get("enable_ui"):
+        from gradio_ui import web_app
+        web_app.launch(pwa=True)
+    else:
+        app = OptiAttack()
+        container.wire(modules=[app])
+        app.startup()
+        app.run()

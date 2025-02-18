@@ -1,4 +1,7 @@
+import os
+
 import gradio as gr
+
 from main import OptiAttack
 from core.problem.base_module import BaseModule
 from PIL import  Image
@@ -21,26 +24,26 @@ class Logger:
     def isatty(self):
         return False
 
+if not os.path.exists("./.cache"):
+    os.makedirs("./.cache")
 
-sys.stdout = Logger("output.log")
+sys.stdout = Logger("./.cache/output.log")
 
 def run_optiattack(host_address, port_number, input_image_path, image_width,
-                               image_height, max_evals, mutation_sigma):
+                               image_height, max_evals):
     container = BaseModule()
     config_parser = container.config_parser()
     if not input_image_path is None:
         image = Image.fromarray(input_image_path)
-        image.save("./tests/test_img_custom.jpeg")
+        image.save("./.cache/cache_img.jpeg")
     parsed_args = config_parser.parse_args()
     parsed_args["image_width"] = image_width
     parsed_args["image_height"] = image_height
-    parsed_args["host_address"] = host_address
-    parsed_args["port_number"] = port_number
-    parsed_args["input_image_path"] = "./tests/test_img_custom.jpeg"
-    parsed_args["max_evals"] = max_evals
-    parsed_args["mutation_sigma"] = mutation_sigma
+    parsed_args["nut_host"] = host_address
+    parsed_args["nut_port"] = port_number
+    parsed_args["input_image"] = "./.cache/cache_img.jpeg"
+    parsed_args["max_evaluations"] = max_evals
     container.config.override(parsed_args)
-
     app = OptiAttack()
     container.wire(modules=[app])
     app.startup()
@@ -49,29 +52,29 @@ def run_optiattack(host_address, port_number, input_image_path, image_width,
 
 def read_logs():
     sys.stdout.flush()
-    with open("output.log", "r") as f:
+    with open("./.cache/output.log", "r") as f:
         return f.read()
 
-with gr.Blocks() as demo:
+def delete_cache():
+    import shutil
+    shutil.rmtree("./.cache", ignore_errors=True)
+
+with gr.Blocks() as web_app:
     with gr.Column():
         with gr.Row():
             host_address = gr.Text(value="localhost", label="Host Address:")
-            port_number = gr.Text(value="8080", label="Port Number")
-        input_image_path = gr.Image(label="Input Image")
+            port_number = gr.Text(value="38000", label="Port Number")
+        input_image_path = gr.Image(label="Input Image", height=224, width=224)
         with gr.Row():
             image_width = gr.Number(value=224, label="Image Width")
             image_height = gr.Number(value=224, label="Image Height")
         with gr.Row():
             max_evals = gr.Number(value=1000, label="Max Evaluations")
-            mutation_sigma = gr.Number(value=50, label="Mutation Sigma")
         btn = gr.Button(value="Run OptiAttack")
         map = gr.Image()
         logs = gr.Textbox(label="Console Output")
     btn.click(run_optiattack, [host_address, port_number, input_image_path, image_width,
-                               image_height, max_evals, mutation_sigma], map)
+                               image_height, max_evals], map)
     t = gr.Timer(1, active=True)
     t.tick(read_logs, outputs=logs)
-
-
-if __name__ == "__main__":
-    demo.launch()
+    web_app.unload(delete_cache)

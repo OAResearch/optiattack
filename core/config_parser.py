@@ -168,3 +168,8 @@ class ConfigParser:
     def show_plots(self):
         """Show plots."""
         return True
+
+    @cfg("Enable web interface.")
+    def enable_ui(self):
+        """Enable web interface."""
+        return False
