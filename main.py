@@ -110,7 +110,7 @@ class OptiAttack:
             self.archive.add_archive_if_needed(ei)
         self.statistics.write_statistics()
         self.logger.info("Search finished")
-
+        return self.statistics.save_final_image()
     def log_execution_time(self, t: int, ind: FitnessValue):
         """Log the execution time and update the individual's execution time."""
         self.stc.report_executed_individual_time(t, 1)

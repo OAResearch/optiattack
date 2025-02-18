@@ -29,7 +29,7 @@ class Statistics(SearchListener):
         seed = self.config.get("seed")
         experiment_label = self.config.get("experiment_label")
 
-        output_dir = f"./{self.config.get("output_dir")}"
+        output_dir = f"./{self.config.get('output_dir')}"
         experiment_folder = f"{output_dir}/{experiment_label}"
         exact_experiment_folder = f"{experiment_folder}/{seed}"
         statistics_folder = f"{exact_experiment_folder}/statistics"
@@ -112,6 +112,7 @@ class Statistics(SearchListener):
         if self.config.get("show_plots"):
             plt.imshow(img)
             plt.show()
+        return image
 
     def save_matrix_overlay(self):
         """Save the matrix overlay. It contains the actions of the archive."""
