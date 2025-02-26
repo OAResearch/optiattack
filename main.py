@@ -107,6 +107,7 @@ class OptiAttack:
         self.stc.start_search()
         self.algorithm.search()
 
+        self.search_status_updater.search_end()
         self.statistics.write_statistics()
         self.logger.info("Search finished")
 

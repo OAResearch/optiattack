@@ -53,6 +53,16 @@ class Action:
             return False
         return self.location == o.location and all(self.get_color() == o.get_color())
 
+    def same_location(self, o: object) -> bool:
+        """Compares two Action objects for equality based on their location."""
+        if not isinstance(o, Action):
+            return False
+        return self.location == o.location
+
+    def __hash__(self) -> int:
+        """Returns a hash of the Action object based on its location and color."""
+        return hash((self.location, tuple(self.get_color())))
+
     def __str__(self) -> str:
         """Returns a string representation of the action, including its location and color."""
         return f"Action at {self.location} with color {self.get_color()}"

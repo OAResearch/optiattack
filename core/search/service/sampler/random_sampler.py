@@ -18,7 +18,6 @@ class RandomSampler(Sampler):
             action = self.sample_random_action()
             while not individual.add_action(action):
                 action = self.sample_random_action()
-                individual.add_action(action)
         return individual
 
     def sample_random_action(self):

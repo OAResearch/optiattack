@@ -12,10 +12,13 @@ class Individual:
 
     def add_action(self, action):
         """Add an action to the individual."""
+        does_contain = [action.same_location(a) for a in self.actions]
+        if any(does_contain):
+            return False
+
         if action not in self.actions:
             self.actions.append(action)
             return True
-        return False
 
     def get_actions(self):
         """Get the actions of the individual."""

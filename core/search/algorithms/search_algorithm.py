@@ -21,7 +21,6 @@ class SearchAlgorithm:
                  sampler: Sampler):
         """Initialize the search algorithm."""
 
-        # TODO add the sampler
         self.ff = ff
         self.randomness = randomness
         self.stc = stc
