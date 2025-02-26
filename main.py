@@ -2,14 +2,18 @@
 
 from logging import Logger
 
+from dependency_injector import providers
 from dependency_injector.wiring import inject, Provide
 
+from core.config_parser import ConfigParser
 from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
+from core.search.algorithms.random_algorithm import RandomAlgorithm
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.service.archive import Archive
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
@@ -31,7 +35,8 @@ class OptiAttack:
                  search_status_updater: SearchStatusUpdater = Provide[BaseModule.search_status_updater],
                  ff=Provide[BaseModule.ff],
                  mutator=Provide[BaseModule.mutator],
-                 statistics=Provide[BaseModule.statistics]
+                 statistics=Provide[BaseModule.statistics],
+                 algorithm=Provide[BaseModule.algorithm]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -46,6 +51,7 @@ class OptiAttack:
         self.ff = ff
         self.mutator = mutator
         self.statistics = statistics
+        self.algorithm = algorithm
 
     def startup(self):
         """Prepare the application."""
@@ -98,23 +104,12 @@ class OptiAttack:
         self.logger.info("Running application")
 
         self.stc.start_search()
+        self.algorithm.search()
 
-        while self.stc.should_continue_search():
-            individual = self.archive.sample_individual()
-
-            fitness_value = SearchTimeController.measure_time_millis(
-                self.log_execution_time,
-                lambda: self.ff.evaluate(individual)
-            )
-            ei = EvaluatedIndividual(individual, fitness_value)
-            self.archive.add_archive_if_needed(ei)
         self.statistics.write_statistics()
         self.logger.info("Search finished")
 
-    def log_execution_time(self, t: int, ind: FitnessValue):
-        """Log the execution time and update the individual's execution time."""
-        self.stc.report_executed_individual_time(t, 1)
-        ind.set_execution_time_ms(t)
+
 
 
 if __name__ == "__main__":
@@ -125,6 +120,23 @@ if __name__ == "__main__":
     container.config.override(parsed_args)
 
     app = OptiAttack()
+
+    if container.config.get("mutator") == ConfigParser.Mutators.STANDARD_MUTATOR:
+        container.mutator.override(providers.Singleton(StandardMutator,
+                                                       randomness=container.randomness,
+                                                       stc=container.stc,
+                                                       config=container.config))
+
+    if container.config.get("algorithm") == ConfigParser.Algorithms.RANDOM_SEARCH:
+        container.algorithm.override(providers.Singleton(RandomAlgorithm,
+                                                         ff=container.ff,
+                                                         randomness=container.randomness,
+                                                         stc=container.stc,
+                                                         archive=container.archive,
+                                                         config=container.config,
+                                                         mutator=container.mutator))
+
     container.wire(modules=[app])
+
     app.startup()
     app.run()

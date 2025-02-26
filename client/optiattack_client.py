@@ -63,7 +63,7 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
             state["controller_host"] = host
             state["controller_port"] = port
             image_base64 = base64.b64decode(data.image)
-            array_data = np.fromstring(image_base64, np.uint8)
+            array_data = np.frombuffer(image_base64, np.uint8)
 
             state["predictions"] = func(array_data)["predictions"]
 
@@ -79,7 +79,7 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
         @app.post(f"{constants.NEW_ACTION}")
         async def new_action(data: MatrixModel):
             image_base64 = base64.b64decode(data.image)
-            array_data = np.fromstring(image_base64, np.uint8)
+            array_data = np.frombuffer(image_base64, np.uint8)
 
             return func(array_data)
 
