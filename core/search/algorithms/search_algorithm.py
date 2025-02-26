@@ -4,6 +4,7 @@ from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.mutator.mutator import Mutator
 from core.search.service.randomness import Randomness
+from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
 
 
@@ -16,7 +17,8 @@ class SearchAlgorithm:
                  stc: SearchTimeController,
                  archive: Archive,
                  config: dict,
-                 mutator: Mutator):
+                 mutator: Mutator,
+                 sampler: Sampler):
         """Initialize the search algorithm."""
 
         # TODO add the sampler
@@ -26,6 +28,7 @@ class SearchAlgorithm:
         self.archive = archive
         self.config = config
         self.mutator = mutator
+        self.sampler = sampler
 
     def search_once(self):
         """Search for a solution."""

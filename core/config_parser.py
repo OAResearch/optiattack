@@ -191,3 +191,24 @@ class ConfigParser:
     def mutator(self):
         """Mutation operator for the search."""
         return ConfigParser.Mutators.STANDARD_MUTATOR
+
+    @cfg("Minimum action size")
+    def min_action_size(self):
+        """Minimum action size."""
+        return 1
+
+    @cfg("Maximum action size")
+    def max_action_size(self):
+        """Maximum action size."""
+        return 10
+
+    class SamplerType:
+
+        """Sampler type for the search."""
+
+        RANDOM_SAMPLER = "random_sampler"
+
+    @cfg("Sampler type for the search.")
+    def sampler(self):
+        """Sampler type for the search."""
+        return ConfigParser.SamplerType.RANDOM_SAMPLER

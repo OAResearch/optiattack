@@ -15,6 +15,7 @@ from core.search.service.archive import Archive
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
+from core.search.service.sampler.random_sampler import RandomSampler
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
 
@@ -126,7 +127,11 @@ if __name__ == "__main__":
                                                        randomness=container.randomness,
                                                        stc=container.stc,
                                                        config=container.config))
-
+    if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
+        container.sampler.override(providers.Singleton(RandomSampler,
+                                                       randomness=container.randomness,
+                                                       config=container.config
+                                                       ))
     if container.config.get("algorithm") == ConfigParser.Algorithms.RANDOM_SEARCH:
         container.algorithm.override(providers.Singleton(RandomAlgorithm,
                                                          ff=container.ff,
@@ -134,7 +139,8 @@ if __name__ == "__main__":
                                                          stc=container.stc,
                                                          archive=container.archive,
                                                          config=container.config,
-                                                         mutator=container.mutator))
+                                                         mutator=container.mutator,
+                                                         sampler=container.sampler))
 
     container.wire(modules=[app])
 

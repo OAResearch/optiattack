@@ -12,6 +12,7 @@ from core.search.service.monitor.search_status_updater import SearchStatusUpdate
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
 from core.search.service.randomness import Randomness
+from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
 
 
@@ -51,8 +52,12 @@ class BaseModule(containers.DeclarativeContainer):
     ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc)
     mutator = providers.Singleton(Mutator, randomness=randomness, stc=stc, config=config)
     statistics = providers.Singleton(Statistics, stc=stc, archive=archive, config=config)
+    sampler = providers.Singleton(Sampler,
+                                  randomness=randomness,
+                                  config=config)
     algorithm = providers.Singleton(SearchAlgorithm,
                                     ff=ff, randomness=randomness,
                                     stc=stc, archive=archive,
                                     config=config,
-                                    mutator=mutator)
+                                    mutator=mutator,
+                                    sampler=sampler)

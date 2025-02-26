@@ -10,6 +10,6 @@ class RandomAlgorithm(SearchAlgorithm):
     def search_once(self):
         """Search for a solution."""
 
-        individual = self.archive.sample_individual()
+        individual = self.sampler.sample()
         ei = self.ff.calculate_fitness(individual)
         self.archive.add_archive_if_needed(ei)
