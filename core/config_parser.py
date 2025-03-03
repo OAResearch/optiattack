@@ -124,6 +124,18 @@ class ConfigParser:
         """Stopping criterion for the search."""
         return ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS
 
+    class Algorithms:
+
+        """Search algorithms for the optimization."""
+
+        RANDOM_SEARCH = "random_search"
+        MIO = "mio"
+
+    @cfg("Search algorithm for the optimization.")
+    def algorithm(self):
+        """Search algorithm for the optimization."""
+        return ConfigParser.Algorithms.RANDOM_SEARCH
+
     @cfg("Maximum number of evaluations for the search.")
     def max_evaluations(self):
         """Maximum number of evaluations for the search."""
@@ -168,3 +180,35 @@ class ConfigParser:
     def show_plots(self):
         """Show plots."""
         return True
+
+    class Mutators:
+
+        """Mutation operators for the search."""
+
+        STANDARD_MUTATOR = "gaussian_mutator"
+
+    @cfg("Mutation operator for the search.")
+    def mutator(self):
+        """Mutation operator for the search."""
+        return ConfigParser.Mutators.STANDARD_MUTATOR
+
+    @cfg("Minimum action size")
+    def min_action_size(self):
+        """Minimum action size."""
+        return 1
+
+    @cfg("Maximum action size")
+    def max_action_size(self):
+        """Maximum action size."""
+        return 10
+
+    class SamplerType:
+
+        """Sampler type for the search."""
+
+        RANDOM_SAMPLER = "random_sampler"
+
+    @cfg("Sampler type for the search.")
+    def sampler(self):
+        """Sampler type for the search."""
+        return ConfigParser.SamplerType.RANDOM_SAMPLER

@@ -1,8 +1,6 @@
 """Module contains the Archive class, which is a base class for the archives used in the search service."""
 
-from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
-from core.search.individual import Individual
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from core.search.solution import Solution
@@ -40,24 +38,6 @@ class Archive:
     def shrink_archive(self):
         """Remove individuals from the archive that do not improve the fitness of the current best solution."""
         raise NotImplementedError("This method should be implemented")
-
-    def sample_individual(self):
-        """Sample an individual randomly."""
-        individual = Individual()
-        number_of_actions = self.randomness.next_int(1, 10)
-        for _ in range(number_of_actions):
-            action = self.sample_random_action()
-            while not individual.add_action(action):
-                action = self.sample_random_action()
-                individual.add_action(action)
-        return individual
-
-    def sample_random_action(self):
-        """Return a random action."""
-        location = (self.randomness.next_int(0, self.config.get("image_width")),
-                    self.randomness.next_int(0, self.config.get("image_height")))
-        color = self.randomness.next_int(0, 255), self.randomness.next_int(0, 255), self.randomness.next_int(0, 255)
-        return Action(location, color[0], color[1], color[2])
 
     def is_empty(self):
         """Check if the archive is empty."""
