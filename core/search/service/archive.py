@@ -1,4 +1,5 @@
 """Module contains the Archive class, which is a base class for the archives used in the search service."""
+import numpy as np
 
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.service.randomness import Randomness
@@ -17,7 +18,6 @@ class Archive:
 
         self.original_predication_results = None
         self.populations: list[EvaluatedIndividual] = []
-        self.sampling_counter = 0
         self.last_chosen: list[EvaluatedIndividual] = []
         self.stc = stc
         self.randomness = randomness
@@ -28,12 +28,28 @@ class Archive:
         """Clean the populations list."""
         self.populations = []
 
-    def add_archive_if_needed(self, individual: EvaluatedIndividual):
+    def add_archive_if_needed(self, individual: EvaluatedIndividual, parent: EvaluatedIndividual = None):
         """Add an individual to the archive if it is better than the current best solution."""
         if self.stc.get_current_fitness_value() > individual.fitness.value:
             self.stc.set_current_fitness(individual.fitness)
             self.populations.append(individual)
             self.stc.new_action_improvement()
+
+            if parent is not None:
+                parent.sampling_counter = 0
+
+    def sample_individual(self):
+        """Sample an individual from the archive."""
+
+        if self.populations.__len__() == 0:
+            return
+
+        sampling_counter = np.array([i.sampling_counter for i in self.populations])
+        random_index = self.randomness.random_choice(np.flatnonzero(sampling_counter == min(sampling_counter)))
+        individual = self.populations[random_index]
+        self.last_chosen = individual
+        individual.sampling_counter += 1
+        return individual
 
     def shrink_archive(self):
         """Remove individuals from the archive that do not improve the fitness of the current best solution."""

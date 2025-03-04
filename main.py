@@ -8,6 +8,7 @@ from dependency_injector.wiring import inject, Provide
 from core.config_parser import ConfigParser
 from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
+from core.search.algorithms.mio_algorithm import MioAlgorithm
 from core.search.algorithms.random_algorithm import RandomAlgorithm
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
@@ -37,7 +38,8 @@ class OptiAttack:
                  ff=Provide[BaseModule.ff],
                  mutator=Provide[BaseModule.mutator],
                  statistics=Provide[BaseModule.statistics],
-                 algorithm=Provide[BaseModule.algorithm]
+                 algorithm=Provide[BaseModule.algorithm],
+                 apc=Provide[BaseModule.apc]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -53,6 +55,7 @@ class OptiAttack:
         self.mutator = mutator
         self.statistics = statistics
         self.algorithm = algorithm
+        self.apc = apc
 
     def startup(self):
         """Prepare the application."""
@@ -127,21 +130,35 @@ if __name__ == "__main__":
         container.mutator.override(providers.Singleton(StandardMutator,
                                                        randomness=container.randomness,
                                                        stc=container.stc,
-                                                       config=container.config))
+                                                       config=container.config,
+                                                       apc=container.apc))
+
     if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
         container.sampler.override(providers.Singleton(RandomSampler,
                                                        randomness=container.randomness,
                                                        config=container.config
                                                        ))
-    if container.config.get("algorithm") == ConfigParser.Algorithms.RANDOM_SEARCH:
-        container.algorithm.override(providers.Singleton(RandomAlgorithm,
-                                                         ff=container.ff,
-                                                         randomness=container.randomness,
-                                                         stc=container.stc,
-                                                         archive=container.archive,
-                                                         config=container.config,
-                                                         mutator=container.mutator,
-                                                         sampler=container.sampler))
+
+    current_algorithm = container.config.get("algorithm")
+
+    #TODO switch/case can be used but it is supported after python 3.10
+
+    if current_algorithm == ConfigParser.Algorithms.RANDOM_SEARCH:
+        algorithm = RandomAlgorithm
+    elif current_algorithm == ConfigParser.Algorithms.MIO:
+        algorithm = MioAlgorithm
+    else:
+        raise ValueError(f"Algorithm {current_algorithm} not supported")
+
+    container.algorithm.override(providers.Singleton(algorithm,
+                                                     ff=container.ff,
+                                                     randomness=container.randomness,
+                                                     stc=container.stc,
+                                                     archive=container.archive,
+                                                     config=container.config,
+                                                     mutator=container.mutator,
+                                                     sampler=container.sampler,
+                                                     apc=container.apc))
 
     container.wire(modules=[app])
 

@@ -6,6 +6,7 @@ from dependency_injector import containers, providers
 from core.config_parser import ConfigParser
 from core.remote.remote_controller import RemoteController
 from core.search.algorithms.search_algorithm import SearchAlgorithm
+from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
@@ -38,6 +39,7 @@ class BaseModule(containers.DeclarativeContainer):
     randomness = providers.Singleton(Randomness, config=config)
     logger = providers.Singleton(configure_logger)
     stc = providers.Singleton(SearchTimeController, config=config)
+    apc = providers.Singleton(AdaptiveParameterControl, stc=stc, config=config)
     remote_controller = providers.Singleton(RemoteController,
                                             config=config,
                                             stc=stc)
@@ -50,7 +52,7 @@ class BaseModule(containers.DeclarativeContainer):
                                                 config=config,
                                                 archive=archive)
     ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc)
-    mutator = providers.Singleton(Mutator, randomness=randomness, stc=stc, config=config)
+    mutator = providers.Singleton(Mutator, randomness=randomness, stc=stc, config=config, apc=apc)
     statistics = providers.Singleton(Statistics, stc=stc, archive=archive, config=config)
     sampler = providers.Singleton(Sampler,
                                   randomness=randomness,
@@ -60,4 +62,5 @@ class BaseModule(containers.DeclarativeContainer):
                                     stc=stc, archive=archive,
                                     config=config,
                                     mutator=mutator,
-                                    sampler=sampler)
+                                    sampler=sampler,
+                                    apc=apc)

@@ -1,5 +1,5 @@
 """Abstract class for search algorithms."""
-
+from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.mutator.mutator import Mutator
@@ -18,7 +18,9 @@ class SearchAlgorithm:
                  archive: Archive,
                  config: dict,
                  mutator: Mutator,
-                 sampler: Sampler):
+                 sampler: Sampler,
+                 apc: AdaptiveParameterControl):
+
         """Initialize the search algorithm."""
 
         self.ff = ff
@@ -28,6 +30,11 @@ class SearchAlgorithm:
         self.config = config
         self.mutator = mutator
         self.sampler = sampler
+        self.apc = apc
+
+    def get_type(self):
+        """Return the type of the search algorithm."""
+        pass
 
     def search_once(self):
         """Search for a solution."""

@@ -134,7 +134,7 @@ class ConfigParser:
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
         """Search algorithm for the optimization."""
-        return ConfigParser.Algorithms.RANDOM_SEARCH
+        return ConfigParser.Algorithms.MIO
 
     @cfg("Maximum number of evaluations for the search.")
     def max_evaluations(self):
@@ -200,7 +200,7 @@ class ConfigParser:
     @cfg("Maximum action size")
     def max_action_size(self):
         """Maximum action size."""
-        return 10
+        return 1
 
     class SamplerType:
 
@@ -212,3 +212,43 @@ class ConfigParser:
     def sampler(self):
         """Sampler type for the search."""
         return ConfigParser.SamplerType.RANDOM_SAMPLER
+
+    @cfg("The start value of the adaptive parameter control")
+    def apc_start_time(self):
+        """APC start time."""
+        return 0.4
+
+    @cfg("The threshold value of the adaptive parameter control")
+    def apc_threshold(self):
+        """APC threshold."""
+        return 0.6
+
+    @cfg("The start value of the adaptive parameter control for the pixel value")
+    def apc_pixel_start(self):
+        """APC pixel start value."""
+        return 40
+
+    @cfg("The end value of the adaptive parameter control for the pixel value")
+    def apc_pixel_end(self):
+        """APC pixel end value."""
+        return 30
+
+    @cfg("The start value of the adaptive parameter control for the location")
+    def apc_location_start(self):
+        """APC noise start value."""
+        return 40
+
+    @cfg("The end value of the adaptive parameter control for the location")
+    def apc_location_end(self):
+        """APC noise end value."""
+        return 30
+
+    @cfg("The percentage of passed search before starting a more focused, less exploratory one")
+    def focused_search_activation_time(self):
+        """Focused search activation time."""
+        return 0.8
+
+    @cfg("Probability of sampling a new individual at random")
+    def random_sampling_probability(self):
+        """Random search probability."""
+        return 0.8
