@@ -111,6 +111,11 @@ class ConfigParser:
         """Image height in pixels."""
         return 224
 
+    @cfg("Target class for the targeted attack. If not specified, any misclassification is considered successful.")
+    def target(self):
+        """Target class for the targeted attack."""
+        return "None"
+
     class StoppingCriterion:
 
         """Stopping criterion for the search."""

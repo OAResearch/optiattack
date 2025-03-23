@@ -104,6 +104,12 @@ class OptiAttack:
         """Run the application."""
         self.logger.info("Running application")
 
+        target_class = self.config.get("target")
+        if target_class:
+            self.logger.info(f"Hedefli saldırı etkinleştirildi. Hedef sınıf: {target_class}")
+            # Burada FF (fitness function) sınıfına hedef sınıfı iletebiliriz
+            # self.ff.set_target_class(target_class)
+
         self.stc.start_search()
         self.algorithm.search()
 
