@@ -25,3 +25,11 @@ def test_img_path(container):
         randomness=container.randomness(),
     )
     assert app.config.get("input_image") == "tests/data/image.jpg"
+
+def test_target_param(container):
+    container.config.override({"target": "kedi", "seed": 42})
+    app = OptiAttack(
+        config=container.config(),
+        randomness=container.randomness(),
+    )
+    assert app.config.get("target") == "kedi"
