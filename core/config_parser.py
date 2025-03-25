@@ -262,4 +262,4 @@ class ConfigParser:
     @cfg("Probability of sampling a new individual at random")
     def random_sampling_probability(self):
         """Random search probability."""
-        return 0.8
+        return 0.5
