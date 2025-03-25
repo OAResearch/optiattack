@@ -14,6 +14,7 @@ from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.service.archive import Archive
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.random_sampler import RandomSampler
@@ -128,6 +129,12 @@ if __name__ == "__main__":
 
     if container.config.get("mutator") == ConfigParser.Mutators.STANDARD_MUTATOR:
         container.mutator.override(providers.Singleton(StandardMutator,
+                                                       randomness=container.randomness,
+                                                       stc=container.stc,
+                                                       config=container.config,
+                                                       apc=container.apc))
+    elif container.config.get("mutator") == ConfigParser.Mutators.ONE_ZERO_MUTATOR:
+        container.mutator.override(providers.Singleton(OneZeroMutator,
                                                        randomness=container.randomness,
                                                        stc=container.stc,
                                                        config=container.config,

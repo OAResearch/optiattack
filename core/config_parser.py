@@ -186,11 +186,22 @@ class ConfigParser:
         """Mutation operators for the search."""
 
         STANDARD_MUTATOR = "gaussian_mutator"
+        ONE_ZERO_MUTATOR = "one_zero_mutator"
 
     @cfg("Mutation operator for the search.")
     def mutator(self):
         """Mutation operator for the search."""
-        return ConfigParser.Mutators.STANDARD_MUTATOR
+        return ConfigParser.Mutators.ONE_ZERO_MUTATOR
+
+    @cfg("Mutation rate for the one mutation.")
+    def one_mutation_rate(self):
+        """Mutation rate for the one mutation."""
+        return 0.3
+
+    @cfg("Mutation rate for the zero mutation.")
+    def zero_mutation_rate(self):
+        """Mutation rate for the zero mutation."""
+        return 0.4
 
     @cfg("Minimum action size")
     def min_action_size(self):
@@ -200,7 +211,7 @@ class ConfigParser:
     @cfg("Maximum action size")
     def max_action_size(self):
         """Maximum action size."""
-        return 1
+        return 5
 
     class SamplerType:
 

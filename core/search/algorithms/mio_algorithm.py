@@ -15,7 +15,7 @@ class MioAlgorithm(SearchAlgorithm):
         if self.archive.is_empty() or self.randomness.next_bool(self.apc.get_probability_random_sampling()):
             individual = self.sampler.sample()
             ei = self.ff.calculate_fitness(individual)
-            self.archive.add_archive_if_needed(ei)
+            res = self.archive.add_archive_if_needed(ei)
             return
 
         sample = self.archive.sample_individual()

@@ -37,6 +37,8 @@ class Archive:
 
             if parent is not None:
                 parent.sampling_counter = 0
+            return True
+        return False
 
     def sample_individual(self):
         """Sample an individual from the archive."""
