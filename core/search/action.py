@@ -28,6 +28,10 @@ class Action:
         """Returns the location of the action as a tuple (x, y)."""
         return self.location
 
+    def set_location(self, x, y):
+        """Sets the location of the action to the provided x and y values."""
+        self.location = (x, y)
+
     def get_color(self):
         """Returns the RGB color of the action as a NumPy array [red, green, blue]."""
         return np.array([self.red, self.green, self.blue])

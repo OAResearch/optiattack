@@ -43,5 +43,5 @@ class Individual:
         """Get the image."""
         for action in self.actions:
             x, y = action.get_location()
-            action_image[y, x] = action.get_color()
+            action_image[x, y] = action.get_color()
         return action_image
