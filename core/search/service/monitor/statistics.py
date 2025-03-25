@@ -29,7 +29,7 @@ class Statistics(SearchListener):
         seed = self.config.get("seed")
         experiment_label = self.config.get("experiment_label")
 
-        output_dir = f"./{self.config.get('output_dir')}"
+        output_dir = f"./{self.config.get("output_dir")}"
         experiment_folder = f"{output_dir}/{experiment_label}"
         exact_experiment_folder = f"{experiment_folder}/{seed}"
         statistics_folder = f"{exact_experiment_folder}/statistics"
