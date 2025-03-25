@@ -128,7 +128,7 @@ class ConfigParser:
 
         """Search algorithms for the optimization."""
 
-        RANDOM_SEARCH = "random_search"
+        RANDOM_SEARCH = "random"
         MIO = "mio"
 
     @cfg("Search algorithm for the optimization.")
@@ -211,7 +211,7 @@ class ConfigParser:
     @cfg("Maximum action size")
     def max_action_size(self):
         """Maximum action size."""
-        return 5
+        return 10
 
     class SamplerType:
 

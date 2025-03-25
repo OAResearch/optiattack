@@ -20,7 +20,6 @@ class SearchAlgorithm:
                  mutator: Mutator,
                  sampler: Sampler,
                  apc: AdaptiveParameterControl):
-
         """Initialize the search algorithm."""
 
         self.ff = ff

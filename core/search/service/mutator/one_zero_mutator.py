@@ -41,6 +41,8 @@ class OneZeroMutator(Mutator):
         return self.mutate_location(action)
 
     def mutate_location(self, action: Action):
+        """Mutates the location of the action."""
+
         sigma = self.apc.get_location_apc()
         mutated_width = self.randomness.random_gaussian(action.get_location()[0], sigma)
         mutated_height = self.randomness.random_gaussian(action.get_location()[1], sigma)

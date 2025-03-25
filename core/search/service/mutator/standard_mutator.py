@@ -24,7 +24,6 @@ class StandardMutator(Mutator):
     def apply_gaussian_mutation(self, action: Action):
         """Applies the Gaussian mutation to the action."""
 
-
         sigma = self.apc.get_pixel_apc()
         pixels = action.get_color()
         delta = self.randomness.random_gaussian(pixels * 0, sigma)
