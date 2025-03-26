@@ -131,10 +131,10 @@ def test_get_mutated_image(archive):
     archive.image.array = image_array
 
     action1 = MagicMock(spec=Action)
-    action1.get_location.return_value = (0, 0)
+    action1.get_location.return_value = (0, 1)
     action1.get_color.return_value = np.array([255, 255, 255])
     action2 = MagicMock(spec=Action)
-    action2.get_location.return_value = (1, 1)
+    action2.get_location.return_value = (1, 2)
     action2.get_color.return_value = np.array([128, 128, 128])
     archive.populations = [
         MagicMock(individual=MagicMock(get_actions=MagicMock(return_value=[action1]))),
@@ -145,8 +145,8 @@ def test_get_mutated_image(archive):
     mutated_image = archive.get_mutated_image()
 
     # Assert that the image was mutated correctly
-    assert all(mutated_image[0][0] == [255, 255, 255])
-    assert all(mutated_image[1][1] == [128, 128, 128])
+    assert all(mutated_image[0][1] == [255, 255, 255])
+    assert all(mutated_image[1][2] == [128, 128, 128])
 
 def test_archive_extract(archive):
     # Mock the actions
