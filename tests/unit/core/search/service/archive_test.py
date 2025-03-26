@@ -44,7 +44,7 @@ def test_add_archive_if_needed_with_better_fitness(archive):
 
     # Assert that the individual was added to the populations
     assert len(archive.populations) == 1
-    archive.stc.set_current_fitness.assert_called_once_with(0.5)
+    assert archive.stc.get_current_fitness_value() == 0.5
     archive.stc.new_action_improvement.assert_called_once()
 
 def test_add_archive_if_needed_with_worse_fitness(archive):

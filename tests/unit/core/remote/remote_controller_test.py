@@ -25,7 +25,7 @@ def process_image(encoded_image: bytes):
 def app():
     container = BaseModule()
     container.unwire()
-    container.config.override({"seed": 42, "nut_host": constants.DEFAULT_CONTROLLER_HOST, "nut_port": constants.DEFAULT_CONTROLLER_PORT})
+    container.config.override({"seed": 42, "nut_host": "localhost", "nut_port": 38000, "base_endpoint": "/api/v1"})
 
     app = OptiAttack(
         config=container.config(),
@@ -39,7 +39,14 @@ def test_get_info_nut(app):
     assert response["is_running"] is False
 
 def test_run_nut(app):
-    response = app.remote_controller.run_nut()
+    image_data = BytesIO()
+    image = Image.new("RGB", (100, 100), color="red")
+    image.save(image_data, format="JPEG")
+    image_data.seek(0)
+
+    image_array = np.array(image)
+
+    response = app.remote_controller.run_nut(image_array)
     assert response["is_running"] is True
 
 def test_stop_nut(app):
@@ -53,10 +60,19 @@ def test_new_action(app):
     image_data.seek(0)
 
     image_array = np.array(image)
+    image.close()
 
     response = app.remote_controller.new_action(image_array)
-    assert response["predictions"] == PROCESS_IMAGE_RESPONSE["predictions"]
-    image.close()
+    assert response.predictions[0].label == PROCESS_IMAGE_RESPONSE["predictions"][0]["label"]
+    assert response.predictions[0].value == PROCESS_IMAGE_RESPONSE["predictions"][0]["score"]
+    assert response.predictions[1].label == PROCESS_IMAGE_RESPONSE["predictions"][1]["label"]
+    assert response.predictions[1].value == PROCESS_IMAGE_RESPONSE["predictions"][1]["score"]
+    assert response.max_score.value == PROCESS_IMAGE_RESPONSE["predictions"][0]["score"]
+    assert response.max_score.label == PROCESS_IMAGE_RESPONSE["predictions"][0]["label"]
+
+    assert response.second_max_score.value == PROCESS_IMAGE_RESPONSE["predictions"][1]["score"]
+    assert response.second_max_score.label == PROCESS_IMAGE_RESPONSE["predictions"][1]["label"]
+
 
 def test_get_test_results():
     # TODO: Not implemented and tested
