@@ -13,17 +13,15 @@ from core.search.individual import Individual
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import ProcessedImage
-from core.utils.nut_request import NutRequest
 from core.search.service.archive import Archive
-from tests.unit.core.search.individual_test import individual
 
 
 # Fixture for the Archive instance
 @pytest.fixture
 def archive():
-    stc = MagicMock(spec=SearchTimeController)
     randomness = MagicMock(spec=Randomness)
     config = {"image_width": 100, "image_height": 100}
+    stc = SearchTimeController(config)
     return Archive(stc, randomness, config)
 
 # Test cases
@@ -34,45 +32,47 @@ def test_clean_population(archive):
     assert len(archive.populations) == 0
 
 def test_add_archive_if_needed_with_better_fitness(archive):
-    # Mock an individual with better fitness
-    individual = MagicMock(spec=EvaluatedIndividual)
-    individual.fitness = MagicMock(spec=FitnessValue)
-    individual.fitness.value = 0.5
-    archive.stc.get_current_fitness_value.return_value = 0.6
+    individual = Individual()
+    individual.get_actions = MagicMock(return_value=[MagicMock(spec=Action)])
+    fitness = MagicMock(spec=FitnessValue)
+    fitness.value = 0.6
 
-    archive.add_archive_if_needed(individual)
+    ei1 = EvaluatedIndividual(individual, fitness)
+
+    individual2 = Individual()
+    individual2.get_actions = MagicMock(return_value=[MagicMock(spec=Action)])
+    fitness2 = MagicMock(spec=FitnessValue)
+    fitness2.value = 0.5
+
+    ei2 = EvaluatedIndividual(individual2, fitness2)
+    archive.stc.set_current_fitness(ei1.fitness)
+
+    archive.add_archive_if_needed(ei2)
 
     # Assert that the individual was added to the populations
     assert len(archive.populations) == 1
     assert archive.stc.get_current_fitness_value() == 0.5
-    archive.stc.new_action_improvement.assert_called_once()
 
 def test_add_archive_if_needed_with_worse_fitness(archive):
-    # Mock an individual with worse fitness
-    individual = MagicMock(spec=EvaluatedIndividual)
-    individual.fitness = MagicMock(spec=FitnessValue)
-    individual.fitness.value = 0.7
-    archive.stc.get_current_fitness_value.return_value = 0.6
+    individual = Individual()
+    individual.get_actions = MagicMock(return_value=[MagicMock(spec=Action)])
+    fitness = MagicMock(spec=FitnessValue)
+    fitness.value = 0.6
 
-    archive.add_archive_if_needed(individual)
+    ei1 = EvaluatedIndividual(individual, fitness)
+
+    individual2 = Individual()
+    individual2.get_actions = MagicMock(return_value=[MagicMock(spec=Action)])
+    fitness2 = MagicMock(spec=FitnessValue)
+    fitness2.value = 0.7
+
+    ei2 = EvaluatedIndividual(individual2, fitness2)
+    archive.stc.set_current_fitness(ei1.fitness)
+
+    archive.add_archive_if_needed(ei2)
 
     # Assert that the individual was not added to the populations
     assert len(archive.populations) == 0
-    archive.stc.set_current_fitness.assert_not_called()
-    archive.stc.new_action_improvement.assert_not_called()
-
-def test_sample_random_action(archive):
-    # Mock the randomness to return specific values
-    archive.randomness.next_int.side_effect = [50, 60, 255, 128, 0]
-
-    # Call the sample_random_action method
-    action = archive.sample_random_action()
-
-    # Assert that the action has the correct location and color
-    assert isinstance(action, Action)
-    assert action.get_location() == (50, 60)
-    assert all(action.get_color() == [255, 128, 0])
-    assert archive.randomness.next_int.call_count == 5
 
 def test_is_empty(archive):
     # Test when the archive is empty

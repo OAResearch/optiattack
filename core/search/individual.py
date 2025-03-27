@@ -45,3 +45,9 @@ class Individual:
             x, y = action.get_location()
             action_image[x, y] = action.get_color()
         return action_image
+
+    def __eq__(self, other):
+        """Check if two individuals are equal."""
+        if not isinstance(other, Individual):
+            return False
+        return self.actions == other.actions and self.individual_origin == other.individual_origin
