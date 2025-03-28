@@ -16,7 +16,7 @@ class RandomSampler(Sampler):
                                                      self.config.get("max_action_size"))
         for _ in range(number_of_actions):
             action = self.sample_random_action()
-            while not individual.add_action(action):
+            while not individual.add_action(action, replace=False):
                 action = self.sample_random_action()
         return individual
 

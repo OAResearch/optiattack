@@ -23,8 +23,9 @@ class SearchStatusUpdater(SearchListener):
         self.utf8 = 'utf-8'
         self.first = True
         self.out = sys.stdout
+        self.enabled = self.config.get("show_progress")
 
-        if self.config.get("show_progress") is True:
+        if self.enabled is True:
             self.stc.add_listener(self)
 
     @staticmethod
@@ -45,6 +46,9 @@ class SearchStatusUpdater(SearchListener):
 
     def new_action_evaluated(self):
         """Update the search status on the console."""
+        if not self.enabled:
+            return
+
         percentage_int = int(self.stc.percentage_used_budget() * 100)
         current = "{:.3f}".format(self.stc.percentage_used_budget() * 100)
 
@@ -98,7 +102,7 @@ class SearchStatusUpdater(SearchListener):
         self.up_line_and_erase()
 
         print(f"{self.bcolors.OKGREEN}Number of evaluated individuals: {self.stc.get_evaluated_individuals()}")
-        print(f"Number of actions: {self.archive.get_actions().__len__()}")
+        print(f"Number of actions: {self.archive.extract_solution().actions.__len__()}")
         print(f"Best fitness: {self.stc.get_current_fitness_value()}")
         print(f"Elapsed time: {self.stc.get_elapsed_time()}")
 

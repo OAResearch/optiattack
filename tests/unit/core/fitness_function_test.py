@@ -1,8 +1,13 @@
 import pytest
 from unittest.mock import MagicMock
+
+from core.remote.remote_controller import RemoteController
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
+from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
+from core.search.service.randomness import Randomness
+from core.search.service.search_time_controller import SearchTimeController
 
 
 # Mock classes for dependencies
@@ -10,14 +15,14 @@ class MockIndividual(Individual):
     def get_action_image(self, image):
         return "mock_image_array"
 
-class MockArchive:
-    def get_image(self):
+class MockArchive(Archive):
+    def get_mutated_image(self):
         return "mock_image"
 
     def get_original_prediction_results(self):
         return MagicMock(max_score=MagicMock(label="original_label"))
 
-class MockRemoteController:
+class MockRemoteController(RemoteController):
     def new_action(self, img_array):
         return MagicMock(
             max_score=MagicMock(value=0.9, label="original_label"),
@@ -27,9 +32,13 @@ class MockRemoteController:
 # Fixture for the FitnessFunction instance
 @pytest.fixture
 def fitness_function():
-    archive = MockArchive()
-    remote_controller = MockRemoteController()
-    return FitnessFunction(archive, remote_controller)
+    stc = MagicMock(spec=SearchTimeController)
+    config = {}
+    randomness = MagicMock(spec=Randomness)
+    archive = MockArchive(stc, randomness, config)
+    remote_controller = MockRemoteController(config, stc)
+    stc = MagicMock(spec=SearchTimeController)
+    return FitnessFunction(archive, remote_controller, stc)
 
 # Test cases
 def test_evaluate_with_matching_labels(fitness_function):

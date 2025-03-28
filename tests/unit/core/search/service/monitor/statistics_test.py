@@ -1,14 +1,10 @@
-from email.utils import specialsre
-
 import pytest
 import os
 import json
 import numpy as np
 from unittest.mock import MagicMock
 
-from mypy.fastparse import MatchAs
 
-from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.service.archive import Archive

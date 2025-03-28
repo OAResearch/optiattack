@@ -16,7 +16,7 @@ class FitnessFunction:
 
     """Represents a fitness function that can be used to evaluate the fitness of individuals."""
 
-    def __init__(self, archive: Archive, remote_controller: RemoteController, stc) -> None:
+    def __init__(self, archive: Archive, remote_controller: RemoteController, stc: SearchTimeController) -> None:
         """Initializes a FitnessFunction instance with the provided archive."""
         self.archive = archive
         self.remote_controller = remote_controller
