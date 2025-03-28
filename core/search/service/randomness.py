@@ -74,6 +74,9 @@ class Randomness:
 
         """
 
+        if min_value == max_value:
+            return min_value
+
         return self.random.randint(min_value, max_value)
 
     def random_choice(self, max_size: int, selection_probs: Optional[List] = None):

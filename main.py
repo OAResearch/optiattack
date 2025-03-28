@@ -2,21 +2,33 @@
 
 from logging import Logger
 
+from dependency_injector import providers
 from dependency_injector.wiring import inject, Provide
 
+from core.config_parser import ConfigParser
 from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
+from core.search.algorithms.mio_algorithm import MioAlgorithm
+from core.search.algorithms.random_algorithm import RandomAlgorithm
+from core.search.algorithms.search_algorithm import SearchAlgorithm
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
+from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
+from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.service.monitor.statistics import Statistics
+from core.search.service.mutator.mutator import Mutator
+from core.search.service.mutator.one_zero_mutator import OneZeroMutator
+from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
+from core.search.service.sampler.random_sampler import RandomSampler
 from core.search.service.search_time_controller import SearchTimeController
+from core.utils.application import configure_container
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
 
 
 class OptiAttack:
-
     """Main class of the application."""
 
     @inject
@@ -29,9 +41,11 @@ class OptiAttack:
                  stc: SearchTimeController = Provide[BaseModule.stc],
                  archive: Archive = Provide[BaseModule.archive],
                  search_status_updater: SearchStatusUpdater = Provide[BaseModule.search_status_updater],
-                 ff=Provide[BaseModule.ff],
-                 mutator=Provide[BaseModule.mutator],
-                 statistics=Provide[BaseModule.statistics]
+                 ff: FitnessFunction = Provide[BaseModule.ff],
+                 mutator: Mutator = Provide[BaseModule.mutator],
+                 statistics: Statistics = Provide[BaseModule.statistics],
+                 algorithm: SearchAlgorithm = Provide[BaseModule.algorithm],
+                 apc: AdaptiveParameterControl = Provide[BaseModule.apc]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -46,6 +60,8 @@ class OptiAttack:
         self.ff = ff
         self.mutator = mutator
         self.statistics = statistics
+        self.algorithm = algorithm
+        self.apc = apc
 
     def startup(self):
         """Prepare the application."""
@@ -98,23 +114,12 @@ class OptiAttack:
         self.logger.info("Running application")
 
         self.stc.start_search()
+        self.algorithm.search()
 
-        while self.stc.should_continue_search():
-            individual = self.archive.sample_individual()
-
-            fitness_value = SearchTimeController.measure_time_millis(
-                self.log_execution_time,
-                lambda: self.ff.evaluate(individual)
-            )
-            ei = EvaluatedIndividual(individual, fitness_value)
-            self.archive.add_archive_if_needed(ei)
+        self.search_status_updater.search_end()
         self.statistics.write_statistics()
         self.logger.info("Search finished")
-        return self.statistics.save_final_image()
-    def log_execution_time(self, t: int, ind: FitnessValue):
-        """Log the execution time and update the individual's execution time."""
-        self.stc.report_executed_individual_time(t, 1)
-        ind.set_execution_time_ms(t)
+        return self.statistics.directories
 
 
 if __name__ == "__main__":
@@ -123,9 +128,11 @@ if __name__ == "__main__":
     config_parser = container.config_parser()
     parsed_args = config_parser.parse_args()
     container.config.override(parsed_args)
+    container = configure_container(container)
 
     if parsed_args.get("enable_ui"):
         from gradio_ui import web_app
+
         web_app.launch(pwa=True)
     else:
         app = OptiAttack()

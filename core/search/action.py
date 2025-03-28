@@ -28,6 +28,10 @@ class Action:
         """Returns the location of the action as a tuple (x, y)."""
         return self.location
 
+    def set_location(self, x, y):
+        """Sets the location of the action to the provided x and y values."""
+        self.location = (x, y)
+
     def get_color(self):
         """Returns the RGB color of the action as a NumPy array [red, green, blue]."""
         return np.array([self.red, self.green, self.blue])
@@ -52,6 +56,16 @@ class Action:
         if not isinstance(o, Action):
             return False
         return self.location == o.location and all(self.get_color() == o.get_color())
+
+    def same_location(self, o: object) -> bool:
+        """Compares two Action objects for equality based on their location."""
+        if not isinstance(o, Action):
+            return False
+        return self.location == o.location
+
+    def __hash__(self) -> int:
+        """Returns a hash of the Action object based on its location and color."""
+        return hash((self.location, tuple(self.get_color())))
 
     def __str__(self) -> str:
         """Returns a string representation of the action, including its location and color."""

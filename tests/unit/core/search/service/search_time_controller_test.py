@@ -5,9 +5,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from core.config_parser import ConfigParser
+from core.search.service.search_time_controller import SearchTimeController
 from main import OptiAttack
 from core.problem.base_module import BaseModule
-from core.search.service.stc import SearchTimeController
 
 
 @pytest.fixture

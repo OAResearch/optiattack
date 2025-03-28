@@ -19,10 +19,12 @@ class TestSearchStatusUpdater:
         mock_time.percentage_used_budget.return_value = 0.5  # 50%
         mock_time.compute_executed_individual_time_statistics.return_value = (100.0, 10.0)  # avg_time, avg_size
         mock_time.get_seconds_since_last_improvement.return_value = 5  # 5 seconds
+        mock_time.get_current_fitness_value.return_value = 0.5  # 50% fitness
         mock_archive.number_of_covered_targets.return_value = 42  # 42 covered targets
 
         # Create the SearchStatusUpdater instance
         return SearchStatusUpdater(mock_time, mock_config, mock_archive)
+
 
     def test_new_action_evaluated_updates_status(self, updater):
         # Redirect stdout to capture printed output
@@ -38,7 +40,8 @@ class TestSearchStatusUpdater:
         # Verify the output
         output = captured_output.getvalue()
         assert "* Consumed search budget: 50.000%" in output
-        assert "* Covered targets: 42; time per test: 100.0ms (10.0 actions); since last improvement: 5s" in output
+        assert "* Action size: 0; time per test: 100.0ms (10.0 actions); since" in output
+        assert "fitness: 0.5" in output
 
     def test_new_action_evaluated_skips_when_disabled(self, updater):
         # Disable the updater

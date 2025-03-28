@@ -23,8 +23,9 @@ class SearchStatusUpdater(SearchListener):
         self.utf8 = 'utf-8'
         self.first = True
         self.out = sys.stdout
+        self.enabled = self.config.get("show_progress")
 
-        if self.config.get("show_progress") is True:
+        if self.enabled is True:
             self.stc.add_listener(self)
 
     @staticmethod
@@ -45,6 +46,9 @@ class SearchStatusUpdater(SearchListener):
 
     def new_action_evaluated(self):
         """Update the search status on the console."""
+        if not self.enabled:
+            return
+
         percentage_int = int(self.stc.percentage_used_budget() * 100)
         current = "{:.3f}".format(self.stc.percentage_used_budget() * 100)
 
@@ -77,3 +81,43 @@ class SearchStatusUpdater(SearchListener):
                   f"time per test: {avg_time}ms ({avg_size} actions); "
                   f"since last improvement: {since_last}s; "
                   f"fitness: {self.stc.get_current_fitness_value()}")
+
+    class bcolors:
+
+        """Class for color codes."""
+
+        HEADER = '\033[95m'
+        OKBLUE = '\033[94m'
+        OKCYAN = '\033[96m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+        BOLD = '\033[1m'
+        UNDERLINE = '\033[4m'
+
+    def search_end(self):
+        """Update the search status on the console."""
+        self.up_line_and_erase()
+        self.up_line_and_erase()
+
+        print(f"{self.bcolors.OKGREEN}Number of evaluated individuals: {self.stc.get_evaluated_individuals()}")
+        print(f"Number of actions: {self.archive.extract_solution().actions.__len__()}")
+        print(f"Best fitness: {self.stc.get_current_fitness_value()}")
+        print(f"Elapsed time: {self.stc.get_elapsed_time()}")
+
+        self.up_line_and_erase()
+        print("Predictions")
+        print("-----------------")
+        prediction_beginning = self.archive.get_original_prediction_results().predictions[0]
+        prediction_end = self.stc.current_fitness_value.predictions[0]
+        print(f"{self.bcolors.ENDC}Beginning prediction: {self.bcolors.OKBLUE}{prediction_beginning.label} "
+              f"{self.bcolors.ENDC}with confidence level: {self.bcolors.WARNING}{prediction_beginning.value}")
+        self.up_line_and_erase()
+        print(f"{self.bcolors.ENDC}End prediction: {self.bcolors.OKBLUE}{prediction_end.label} "
+              f"{self.bcolors.ENDC}with confidence level: {self.bcolors.OKGREEN}{prediction_end.value}")
+
+        self.up_line_and_erase()
+        self.up_line_and_erase()
+
+        print(f"Search ended.{self.bcolors.ENDC}")

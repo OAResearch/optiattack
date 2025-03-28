@@ -15,10 +15,10 @@ class FitnessValue:
     and execution time in milliseconds.
     """
 
-    def __init__(self, value: float, predictions: list):
+    def __init__(self, value: float, predictions: list, execution_time_ms: int = 0):
         """Initializes FitnessValue with default fitness_value=0 and execution_time_ms=0."""
         self.value = value
-        self.execution_time_ms = 0
+        self.execution_time_ms = execution_time_ms
         self.predictions = predictions
 
     def set_fitness_value(self, value):
@@ -32,3 +32,7 @@ class FitnessValue:
     def set_predictions(self, predictions):
         """Sets the predictions to the provided list."""
         self.predictions = predictions
+
+    def copy(self):
+        """Returns a copy of the FitnessValue."""
+        return FitnessValue(self.value, self.predictions, self.execution_time_ms)
