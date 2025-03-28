@@ -1,3 +1,5 @@
+"""Configure the container with the provided configuration."""
+
 from dependency_injector import providers
 
 from core.config_parser import ConfigParser
@@ -9,6 +11,8 @@ from core.search.service.sampler.random_sampler import RandomSampler
 
 
 def configure_container(container):
+    """Configure the container with the provided configuration."""
+
     if container.config.get("mutator") == ConfigParser.Mutators.STANDARD_MUTATOR:
         container.mutator.override(providers.Singleton(StandardMutator,
                                                        randomness=container.randomness,
