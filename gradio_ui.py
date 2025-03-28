@@ -50,8 +50,17 @@ def run_optiattack(host_address, port_number, input_image_path, image_width,
     app = OptiAttack()
     container.wire(modules=[app])
     app.startup()
-    image = app.run()
-    return image
+    folders = app.run()
+    image_folder = folders["images_folder"]
+    final_image_path = f"{image_folder}/final_image.jpg"
+    line_image_path = f"{image_folder}/line.png"
+    matrix_overlay_path = f"{image_folder}/matrix_overlay.png"
+
+    final_image = Image.open(final_image_path)
+    line_image = Image.open(line_image_path)
+    matrix_overlay_image = Image.open(matrix_overlay_path)
+
+    return final_image, line_image, matrix_overlay_image
 
 def read_logs():
     sys.stdout.flush()
@@ -74,10 +83,13 @@ with gr.Blocks() as web_app:
         with gr.Row():
             max_evals = gr.Number(value=1000, label="Max Evaluations")
         btn = gr.Button(value="Run OptiAttack")
-        map = gr.Image()
+        with gr.Row():
+            final_image = gr.Image()
+            line_image = gr.Image()
+            matrix_overlay_image = gr.Image()
         logs = gr.Textbox(label="Console Output")
     btn.click(run_optiattack, [host_address, port_number, input_image_path, image_width,
-                               image_height, max_evals], map)
+                               image_height, max_evals], [final_image, line_image, matrix_overlay_image])
     t = gr.Timer(1, active=True)
     t.tick(read_logs, outputs=logs)
     web_app.unload(delete_cache)
