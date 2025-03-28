@@ -268,3 +268,8 @@ class ConfigParser:
     def random_sampling_probability(self):
         """Random search probability."""
         return 0.5
+      
+    @cfg("Enable web interface.")
+    def enable_ui(self):
+        """Enable web interface."""
+        return False

@@ -1,0 +1,80 @@
+import os
+
+import gradio as gr
+
+from main import OptiAttack
+from core.problem.base_module import BaseModule
+from PIL import  Image
+import sys
+
+
+class Logger:
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, "w")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+    def isatty(self):
+        return False
+
+if not os.path.exists("./.cache"):
+    os.makedirs("./.cache")
+
+sys.stdout = Logger("./.cache/output.log")
+
+def run_optiattack(host_address, port_number, input_image_path, image_width,
+                               image_height, max_evals):
+    container = BaseModule()
+    config_parser = container.config_parser()
+    if not input_image_path is None:
+        image = Image.fromarray(input_image_path)
+        image.save("./.cache/cache_img.jpeg")
+    parsed_args = config_parser.parse_args()
+    parsed_args["image_width"] = image_width
+    parsed_args["image_height"] = image_height
+    parsed_args["nut_host"] = host_address
+    parsed_args["nut_port"] = port_number
+    parsed_args["input_image"] = "./.cache/cache_img.jpeg"
+    parsed_args["max_evaluations"] = max_evals
+    container.config.override(parsed_args)
+    app = OptiAttack()
+    container.wire(modules=[app])
+    app.startup()
+    image = app.run()
+    return image
+
+def read_logs():
+    sys.stdout.flush()
+    with open("./.cache/output.log", "r") as f:
+        return f.read()
+
+def delete_cache():
+    import shutil
+    shutil.rmtree("./.cache", ignore_errors=True)
+
+with gr.Blocks() as web_app:
+    with gr.Column():
+        with gr.Row():
+            host_address = gr.Text(value="localhost", label="Host Address:")
+            port_number = gr.Text(value="38000", label="Port Number")
+        input_image_path = gr.Image(label="Input Image", height=224, width=224)
+        with gr.Row():
+            image_width = gr.Number(value=224, label="Image Width")
+            image_height = gr.Number(value=224, label="Image Height")
+        with gr.Row():
+            max_evals = gr.Number(value=1000, label="Max Evaluations")
+        btn = gr.Button(value="Run OptiAttack")
+        map = gr.Image()
+        logs = gr.Textbox(label="Console Output")
+    btn.click(run_optiattack, [host_address, port_number, input_image_path, image_width,
+                               image_height, max_evals], map)
+    t = gr.Timer(1, active=True)
+    t.tick(read_logs, outputs=logs)
+    web_app.unload(delete_cache)

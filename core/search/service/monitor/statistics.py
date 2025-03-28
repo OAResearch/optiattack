@@ -112,6 +112,7 @@ class Statistics(SearchListener):
         if self.config.get("show_plots"):
             plt.imshow(img)
             plt.show()
+        return image
 
     def save_matrix_overlay(self):
         """Save the matrix overlay. It contains the actions of the archive."""

@@ -116,8 +116,6 @@ class OptiAttack:
         self.logger.info("Search finished")
 
 
-
-
 if __name__ == "__main__":
 
     container = BaseModule()
@@ -167,7 +165,13 @@ if __name__ == "__main__":
                                                      sampler=container.sampler,
                                                      apc=container.apc))
 
-    container.wire(modules=[app])
 
-    app.startup()
-    app.run()
+
+    if parsed_args.get("enable_ui"):
+        from gradio_ui import web_app
+        web_app.launch(pwa=True)
+    else:
+        app = OptiAttack()
+        container.wire(modules=[app])
+        app.startup()
+        app.run()
