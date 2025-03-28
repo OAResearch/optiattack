@@ -32,14 +32,15 @@ class SearchTimeController:
     T = TypeVar("T")
 
     @staticmethod
-    def measure_time_millis(logging_function: Callable[[int, T], None], function: Callable[[], T]) -> T:
+    def measure_time_millis(logging_function: Callable[[int, T, int], None],
+                            function: Callable[[], T], action_size: int = 1) -> T:
         """Measure the execution time of a function and log the result using the provided logging function."""
         start_time = int(time.time() * 1000)  # Current time in milliseconds
         result = function()  # Execute the function
         elapsed_time = int(time.time() * 1000) - start_time  # Calculate elapsed time in milliseconds
 
         # Call the logging function with the elapsed time and result
-        logging_function(elapsed_time, result)
+        logging_function(elapsed_time, result, action_size)
 
         return result
 
