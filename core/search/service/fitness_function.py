@@ -38,12 +38,13 @@ class FitnessFunction:
 
         fitness_value = SearchTimeController.measure_time_millis(
             self.log_execution_time,
-            lambda: self.evaluate(individual)
+            lambda: self.evaluate(individual),
+            individual.actions.__len__()
         )
         ei = EvaluatedIndividual(individual, fitness_value)
         return ei
 
-    def log_execution_time(self, t: int, ind: FitnessValue):
+    def log_execution_time(self, t: int, ind: FitnessValue, action_size: int = 1) -> None:
         """Log the execution time and update the individual's execution time."""
-        self.stc.report_executed_individual_time(t, 1)
+        self.stc.report_executed_individual_time(t, action_size)
         ind.set_execution_time_ms(t)
