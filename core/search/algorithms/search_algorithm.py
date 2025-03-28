@@ -19,7 +19,8 @@ class SearchAlgorithm:
                  config: dict,
                  mutator: Mutator,
                  sampler: Sampler,
-                 apc: AdaptiveParameterControl):
+                 apc: AdaptiveParameterControl,
+                 pruning: Pruner):
         """Initialize the search algorithm."""
 
         self.ff = ff

@@ -273,3 +273,8 @@ class ConfigParser:
     def enable_ui(self):
         """Enable web interface."""
         return False
+
+    @cfg("Enable pruning of the final results.")
+    def enable_pruning(self):
+        """Enable pruning of the final results."""
+        return True

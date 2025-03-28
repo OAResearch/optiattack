@@ -24,7 +24,7 @@ class SearchTimeController:
         self.search_started = False
         self.average_test_time_ms = IncrementalAverage()
         self.executed_individual_time: deque[Tuple[int, int]] = deque(maxlen=100)
-        self.current_fitness_value = FitnessValue(1.0, {})
+        self.current_fitness_value = FitnessValue(1.0, list())
 
         self.listeners = []
 
