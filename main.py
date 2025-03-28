@@ -19,6 +19,7 @@ from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.random_sampler import RandomSampler
 from core.search.service.search_time_controller import SearchTimeController
+from core.utils.application import configure_container
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
 
 
@@ -122,50 +123,7 @@ if __name__ == "__main__":
     config_parser = container.config_parser()
     parsed_args = config_parser.parse_args()
     container.config.override(parsed_args)
-
-    app = OptiAttack()
-
-    if container.config.get("mutator") == ConfigParser.Mutators.STANDARD_MUTATOR:
-        container.mutator.override(providers.Singleton(StandardMutator,
-                                                       randomness=container.randomness,
-                                                       stc=container.stc,
-                                                       config=container.config,
-                                                       apc=container.apc))
-    elif container.config.get("mutator") == ConfigParser.Mutators.ONE_ZERO_MUTATOR:
-        container.mutator.override(providers.Singleton(OneZeroMutator,
-                                                       randomness=container.randomness,
-                                                       stc=container.stc,
-                                                       config=container.config,
-                                                       apc=container.apc))
-
-    if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
-        container.sampler.override(providers.Singleton(RandomSampler,
-                                                       randomness=container.randomness,
-                                                       config=container.config
-                                                       ))
-
-    current_algorithm = container.config.get("algorithm")
-
-    #TODO switch/case can be used but it is supported after python 3.10
-
-    if current_algorithm == ConfigParser.Algorithms.RANDOM_SEARCH:
-        algorithm = RandomAlgorithm
-    elif current_algorithm == ConfigParser.Algorithms.MIO:
-        algorithm = MioAlgorithm
-    else:
-        raise ValueError(f"Algorithm {current_algorithm} not supported")
-
-    container.algorithm.override(providers.Singleton(algorithm,
-                                                     ff=container.ff,
-                                                     randomness=container.randomness,
-                                                     stc=container.stc,
-                                                     archive=container.archive,
-                                                     config=container.config,
-                                                     mutator=container.mutator,
-                                                     sampler=container.sampler,
-                                                     apc=container.apc))
-
-
+    container = configure_container(container)
 
     if parsed_args.get("enable_ui"):
         from gradio_ui import web_app

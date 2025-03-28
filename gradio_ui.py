@@ -2,6 +2,7 @@ import os
 
 import gradio as gr
 
+from core.utils.application import configure_container
 from main import OptiAttack
 from core.problem.base_module import BaseModule
 from PIL import  Image
@@ -44,6 +45,8 @@ def run_optiattack(host_address, port_number, input_image_path, image_width,
     parsed_args["input_image"] = "./.cache/cache_img.jpeg"
     parsed_args["max_evaluations"] = max_evals
     container.config.override(parsed_args)
+    container = configure_container(container)
+
     app = OptiAttack()
     container.wire(modules=[app])
     app.startup()
