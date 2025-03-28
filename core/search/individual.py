@@ -10,11 +10,19 @@ class Individual:
         self.actions = []
         self.individual_origin = None
 
-    def add_action(self, action):
+    def add_action(self, action, replace=True):
         """Add an action to the individual."""
         does_contain = [action.same_location(a) for a in self.actions]
-        if any(does_contain):
+
+        if not replace and any(does_contain):
+            # If the action already exists in the individual and we don't want to replace it, return False
             return False
+
+        if any(does_contain):
+            # If the action already exists in the individual, replace it
+            index = does_contain.index(True)
+            self.actions[index] = action
+            return True
 
         if action not in self.actions:
             self.actions.append(action)

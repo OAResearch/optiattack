@@ -102,7 +102,7 @@ class SearchStatusUpdater(SearchListener):
         self.up_line_and_erase()
 
         print(f"{self.bcolors.OKGREEN}Number of evaluated individuals: {self.stc.get_evaluated_individuals()}")
-        print(f"Number of actions: {self.archive.get_actions().__len__()}")
+        print(f"Number of actions: {self.archive.extract_solution().actions.__len__()}")
         print(f"Best fitness: {self.stc.get_current_fitness_value()}")
         print(f"Elapsed time: {self.stc.get_elapsed_time()}")
 

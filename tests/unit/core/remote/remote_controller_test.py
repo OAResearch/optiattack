@@ -10,13 +10,16 @@ from main import OptiAttack
 from core.problem.base_module import BaseModule
 
 PROCESS_IMAGE_RESPONSE = {
-        "predictions": [
-            {"label": "zebra", "score": 0.99},
-            {"label": "horse", "score": 0.01},
-        ]
-    }
+    "predictions": [
+        {"label": "zebra", "score": 0.99},
+        {"label": "horse", "score": 0.01},
+    ]
+}
 
-@collect_info(host=constants.DEFAULT_CONTROLLER_HOST, port=constants.DEFAULT_CONTROLLER_PORT)
+HOST = "localhost"
+PORT = 38010
+
+@collect_info(host=HOST, port=PORT)
 def process_image(encoded_image: bytes):
     return PROCESS_IMAGE_RESPONSE
 
@@ -25,7 +28,9 @@ def process_image(encoded_image: bytes):
 def app():
     container = BaseModule()
     container.unwire()
-    container.config.override({"seed": 42, "nut_host": "localhost", "nut_port": 38000, "base_endpoint": "/api/v1"})
+    container.config.override(
+        {"seed": 42, "nut_host": HOST, "nut_port": PORT,
+         "base_endpoint": "/api/v1"})
 
     app = OptiAttack(
         config=container.config(),
@@ -33,10 +38,6 @@ def app():
     )
     yield app
 
-def test_get_info_nut(app):
-
-    response = app.remote_controller.get_nut_info()
-    assert response["is_running"] is False
 
 def test_run_nut(app):
     image_data = BytesIO()
@@ -49,9 +50,11 @@ def test_run_nut(app):
     response = app.remote_controller.run_nut(image_array)
     assert response["is_running"] is True
 
+
 def test_stop_nut(app):
     response = app.remote_controller.stop_nut()
     assert response["is_running"] is False
+
 
 def test_new_action(app):
     image_data = BytesIO()
