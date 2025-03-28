@@ -10,20 +10,25 @@ from core.problem.base_module import BaseModule
 from core.remote.remote_controller import RemoteController
 from core.search.algorithms.mio_algorithm import MioAlgorithm
 from core.search.algorithms.random_algorithm import RandomAlgorithm
+from core.search.algorithms.search_algorithm import SearchAlgorithm
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
+from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
+from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.service.monitor.statistics import Statistics
+from core.search.service.mutator.mutator import Mutator
 from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.random_sampler import RandomSampler
 from core.search.service.search_time_controller import SearchTimeController
+from core.utils.application import configure_container
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
 
 
 class OptiAttack:
-
     """Main class of the application."""
 
     @inject
@@ -36,11 +41,11 @@ class OptiAttack:
                  stc: SearchTimeController = Provide[BaseModule.stc],
                  archive: Archive = Provide[BaseModule.archive],
                  search_status_updater: SearchStatusUpdater = Provide[BaseModule.search_status_updater],
-                 ff=Provide[BaseModule.ff],
-                 mutator=Provide[BaseModule.mutator],
-                 statistics=Provide[BaseModule.statistics],
-                 algorithm=Provide[BaseModule.algorithm],
-                 apc=Provide[BaseModule.apc]
+                 ff: FitnessFunction = Provide[BaseModule.ff],
+                 mutator: Mutator = Provide[BaseModule.mutator],
+                 statistics: Statistics = Provide[BaseModule.statistics],
+                 algorithm: SearchAlgorithm = Provide[BaseModule.algorithm],
+                 apc: AdaptiveParameterControl = Provide[BaseModule.apc]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -114,8 +119,7 @@ class OptiAttack:
         self.search_status_updater.search_end()
         self.statistics.write_statistics()
         self.logger.info("Search finished")
-
-
+        return self.statistics.directories
 
 
 if __name__ == "__main__":
@@ -124,50 +128,14 @@ if __name__ == "__main__":
     config_parser = container.config_parser()
     parsed_args = config_parser.parse_args()
     container.config.override(parsed_args)
+    container = configure_container(container)
 
-    app = OptiAttack()
+    if parsed_args.get("enable_ui"):
+        from gradio_ui import web_app
 
-    if container.config.get("mutator") == ConfigParser.Mutators.STANDARD_MUTATOR:
-        container.mutator.override(providers.Singleton(StandardMutator,
-                                                       randomness=container.randomness,
-                                                       stc=container.stc,
-                                                       config=container.config,
-                                                       apc=container.apc))
-    elif container.config.get("mutator") == ConfigParser.Mutators.ONE_ZERO_MUTATOR:
-        container.mutator.override(providers.Singleton(OneZeroMutator,
-                                                       randomness=container.randomness,
-                                                       stc=container.stc,
-                                                       config=container.config,
-                                                       apc=container.apc))
-
-    if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
-        container.sampler.override(providers.Singleton(RandomSampler,
-                                                       randomness=container.randomness,
-                                                       config=container.config
-                                                       ))
-
-    current_algorithm = container.config.get("algorithm")
-
-    #TODO switch/case can be used but it is supported after python 3.10
-
-    if current_algorithm == ConfigParser.Algorithms.RANDOM_SEARCH:
-        algorithm = RandomAlgorithm
-    elif current_algorithm == ConfigParser.Algorithms.MIO:
-        algorithm = MioAlgorithm
+        web_app.launch(pwa=True)
     else:
-        raise ValueError(f"Algorithm {current_algorithm} not supported")
-
-    container.algorithm.override(providers.Singleton(algorithm,
-                                                     ff=container.ff,
-                                                     randomness=container.randomness,
-                                                     stc=container.stc,
-                                                     archive=container.archive,
-                                                     config=container.config,
-                                                     mutator=container.mutator,
-                                                     sampler=container.sampler,
-                                                     apc=container.apc))
-
-    container.wire(modules=[app])
-
-    app.startup()
-    app.run()
+        app = OptiAttack()
+        container.wire(modules=[app])
+        app.startup()
+        app.run()
