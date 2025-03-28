@@ -274,6 +274,17 @@ class ConfigParser:
         """Enable web interface."""
         return False
 
+    class PruningTypes:
+
+        """Pruning methods for the search."""
+
+        STANDARD = "standard"
+
+    @cfg("Pruning method for the search.")
+    def pruning_method(self):
+        """Pruning method for the search."""
+        return ConfigParser.PruningTypes.STANDARD
+
     @cfg("Enable pruning of the final results.")
     def enable_pruning(self):
         """Enable pruning of the final results."""

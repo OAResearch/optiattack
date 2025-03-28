@@ -1,3 +1,5 @@
+"""Abstract class for pruners."""
+
 from logging import Logger
 
 from core.search.action import Action
@@ -18,8 +20,9 @@ class Pruner:
         pass
 
     def minimize_actions_in_archive(self):
-        """Return the type of the pruner."""
+        """Minimize the actions in the archive."""
         pass
 
-    def print_progress(self, action:Action):
+    def print_progress(self, action: Action):
+        """Print the progress of the pruner."""
         self.logger.info(f"Action {action} is trying to be pruned")

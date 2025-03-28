@@ -3,6 +3,7 @@ from core.search.service.adaptive_parameter_control import AdaptiveParameterCont
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.mutator.mutator import Mutator
+from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
@@ -20,7 +21,7 @@ class SearchAlgorithm:
                  mutator: Mutator,
                  sampler: Sampler,
                  apc: AdaptiveParameterControl,
-                 pruning: Pruner):
+                 pruner: Pruner):
         """Initialize the search algorithm."""
 
         self.ff = ff
@@ -31,6 +32,7 @@ class SearchAlgorithm:
         self.mutator = mutator
         self.sampler = sampler
         self.apc = apc
+        self.pruner = pruner
 
     def get_type(self):
         """Return the type of the search algorithm."""
@@ -58,6 +60,5 @@ class SearchAlgorithm:
 
     def after_search(self):
         """Actions to do after the search."""
-
-        # TODO minimization
-        pass
+        if self.config.get("enable_pruning"):
+            self.pruner.minimize_actions_in_archive()

@@ -12,6 +12,7 @@ from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
+from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
@@ -57,10 +58,14 @@ class BaseModule(containers.DeclarativeContainer):
     sampler = providers.Singleton(Sampler,
                                   randomness=randomness,
                                   config=config)
+    pruner = providers.Singleton(Pruner,
+                                 logger=logger,
+                                 archive=archive)
     algorithm = providers.Singleton(SearchAlgorithm,
                                     ff=ff, randomness=randomness,
                                     stc=stc, archive=archive,
                                     config=config,
                                     mutator=mutator,
                                     sampler=sampler,
-                                    apc=apc)
+                                    apc=apc,
+                                    pruner=pruner)

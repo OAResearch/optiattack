@@ -21,6 +21,7 @@ from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
 from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.mutator.standard_mutator import StandardMutator
+from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.random_sampler import RandomSampler
 from core.search.service.search_time_controller import SearchTimeController
@@ -45,7 +46,8 @@ class OptiAttack:
                  mutator: Mutator = Provide[BaseModule.mutator],
                  statistics: Statistics = Provide[BaseModule.statistics],
                  algorithm: SearchAlgorithm = Provide[BaseModule.algorithm],
-                 apc: AdaptiveParameterControl = Provide[BaseModule.apc]
+                 apc: AdaptiveParameterControl = Provide[BaseModule.apc],
+                 pruner: Pruner = Provide[BaseModule.pruner],
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -62,6 +64,7 @@ class OptiAttack:
         self.statistics = statistics
         self.algorithm = algorithm
         self.apc = apc
+        self.pruner = pruner
 
     def startup(self):
         """Prepare the application."""
