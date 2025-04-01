@@ -8,6 +8,7 @@ from typing import Tuple, TypeVar, Callable
 from core.config_parser import ConfigParser
 from core.search.fitness_value import FitnessValue
 from core.search.phase_controller import PhaseController
+from core.search.service.monitor.search_listener import SearchListener
 from core.utils.incremental_average import IncrementalAverage
 
 
@@ -30,7 +31,7 @@ class SearchTimeController:
         self.current_fitness_value = FitnessValue(1.0, list())
         self.pruned_fitness_value = FitnessValue(1.0, list())
 
-        self.listeners = []
+        self.listeners = list[SearchListener]
 
     # Generic type for the function return value
     T = TypeVar("T")

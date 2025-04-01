@@ -12,7 +12,7 @@ class StandardPruner(Pruner):
         """Return the type of the pruner."""
         return "standard"
 
-    def minimize_actions_in_archive(self):
+    def minimize_actions_in_archive(self) -> Solution:
         """Minimize the actions in the archive."""
 
         self.ssu.start_minimization()

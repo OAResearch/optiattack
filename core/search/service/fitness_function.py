@@ -1,6 +1,6 @@
 """Module defines the FitnessFunction class, which represents a fitness function that can be used to evaluate the"""
 
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 from core.remote.remote_controller import RemoteController
 from core.search.action import Action
@@ -25,7 +25,7 @@ class FitnessFunction:
 
     """Represents a fitness function that can be used to evaluate the fitness of individuals."""
 
-    def evaluate(self, individual: T = None, actions: list[Action] = None) -> FitnessValue:
+    def evaluate(self, individual: Optional[T] = None, actions: Optional[list[Action]] = None) -> FitnessValue:
         """Evaluates the fitness of the provided individual and returns a float value."""
         img_array = self.archive.get_mutated_image(actions)
 

@@ -20,6 +20,6 @@ class Pruner:
         """Return the type of the pruner."""
         pass
 
-    def minimize_actions_in_archive(self) -> Solution:
+    def minimize_actions_in_archive(self):
         """Minimize the actions in the archive."""
         pass
