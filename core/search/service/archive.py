@@ -106,10 +106,10 @@ class Archive:
         """Set the minimized solution."""
         self.minimized_solution = solution
 
-    def extract_solution(self) -> Solution:
+    def extract_solution(self, not_minimized=False) -> Solution:
         """Extract the solution from the archive. If the solution is already minimized, return it."""
 
-        if self.minimized_solution is not None:
+        if self.minimized_solution is not None and not not_minimized:
             return self.minimized_solution
 
         actions = self.get_actions().copy()

@@ -192,6 +192,17 @@ class Statistics(SearchListener):
 
         data['changes'] = changes
 
+        not_minimized_matrix = matrix = self.archive.extract_solution(not_minimized=True).actions.copy()
+        not_minimized_changes = []
+        for point in not_minimized_matrix:
+            not_minimized_changes.append({
+                'location': point.get_location(),
+                'color': point.get_color()
+            })
+
+        data['not_minimized__size'] = len(not_minimized_changes)
+        data['not_minimized_changes'] = not_minimized_changes
+
         data['config'] = self.config
 
         with open(f"{self.directories['statistics_folder']}/data.json", 'w') as outfile:

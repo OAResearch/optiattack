@@ -106,7 +106,7 @@ class SearchStatusUpdater(SearchListener):
               f"{self.archive.get_actions().__len__()}")
         print(f"{self.bcolors.OKCYAN}Total number of the actions in the archive after removing redundant actions: "
               f"{self.archive.extract_solution().actions.__len__()}")
-        print(f"{self.bcolors.OKCYAN}Pruner type: {self.config.get("pruning_method")}")
+        print(f"{self.bcolors.OKCYAN}Pruner type: {self.config.get('pruning_method')}")
         print(f"{self.bcolors.OKCYAN}Pruning started with sending request NUT...")
 
     def remove_action(self, remove_counter: int, total_length: int, action: Action):
