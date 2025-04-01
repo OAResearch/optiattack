@@ -6,12 +6,14 @@ from dependency_injector import containers, providers
 from core.config_parser import ConfigParser
 from core.remote.remote_controller import RemoteController
 from core.search.algorithms.search_algorithm import SearchAlgorithm
+from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
+from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
@@ -38,7 +40,8 @@ class BaseModule(containers.DeclarativeContainer):
     config_parser = providers.Singleton(ConfigParser)
     randomness = providers.Singleton(Randomness, config=config)
     logger = providers.Singleton(configure_logger)
-    stc = providers.Singleton(SearchTimeController, config=config)
+    pc = providers.Singleton(PhaseController)
+    stc = providers.Singleton(SearchTimeController, config=config, pc=pc)
     apc = providers.Singleton(AdaptiveParameterControl, stc=stc, config=config)
     remote_controller = providers.Singleton(RemoteController,
                                             config=config,
@@ -57,6 +60,10 @@ class BaseModule(containers.DeclarativeContainer):
     sampler = providers.Singleton(Sampler,
                                   randomness=randomness,
                                   config=config)
+    pruner = providers.Singleton(Pruner,
+                                 archive=archive,
+                                 ff=ff,
+                                 ssu=search_status_updater)
     algorithm = providers.Singleton(SearchAlgorithm,
                                     ff=ff, randomness=randomness,
                                     stc=stc, archive=archive,

@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from core.config_parser import ConfigParser
+from core.search.phase_controller import PhaseController
 from core.search.service.search_time_controller import SearchTimeController
 from main import OptiAttack
 from core.problem.base_module import BaseModule
@@ -23,6 +24,7 @@ def get_app(container, config_setting=None):
         config=container.config(),
         randomness=container.randomness(),
         stc=container.stc(),
+        pc=container.pc()
     )
     assert app.config.get("stopping_criterion") == config_setting.get("stopping_criterion")
     assert app.config.get("max_evaluations") == config_setting.get("max_evaluations")
@@ -62,7 +64,8 @@ def search_time_controller():
         'max_evaluations': 100,
         'stopping_criterion': ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS
     }.get(key)
-    return SearchTimeController(mock_config)
+    pc = PhaseController()
+    return SearchTimeController(mock_config, pc=pc)
 
 def test_start_search(search_time_controller):
     """Test that the search start time is set correctly."""

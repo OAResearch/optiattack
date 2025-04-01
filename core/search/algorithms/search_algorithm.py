@@ -52,11 +52,9 @@ class SearchAlgorithm:
         while self.stc.should_continue_search():
             self.search_once()
 
-        self.after_search()
-        return self.archive.extract_solution()
+        solution = self.after_search()
+        return solution
 
     def after_search(self):
         """Actions to do after the search."""
-
-        # TODO minimization
-        pass
+        return self.archive.extract_solution()

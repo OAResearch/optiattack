@@ -25,6 +25,7 @@ class Archive:
         self.randomness = randomness
         self.config = config
         self.image: ProcessedImage = ProcessedImage(None, None, None)
+        self.minimized_solution: Optional[Solution] = None
 
     def clean_population(self):
         """Clean the populations list."""
@@ -81,10 +82,13 @@ class Archive:
         actions = [ei.individual.get_actions() for ei in self.populations]
         return [action for sublist in actions for action in sublist]
 
-    def get_mutated_image(self) -> np.ndarray:
+    def get_mutated_image(self, actions=None) -> np.ndarray:
         """Get mutated image. This image contains the actions of the archive."""
         action_image = self.image.array.copy()
-        actions = self.get_actions()
+
+        if actions is None:
+            actions = self.get_actions()
+
         for action in actions:
             x, y = action.get_location()
             action_image[x, y] = action.get_color()
@@ -98,8 +102,16 @@ class Archive:
         """Get the original prediction results."""
         return self.original_predication_results
 
-    def extract_solution(self) -> Solution:
-        """Extract the solution from the archive."""
+    def set_minimized_solution(self, solution):
+        """Set the minimized solution."""
+        self.minimized_solution = solution
+
+    def extract_solution(self, not_minimized=False) -> Solution:
+        """Extract the solution from the archive. If the solution is already minimized, return it."""
+
+        if self.minimized_solution is not None and not not_minimized:
+            return self.minimized_solution
+
         actions = self.get_actions().copy()
 
         for action in actions:

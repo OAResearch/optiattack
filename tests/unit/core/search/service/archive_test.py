@@ -10,6 +10,7 @@ from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
+from core.search.phase_controller import PhaseController
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.images import ProcessedImage
@@ -21,7 +22,7 @@ from core.search.service.archive import Archive
 def archive():
     randomness = MagicMock(spec=Randomness)
     config = {"image_width": 100, "image_height": 100}
-    stc = SearchTimeController(config)
+    stc = SearchTimeController(config, pc = PhaseController())
     return Archive(stc, randomness, config)
 
 # Test cases

@@ -2,6 +2,7 @@
 import sys
 import time
 
+from core.search.action import Action
 from core.search.service.archive import Archive
 from core.search.service.monitor.search_listener import SearchListener
 from core.search.service.search_time_controller import SearchTimeController
@@ -95,6 +96,35 @@ class SearchStatusUpdater(SearchListener):
         ENDC = '\033[0m'
         BOLD = '\033[1m'
         UNDERLINE = '\033[4m'
+
+    def start_minimization(self):
+        """Update the search status on the console."""
+
+        self.up_line_and_erase()
+        self.up_line_and_erase()
+        print(f"{self.bcolors.OKCYAN}Total number of the actions in the archive before pruning: "
+              f"{self.archive.get_actions().__len__()}")
+        print(f"{self.bcolors.OKCYAN}Total number of the actions in the archive after removing redundant actions: "
+              f"{self.archive.extract_solution().actions.__len__()}")
+        print(f"{self.bcolors.OKCYAN}Pruner type: {self.config.get('pruning_method')}")
+        print(f"{self.bcolors.OKCYAN}Pruning started with sending request NUT...")
+
+    def remove_action(self, remove_counter: int, total_length: int, action: Action):
+        """Update the search status on the console."""
+
+        self.up_line_and_erase()
+        print(f"{self.bcolors.WARNING}{remove_counter}/{total_length} - "
+              f"Action removed located in {action.get_location()} "
+              f"color: {action.get_color()}")
+        self.up_line_and_erase()
+
+    def kept_action(self, remove_counter: int, total_length: int, action: Action):
+        """Update the search status on the console."""
+        self.up_line_and_erase()
+        print(f"{self.bcolors.OKGREEN}{remove_counter}/{total_length} - "
+              f"Action kept located in {action.get_location()}, "
+              f"color: {action.get_color()}")
+        self.up_line_and_erase()
 
     def search_end(self):
         """Update the search status on the console."""
