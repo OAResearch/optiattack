@@ -7,6 +7,7 @@ from core.utils.decorators import cfg
 
 
 def t_or_f(arg):
+    """Convert string to boolean."""
     ua = str(arg).upper()
     if 'TRUE'.startswith(ua):
         return True
@@ -15,7 +16,9 @@ def t_or_f(arg):
     else:
         raise argparse.ArgumentTypeError(f"Boolean value expected for {arg}")
 
+
 class ConfigParser:
+
     """Configuration parser for the Client."""
 
     def __init__(self):
@@ -38,7 +41,7 @@ class ConfigParser:
         self._descriptions[name] = description
 
         # Add argument to the parser
-        if type(default) == bool:
+        if type(default) is bool:
             self.parser.add_argument(f"--{name}",
                                      default=default,
                                      help=description,
@@ -50,8 +53,6 @@ class ConfigParser:
                                      help=description,
                                      type=type(default),
                                      **kwargs)
-
-
 
     def parse_args(self):
         """Parse command-line arguments and validate them."""
