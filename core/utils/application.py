@@ -35,8 +35,9 @@ def configure_container(container):
 
     if container.config.get("pruning_method") == ConfigParser.PruningTypes.STANDARD:
         container.pruner.override(providers.Singleton(StandardPruner,
-                                                      logger=container.logger,
-                                                      archive=container.archive))
+                                                      archive=container.archive,
+                                                      ff=container.ff,
+                                                      ssu=container.search_status_updater))
 
     current_algorithm = container.config.get("algorithm")
 
@@ -57,7 +58,6 @@ def configure_container(container):
                                                      config=container.config,
                                                      mutator=container.mutator,
                                                      sampler=container.sampler,
-                                                     apc=container.apc,
-                                                     pruner=container.pruner))
+                                                     apc=container.apc))
 
     return container

@@ -1,28 +1,25 @@
 """Abstract class for pruners."""
 
-from logging import Logger
-
-from core.search.action import Action
 from core.search.service.archive import Archive
+from core.search.service.fitness_function import FitnessFunction
+from core.search.service.monitor.search_status_updater import SearchStatusUpdater
+from core.search.solution import Solution
 
 
 class Pruner:
 
     """Abstract class for pruners."""
 
-    def __init__(self, logger: Logger, archive: Archive):
+    def __init__(self, archive: Archive, ff: FitnessFunction, ssu: SearchStatusUpdater):
         """Initialize the pruner."""
         self.archive = archive
-        self.logger = logger
+        self.ff = ff
+        self.ssu = ssu
 
     def pruner_type(self):
         """Return the type of the pruner."""
         pass
 
-    def minimize_actions_in_archive(self):
+    def minimize_actions_in_archive(self) -> Solution:
         """Minimize the actions in the archive."""
         pass
-
-    def print_progress(self, action: Action):
-        """Print the progress of the pruner."""
-        self.logger.info(f"Action {action} is trying to be pruned")

@@ -6,6 +6,7 @@ from dependency_injector import containers, providers
 from core.config_parser import ConfigParser
 from core.remote.remote_controller import RemoteController
 from core.search.algorithms.search_algorithm import SearchAlgorithm
+from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
@@ -39,7 +40,8 @@ class BaseModule(containers.DeclarativeContainer):
     config_parser = providers.Singleton(ConfigParser)
     randomness = providers.Singleton(Randomness, config=config)
     logger = providers.Singleton(configure_logger)
-    stc = providers.Singleton(SearchTimeController, config=config)
+    pc = providers.Singleton(PhaseController)
+    stc = providers.Singleton(SearchTimeController, config=config, pc=pc)
     apc = providers.Singleton(AdaptiveParameterControl, stc=stc, config=config)
     remote_controller = providers.Singleton(RemoteController,
                                             config=config,
@@ -59,13 +61,13 @@ class BaseModule(containers.DeclarativeContainer):
                                   randomness=randomness,
                                   config=config)
     pruner = providers.Singleton(Pruner,
-                                 logger=logger,
-                                 archive=archive)
+                                 archive=archive,
+                                 ff=ff,
+                                 ssu=search_status_updater)
     algorithm = providers.Singleton(SearchAlgorithm,
                                     ff=ff, randomness=randomness,
                                     stc=stc, archive=archive,
                                     config=config,
                                     mutator=mutator,
                                     sampler=sampler,
-                                    apc=apc,
-                                    pruner=pruner)
+                                    apc=apc)

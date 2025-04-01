@@ -13,17 +13,15 @@ from core.search.algorithms.random_algorithm import RandomAlgorithm
 from core.search.algorithms.search_algorithm import SearchAlgorithm
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
+from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
-from core.search.service.mutator.one_zero_mutator import OneZeroMutator
-from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
-from core.search.service.sampler.random_sampler import RandomSampler
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.application import configure_container
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
@@ -48,6 +46,7 @@ class OptiAttack:
                  algorithm: SearchAlgorithm = Provide[BaseModule.algorithm],
                  apc: AdaptiveParameterControl = Provide[BaseModule.apc],
                  pruner: Pruner = Provide[BaseModule.pruner],
+                 pc: PhaseController = Provide[BaseModule.pc]
                  ):
         """Initialize the application."""
         self.__name__ = "OptiAttack"
@@ -65,6 +64,7 @@ class OptiAttack:
         self.algorithm = algorithm
         self.apc = apc
         self.pruner = pruner
+        self.pc = pc
 
     def startup(self):
         """Prepare the application."""
@@ -114,14 +114,20 @@ class OptiAttack:
 
     def run(self):
         """Run the application."""
-        self.logger.info("Running application")
 
+        self.pc.start()
         self.stc.start_search()
         self.algorithm.search()
 
+        if self.config.get("enable_pruning"):
+            self.pc.prune()
+            final_solution = self.pruner.minimize_actions_in_archive()
+            self.archive.set_minimized_solution(final_solution)
+            self.stc.set_pruned_fitness(final_solution.fitness_value)
+
+        self.pc.end()
         self.search_status_updater.search_end()
         self.statistics.write_statistics()
-        self.logger.info("Search finished")
         return self.statistics.directories
 
 

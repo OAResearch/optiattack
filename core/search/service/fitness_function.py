@@ -3,6 +3,7 @@
 from typing import TypeVar
 
 from core.remote.remote_controller import RemoteController
+from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
@@ -24,13 +25,17 @@ class FitnessFunction:
 
     """Represents a fitness function that can be used to evaluate the fitness of individuals."""
 
-    def evaluate(self, individual: T) -> FitnessValue:
+    def evaluate(self, individual: T = None, actions: list[Action] = None) -> FitnessValue:
         """Evaluates the fitness of the provided individual and returns a float value."""
-        img_array = individual.get_action_image(self.archive.get_mutated_image())
+        img_array = self.archive.get_mutated_image(actions)
+
+        if individual is not None:
+            img_array = individual.get_action_image(img_array)
+
         result = self.remote_controller.new_action(img_array)
         original_result = self.archive.get_original_prediction_results()
         fitness_value = result.max_score.value - result.second_max_score.value \
-            if result.max_score.label == original_result.max_score.label else 0
+            if result.max_score.label == original_result.max_score.label else 0.0
         return FitnessValue(fitness_value, result.predictions)
 
     def calculate_fitness(self, individual: T) -> EvaluatedIndividual:
@@ -38,11 +43,16 @@ class FitnessFunction:
 
         fitness_value = SearchTimeController.measure_time_millis(
             self.log_execution_time,
-            lambda: self.evaluate(individual),
+            lambda: self.evaluate(individual=individual),
             individual.actions.__len__()
         )
         ei = EvaluatedIndividual(individual, fitness_value)
         return ei
+
+    def calculate_fitness_with_actions(self, actions: list[Action]) -> FitnessValue:
+        """Calculate the fitness of an individual."""
+        fitness_value = self.evaluate(actions=actions)
+        return fitness_value
 
     def log_execution_time(self, t: int, ind: FitnessValue, action_size: int = 1) -> None:
         """Log the execution time and update the individual's execution time."""

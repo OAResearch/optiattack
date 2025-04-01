@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from core.search.action import Action
 from core.search.individual import Individual
+from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.randomness import Randomness
@@ -18,7 +19,7 @@ def standard_mutator():
     config = {"seed":42, "image_height": 224, "image_width": 224, "mutation_sigma": 0.1, "apc_pixel_start": 0, "apc_pixel_end": 255, "start_time": 0.5, "threshold": 1.0}
     randomness = Randomness(config)
 
-    stc = SearchTimeController(config)
+    stc = SearchTimeController(config, pc=PhaseController())
     apc = AdaptiveParameterControl(stc, config)
     # Initialize StandardMutator with the required arguments
     mutator = StandardMutator(randomness, time, config, apc)

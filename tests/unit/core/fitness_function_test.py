@@ -16,7 +16,7 @@ class MockIndividual(Individual):
         return "mock_image_array"
 
 class MockArchive(Archive):
-    def get_mutated_image(self):
+    def get_mutated_image(self, actions=None):
         return "mock_image"
 
     def get_original_prediction_results(self):
