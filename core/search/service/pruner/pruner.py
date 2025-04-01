@@ -3,7 +3,6 @@
 from core.search.service.archive import Archive
 from core.search.service.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
-from core.search.solution import Solution
 
 
 class Pruner:

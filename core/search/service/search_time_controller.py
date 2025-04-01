@@ -31,7 +31,7 @@ class SearchTimeController:
         self.current_fitness_value = FitnessValue(1.0, list())
         self.pruned_fitness_value = FitnessValue(1.0, list())
 
-        self.listeners = list[SearchListener]
+        self.listeners: list[SearchListener] = []
 
     # Generic type for the function return value
     T = TypeVar("T")
