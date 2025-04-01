@@ -192,16 +192,20 @@ class Statistics(SearchListener):
 
         data['changes'] = changes
 
-        not_minimized_matrix = matrix = self.archive.extract_solution(not_minimized=True).actions.copy()
-        not_minimized_changes = []
-        for point in not_minimized_matrix:
-            not_minimized_changes.append({
-                'location': point.get_location(),
-                'color': point.get_color()
-            })
+        if self.config.get("enable_pruning"):
+            not_minimized_matrix = self.archive.extract_solution(not_minimized=True).actions.copy()
+            not_minimized_changes = []
+            for point in not_minimized_matrix:
+                not_minimized_changes.append({
+                    'location': point.get_location(),
+                    'color': point.get_color()
+                })
 
-        data['not_minimized__size'] = len(not_minimized_changes)
-        data['not_minimized_changes'] = not_minimized_changes
+            data['not_minimized__size'] = len(not_minimized_changes)
+            data['not_minimized_changes'] = not_minimized_changes
+        else:
+            data['not_minimized_size'] = None
+            data['not_minimized_changes'] = None
 
         data['config'] = self.config
 

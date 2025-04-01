@@ -6,8 +6,16 @@ from typing import Any
 from core.utils.decorators import cfg
 
 
-class ConfigParser:
+def t_or_f(arg):
+    ua = str(arg).upper()
+    if 'TRUE'.startswith(ua):
+        return True
+    elif 'FALSE'.startswith(ua):
+        return False
+    else:
+        raise argparse.ArgumentTypeError(f"Boolean value expected for {arg}")
 
+class ConfigParser:
     """Configuration parser for the Client."""
 
     def __init__(self):
@@ -30,11 +38,20 @@ class ConfigParser:
         self._descriptions[name] = description
 
         # Add argument to the parser
-        self.parser.add_argument(f"--{name}",
-                                 default=default,
-                                 help=description,
-                                 type=type(default),
-                                 **kwargs)
+        if type(default) == bool:
+            self.parser.add_argument(f"--{name}",
+                                     default=default,
+                                     help=description,
+                                     type=t_or_f,
+                                     **kwargs)
+        else:
+            self.parser.add_argument(f"--{name}",
+                                     default=default,
+                                     help=description,
+                                     type=type(default),
+                                     **kwargs)
+
+
 
     def parse_args(self):
         """Parse command-line arguments and validate them."""
@@ -274,6 +291,11 @@ class ConfigParser:
         """Enable web interface."""
         return False
 
+    @cfg("Enable pruning of the final results.")
+    def enable_pruning(self):
+        """Enable pruning of the final results."""
+        return False
+
     class PruningTypes:
 
         """Pruning methods for the search."""
@@ -285,7 +307,8 @@ class ConfigParser:
         """Pruning method for the search."""
         return ConfigParser.PruningTypes.STANDARD
 
-    @cfg("Enable pruning of the final results.")
-    def enable_pruning(self):
-        """Enable pruning of the final results."""
-        return True
+
+if __name__ == "__main__":
+    config_parser = ConfigParser()
+    config = config_parser.parse_args()
+    config_parser.to_markdown()

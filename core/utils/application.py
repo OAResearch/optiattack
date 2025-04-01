@@ -26,18 +26,24 @@ def configure_container(container):
                                                        stc=container.stc,
                                                        config=container.config,
                                                        apc=container.apc))
+    else:
+        raise ValueError(f"Mutator {container.config.get('mutator')} not supported")
 
     if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
         container.sampler.override(providers.Singleton(RandomSampler,
                                                        randomness=container.randomness,
                                                        config=container.config
                                                        ))
+    else:
+        raise ValueError(f"Sampler {container.config.get('sampler')} not supported")
 
     if container.config.get("pruning_method") == ConfigParser.PruningTypes.STANDARD:
         container.pruner.override(providers.Singleton(StandardPruner,
                                                       archive=container.archive,
                                                       ff=container.ff,
                                                       ssu=container.search_status_updater))
+    else:
+        raise ValueError(f"Pruning method {container.config.get('pruning_method')} not supported")
 
     current_algorithm = container.config.get("algorithm")
 

@@ -119,7 +119,7 @@ class OptiAttack:
         self.stc.start_search()
         self.algorithm.search()
 
-        if self.config.get("enable_pruning"):
+        if self.config.get("enable_pruning") is True:
             self.pc.prune()
             final_solution = self.pruner.minimize_actions_in_archive()
             self.archive.set_minimized_solution(final_solution)
