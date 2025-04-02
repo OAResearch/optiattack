@@ -36,9 +36,7 @@ class TestOriginal(E2EBase):
             "--nut_port",
             str(TestOriginal.COLLECT_INFO_PORT),  # Use the class variable
             "--snapshot_interval",
-            "1",
-            "--input_image",
-            "../../test_img.jpeg",
+            "1"
         ]
 
     def custom_assertions(self):
