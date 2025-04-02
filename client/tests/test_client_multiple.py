@@ -23,19 +23,23 @@ PROCESS_IMAGE_RESPONSE_2 = {
     ]
 }
 
+
 @collect_info(host="localhost",
               port=37000)
 def process_image(image_array: np.ndarray):
     return PROCESS_IMAGE_RESPONSE
+
 
 @collect_info(host="localhost",
               port=38000)
 def process_image_new(image_array: np.ndarray):
     return PROCESS_IMAGE_RESPONSE_2
 
+
 @pytest.fixture(scope="module")
 def setup_test_app():
     return TestClient(process_image.app)
+
 
 @pytest.fixture(scope="module")
 def setup_test_app_other_client():
@@ -96,4 +100,3 @@ def test_new_action_endpoint():
     other_response = other_client.post(constants.NEW_ACTION, json=body)
     assert other_response.status_code == 200
     assert other_response.json() == PROCESS_IMAGE_RESPONSE_2
-
