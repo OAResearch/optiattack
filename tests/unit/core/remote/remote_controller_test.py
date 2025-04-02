@@ -4,24 +4,23 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from client import constants
 from client.optiattack_client import collect_info
 from main import OptiAttack
 from core.problem.base_module import BaseModule
 
-PROCESS_IMAGE_RESPONSE = {
+RESPONSE = {
     "predictions": [
-        {"label": "zebra", "score": 0.99},
-        {"label": "horse", "score": 0.01},
+        {"label": "zebra", "score": 0.93},
+        {"label": "horse", "score": 0.07},
     ]
 }
 
 HOST = "localhost"
-PORT = 38010
+PORT = 38030
 
 @collect_info(host=HOST, port=PORT)
 def process_image(encoded_image: bytes):
-    return PROCESS_IMAGE_RESPONSE
+    return RESPONSE
 
 
 @pytest.fixture
@@ -66,15 +65,15 @@ def test_new_action(app):
     image.close()
 
     response = app.remote_controller.new_action(image_array)
-    assert response.predictions[0].label == PROCESS_IMAGE_RESPONSE["predictions"][0]["label"]
-    assert response.predictions[0].value == PROCESS_IMAGE_RESPONSE["predictions"][0]["score"]
-    assert response.predictions[1].label == PROCESS_IMAGE_RESPONSE["predictions"][1]["label"]
-    assert response.predictions[1].value == PROCESS_IMAGE_RESPONSE["predictions"][1]["score"]
-    assert response.max_score.value == PROCESS_IMAGE_RESPONSE["predictions"][0]["score"]
-    assert response.max_score.label == PROCESS_IMAGE_RESPONSE["predictions"][0]["label"]
+    assert response.predictions[0].label == RESPONSE["predictions"][0]["label"]
+    assert response.predictions[0].value == RESPONSE["predictions"][0]["score"]
+    assert response.predictions[1].label == RESPONSE["predictions"][1]["label"]
+    assert response.predictions[1].value == RESPONSE["predictions"][1]["score"]
+    assert response.max_score.value == RESPONSE["predictions"][0]["score"]
+    assert response.max_score.label == RESPONSE["predictions"][0]["label"]
 
-    assert response.second_max_score.value == PROCESS_IMAGE_RESPONSE["predictions"][1]["score"]
-    assert response.second_max_score.label == PROCESS_IMAGE_RESPONSE["predictions"][1]["label"]
+    assert response.second_max_score.value == RESPONSE["predictions"][1]["score"]
+    assert response.second_max_score.label == RESPONSE["predictions"][1]["label"]
 
 
 def test_get_test_results():
