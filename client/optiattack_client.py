@@ -14,18 +14,6 @@ try:
 except ImportError:
     import constants
 
-# State dictionary to track method call counts
-state = {
-    "is_running": False,
-    "controller_host": "",
-    "controller_port": None,
-    "run_nut": constants.RUN_NUT_PATH,
-    "stop_nut": constants.STOP_NUT_PATH,
-    "info_nut": constants.INFO_NUT_PATH,
-    "new_action": constants.NEW_ACTION,
-}
-app = FastAPI()
-
 
 class MatrixModel(BaseModel):
     image: str
@@ -44,6 +32,17 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
     """
 
     def decorator(func):
+        # State dictionary to track method call counts
+        state = {
+            "is_running": False,
+            "controller_host": "",
+            "controller_port": None,
+            "run_nut": constants.RUN_NUT_PATH,
+            "stop_nut": constants.STOP_NUT_PATH,
+            "info_nut": constants.INFO_NUT_PATH,
+            "new_action": constants.NEW_ACTION,
+        }
+        app = FastAPI()
 
         @wraps(func)
         async def wrapper(*args, **kwargs):
