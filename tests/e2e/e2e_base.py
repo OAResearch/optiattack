@@ -103,8 +103,8 @@ class E2EBase:
         # Check if the statistics are saved
         assert os.path.exists(f"{save_folder}/statistics/data.json")
 
-        self.custom_assertions()
+        self.additional_assertions()
 
-    def custom_assertions(self):
+    def additional_assertions(self):
         """Override this method in child classes to add custom assertions"""
         pass

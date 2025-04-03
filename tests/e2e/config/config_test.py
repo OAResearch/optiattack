@@ -39,5 +39,5 @@ class TestOriginal(E2EBase):
             "1"
         ]
 
-    def custom_assertions(self):
+    def additional_assertions(self):
         assert self._app_instance.stc.current_fitness_value.value == 0.0
