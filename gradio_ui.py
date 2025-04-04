@@ -112,5 +112,3 @@ with gr.Blocks() as web_app:
     t = gr.Timer(1, active=True)
     t.tick(read_logs, outputs=logs)
     web_app.unload(delete_cache)
-
-web_app.launch(pwa=True)
