@@ -73,23 +73,44 @@ def delete_cache():
 
 with gr.Blocks() as web_app:
     with gr.Column():
+        title = gr.HTML('</br><h1 style="text-align:center">OptiAttack: Optimization-Based Adversarial Example Generation Software</h1></br>')
         with gr.Row():
-            host_address = gr.Text(value="localhost", label="Host Address:")
-            port_number = gr.Text(value="38000", label="Port Number")
-        input_image_path = gr.Image(label="Input Image", height=224, width=224)
+            with gr.Column(scale=1, min_width=300):
+                gr.HTML('<h2 style="text-align:center">Parameters</h2>')
+                with gr.Row():
+                    host_address = gr.Text(value="localhost", label="Host Address:")
+                    port_number = gr.Text(value="38000", label="Port Number")
+                with gr.Row():
+                    image_width = gr.Number(value=224, label="Image Width")
+                    image_height = gr.Number(value=224, label="Image Height")
+                with gr.Row():
+                    max_evals = gr.Number(value=1000, label="Max Evaluations")
+            with gr.Column(scale=2, min_width=300):
+                gr.HTML('<h2 style="text-align:center">Input Image</h2>')
+                input_image_path = gr.Image(label="Input Image", height=300, width=300)
         with gr.Row():
-            image_width = gr.Number(value=224, label="Image Width")
-            image_height = gr.Number(value=224, label="Image Height")
+
+            btn_clr = gr.Button(value="Clear", size="lg")
+            btn_run = gr.Button(value="Run OptiAttack", variant="primary", size="lg")
+
         with gr.Row():
-            max_evals = gr.Number(value=1000, label="Max Evaluations")
-        btn = gr.Button(value="Run OptiAttack")
-        with gr.Row():
-            final_image = gr.Image()
-            line_image = gr.Image()
-            matrix_overlay_image = gr.Image()
-        logs = gr.Textbox(label="Console Output")
-    btn.click(run_optiattack, [host_address, port_number, input_image_path, image_width,
+            with gr.Column(scale=1, min_width=300):
+                gr.HTML('<h2 style="text-align:center">Final Image</h2>')
+                final_image = gr.Image()
+            with gr.Column(scale=1, min_width=300):
+                gr.HTML('<h2 style="text-align:center">Confidence Score Chart</h2>')
+                line_image = gr.Image()
+            with gr.Column(scale=1, min_width=300):
+                gr.HTML('<h2 style="text-align:center">Adversarial Attack Image</h2>')
+                matrix_overlay_image = gr.Image()
+        with gr.Tab("Console Output"):
+            logs = gr.Textbox(label="Console Output")
+        with gr.Tab("Report"):
+            resport_text = gr.Textbox(label="Report")
+    btn_run.click(run_optiattack, [host_address, port_number, input_image_path, image_width,
                                image_height, max_evals], [final_image, line_image, matrix_overlay_image])
     t = gr.Timer(1, active=True)
     t.tick(read_logs, outputs=logs)
     web_app.unload(delete_cache)
+
+web_app.launch(pwa=True)
