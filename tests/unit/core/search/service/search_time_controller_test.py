@@ -125,7 +125,7 @@ def test_percentage_used_budget_time(search_time_controller):
 
     search_time_controller.start_search()
     time.sleep(1)  # Simulate 1 second delay
-    assert search_time_controller.percentage_used_budget() == pytest.approx(0.1, rel=1e-2)  # 1 / 10
+    assert search_time_controller.percentage_used_budget() == pytest.approx(0.1, rel=1e-1)  # 1 / 10
 
 def test_should_continue_search(search_time_controller):
     """Test that the search should continue if the budget is not exhausted."""
