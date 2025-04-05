@@ -7,16 +7,19 @@ import pytest
 from core.problem.base_module import BaseModule
 from core.utils.application import configure_container
 from main import OptiAttack
+from tests.utils import get_test_img_path, run_multiple
 
 
 class E2EBase:
     # Class variables that can be overridden by child classes
     COLLECT_INFO_HOST: str = "localhost"
     COLLECT_INFO_PORT: int = 3410
-    TEST_FOLDER = "output_default"
-
+    TEST_FOLDER = "default"
     COLLECT_INFO_KWARGS: dict = {}
     _app_instance: Optional[OptiAttack] = None
+
+    # Number of times to repeat the test. Cannot be changed in child classes
+    REPEAT = 10
 
     @staticmethod
     def get_process_image_func() -> Callable:
@@ -28,6 +31,22 @@ class E2EBase:
         """To be overridden by child classes to provide different command line arguments"""
         raise NotImplementedError("Child classes must implement get_sys_argv()")
 
+    def get_final_sys_argv(self) -> list:
+        """To be overridden by child classes to provide different command line arguments"""
+        default_argv = [
+            "main.py",
+            "--show_plots",
+            "false",
+            "--output_dir",
+            f"output_{self.TEST_FOLDER}",
+            "--input_image",
+            get_test_img_path(),
+            "--nut_port",
+            str(self.COLLECT_INFO_PORT)
+        ]
+
+        return default_argv + self.get_sys_argv()
+
     @staticmethod
     def get_collect_info_decorator() -> Callable:
         """Optional: Override to provide a custom collect_info decorator"""
@@ -38,9 +57,7 @@ class E2EBase:
     def container(self):
         # Set arguments for the argparse
         original_argv = sys.argv
-        sys.argv = self.get_sys_argv()
-        sys.argv.append("--output_dir")
-        sys.argv.append(self.TEST_FOLDER)
+        sys.argv = self.get_final_sys_argv()
 
         # Get the process_image function and decorate it
         process_image_func = self.get_process_image_func()
@@ -76,6 +93,7 @@ class E2EBase:
         yield app
         self._app_instance = None  # Clean up
 
+    @run_multiple(times=REPEAT)
     def test_run_nut(self, app):
         """Base test that runs the application and verifies basic functionality"""
         app.run()
