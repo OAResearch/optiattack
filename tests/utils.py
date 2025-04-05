@@ -1,6 +1,13 @@
+import os
 import random
 from functools import wraps
 
+
+TEST_ROOT_DIR = os.path.dirname(__file__)
+
+def get_test_img_path() -> str:
+    """Get a test image path for testing purposes."""
+    return os.path.join(TEST_ROOT_DIR, "test_img.jpeg")
 
 def run_multiple(times=1000):
     """

@@ -1,9 +1,9 @@
 from tests.e2e.e2e_base import E2EBase
 
 
-class TestConfig(E2EBase):
-    COLLECT_INFO_PORT = 3410  # Override the default port
-    TEST_FOLDER = "config"
+class TestLinePlot(E2EBase):
+    COLLECT_INFO_PORT = 3420  # Override the default port
+    TEST_FOLDER = "line_plot"
 
     @staticmethod
     def get_process_image_func():
