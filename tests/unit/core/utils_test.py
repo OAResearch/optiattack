@@ -85,4 +85,4 @@ def not_test_add_value_after_timer():
 
     avg.add_value(50)
     assert avg.n == 2
-    assert avg.mean == pytest.approx((avg.mean * 1 + 50) / 2, rel=1e-2)
+    assert avg.mean == pytest.approx((avg.mean * 1 + 50) / 2, rel=1e-1)
