@@ -14,6 +14,7 @@ T = TypeVar('T', bound=Individual)
 
 
 class FitnessFunction:
+
     """Abstract class for fitness functions that evaluate individuals in the search space."""
 
     def __init__(self, archive: Archive, remote_controller: RemoteController, stc: SearchTimeController) -> None:
@@ -23,14 +24,12 @@ class FitnessFunction:
         self.stc = stc
 
     def evaluate(self, individual: Optional[T] = None, actions: Optional[list[Action]] = None) -> FitnessValue:
-        """Evaluate the fitness of the provided individual and return a fitness value.
-
-        This method should be implemented by concrete subclasses.
-        """
+        """Evaluate the fitness of the provided individual and return a fitness value."""
         raise NotImplementedError("This method should be implemented by subclasses")
 
     def calculate_fitness(self, individual: T) -> EvaluatedIndividual:
         """Calculate the fitness of an individual."""
+
         fitness_value = SearchTimeController.measure_time_millis(
             self.log_execution_time,
             lambda: self.evaluate(individual=individual),
