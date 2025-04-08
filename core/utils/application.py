@@ -38,8 +38,7 @@ def configure_container(container):
     else:
         raise ValueError(f"Sampler {container.config.get('sampler')} not supported")
 
-    # Fitness Function seçimi
-    if container.config.get("target") != "None":
+    if container.config.get("attack_type") == ConfigParser.AttackType.TARGETED:
         container.ff.override(providers.Singleton(UntargetedFitnessFunction,
                                                   archive=container.archive,
                                                   remote_controller=container.remote_controller,

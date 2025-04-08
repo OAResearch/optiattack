@@ -8,7 +8,6 @@ from core.search.individual import Individual
 from core.search.service.archive import Archive
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
-# Mock classes for dependencies
 class MockIndividual(Individual):
     def get_action_image(self, image):
         return "mock_image_array"
@@ -36,7 +35,7 @@ def fitness_function():
     archive = MockArchive(stc, randomness, config)
     remote_controller = MockRemoteController(config, stc)
     stc = MagicMock(spec=SearchTimeController)
-    return UntargetedFitnessFunction(archive, remote_controller, stc)  # Yeni sınıf
+    return UntargetedFitnessFunction(archive, remote_controller, stc)
 
 # Test cases
 def test_evaluate_with_matching_labels(fitness_function):

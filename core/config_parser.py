@@ -134,6 +134,18 @@ class ConfigParser:
         """Target class for the targeted attack."""
         return "None"
 
+    class AttackType:
+
+        """Attack type for the search."""
+
+        TARGETED = "targeted"
+        UNTARGETED = "untargeted"
+
+    @cfg("Attack type for the search. Options: 'targeted' or 'untargeted'.")
+    def attack_type(self):
+        """Attack type for the search."""
+        return ConfigParser.AttackType.UNTARGETED
+
     class StoppingCriterion:
 
         """Stopping criterion for the search."""

@@ -12,14 +12,10 @@ T = TypeVar('T', bound=Individual)
 
 class UntargetedFitnessFunction(FitnessFunction):
 
-    """Untargeted fitness function that evaluates individuals based on preserving original classification."""
+    """Untargeted fitness function that attempts to change classification without any target."""
 
     def evaluate(self, individual: Optional[T] = None, actions: Optional[list[Action]] = None) -> FitnessValue:
-        """
-        Evaluates the fitness of the provided individual and returns a fitness value.
-
-        Untargeted approach: Preserves original classification while maximizing difference between top two classes.
-        """
+        """Untargeted fitness function that attempts to change classification without any target."""
 
         img_array = self.archive.get_mutated_image(actions)
 
