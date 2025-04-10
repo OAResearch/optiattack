@@ -9,7 +9,7 @@ from core.search.algorithms.search_algorithm import SearchAlgorithm
 from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
-from core.search.service.fitness_function import FitnessFunction
+from core.search.service.fitness_function.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator

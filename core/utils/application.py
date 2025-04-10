@@ -9,6 +9,8 @@ from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.mutator.standard_mutator import StandardMutator
 from core.search.service.pruner.standard_pruner import StandardPruner
 from core.search.service.sampler.random_sampler import RandomSampler
+from core.search.service.fitness_function.untargeted_fitness_function import UntargetedFitnessFunction
+from core.search.service.fitness_function.targeted_fitness_function import TargetedFitnessFunction
 
 
 def configure_container(container):
@@ -36,6 +38,17 @@ def configure_container(container):
                                                        ))
     else:
         raise ValueError(f"Sampler {container.config.get('sampler')} not supported")
+
+    if container.config.get("attack_type") == ConfigParser.AttackType.TARGETED:
+        container.ff.override(providers.Singleton(TargetedFitnessFunction,
+                                                  archive=container.archive,
+                                                  remote_controller=container.remote_controller,
+                                                  stc=container.stc))
+    else:
+        container.ff.override(providers.Singleton(UntargetedFitnessFunction,
+                                                  archive=container.archive,
+                                                  remote_controller=container.remote_controller,
+                                                  stc=container.stc))
 
     if container.config.get("pruning_method") == ConfigParser.PruningTypes.STANDARD:
         container.pruner.override(providers.Singleton(StandardPruner,

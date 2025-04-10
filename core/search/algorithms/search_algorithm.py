@@ -1,7 +1,7 @@
 """Abstract class for search algorithms."""
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
-from core.search.service.fitness_function import FitnessFunction
+from core.search.service.fitness_function.fitness_function import FitnessFunction
 from core.search.service.mutator.mutator import Mutator
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.sampler import Sampler
