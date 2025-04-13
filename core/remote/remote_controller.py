@@ -68,7 +68,7 @@ class RemoteController:
             logging.error("Connection Error")
             raise ConnectionError("Connection Error")
 
-    def new_action(self, image_array):
+    def new_action(self, image_array, target=None):
         """Send new action."""
         try:
             logging.info("Sending new action")
@@ -76,7 +76,7 @@ class RemoteController:
             self.stc.new_individual_evaluation()
             response = self.connection.post(self.NUT_ENDPOINTS["newAction"],
                                             json={"image": json_data}).json()
-            nut_request = NutRequest(response)
+            nut_request = NutRequest(response, target=target)
             return nut_request
 
         except requests.exceptions.ConnectionError:
