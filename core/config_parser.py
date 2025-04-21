@@ -72,7 +72,7 @@ class ConfigParser:
     #             self._defaults[key] = value
     #     return self._args
 
-    def to_markdown(self, output_file: str = "config.md"):
+    def to_markdown(self, output_file: str = "../docs/parameters.md"):
         """Export configuration parameters to a Markdown file."""
         with open(output_file, "w") as f:
             f.write("# Configuration Parameters\n\n")
