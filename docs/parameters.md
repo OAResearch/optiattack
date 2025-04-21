@@ -35,11 +35,6 @@
 - **Default Value**: 0.6
 - **Description**: The threshold value of the adaptive parameter control
 
-## attack_type
-
-- **Default Value**: untargeted
-- **Description**: Attack type for the search. Options: 'targeted' or 'untargeted'.
-
 ## base_endpoint
 
 - **Default Value**: /api/v1
