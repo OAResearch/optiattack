@@ -15,8 +15,9 @@ class Logger:
         self.log = open(filename, "w")
 
     def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
+        m = strip_ascii(message)
+        self.terminal.write(m)
+        self.log.write(m)
 
     def flush(self):
         self.terminal.flush()
@@ -30,8 +31,31 @@ if not os.path.exists("./.cache"):
 
 sys.stdout = Logger("./.cache/output.log")
 
+def strip_ascii(text):
+    res = "".join(
+        char for char
+        in text
+        if not ord(char) == 27
+    )
+    res = res.replace("[1A", "")
+    res = res.replace("[2K", "")
+    return res
+
+def read_logs():
+    sys.stdout.flush()
+    with open("./.cache/output.log", "r") as f:
+        return f.read()
+
+def clear_log():
+    open("./.cache/output.log", "w")
+
+def delete_cache():
+    import shutil
+    shutil.rmtree("./.cache", ignore_errors=True)
+
 def run_optiattack(host_address, port_number, input_image_path, image_width,
-                               image_height, max_evals):
+                   image_height, max_evals, ):
+
     container = BaseModule()
     config_parser = container.config_parser()
     if not input_image_path is None:
@@ -60,16 +84,15 @@ def run_optiattack(host_address, port_number, input_image_path, image_width,
     line_image = Image.open(line_image_path)
     matrix_overlay_image = Image.open(matrix_overlay_path)
 
-    return final_image, line_image, matrix_overlay_image
+    statistics_folder = folders["statistics_folder"]
+    statistics_file_path = os.path.join(statistics_folder + '/data.json')
+    if os.path.exists(statistics_file_path):
+        statistics_file = open(statistics_file_path)
+        report_text = statistics_file.read()
+    else:
+        report_text = ""
 
-def read_logs():
-    sys.stdout.flush()
-    with open("./.cache/output.log", "r") as f:
-        return f.read()
-
-def delete_cache():
-    import shutil
-    shutil.rmtree("./.cache", ignore_errors=True)
+    return final_image, line_image, matrix_overlay_image, report_text
 
 with gr.Blocks() as web_app:
     with gr.Column():
@@ -89,26 +112,50 @@ with gr.Blocks() as web_app:
                 gr.HTML('<h2 style="text-align:center">Input Image</h2>')
                 input_image_path = gr.Image(label="Input Image", height=300, width=300)
         with gr.Row():
-
             btn_clr = gr.Button(value="Clear", size="lg")
             btn_run = gr.Button(value="Run OptiAttack", variant="primary", size="lg")
 
         with gr.Row():
             with gr.Column(scale=1, min_width=300):
                 gr.HTML('<h2 style="text-align:center">Final Image</h2>')
-                final_image = gr.Image()
+                final_image = gr.Image(label="Final Image")
             with gr.Column(scale=1, min_width=300):
                 gr.HTML('<h2 style="text-align:center">Confidence Score Chart</h2>')
-                line_image = gr.Image()
+                line_image = gr.Image(label="Line Image")
             with gr.Column(scale=1, min_width=300):
                 gr.HTML('<h2 style="text-align:center">Adversarial Attack Image</h2>')
-                matrix_overlay_image = gr.Image()
+                matrix_overlay_image = gr.Image(label="Matrix Overlay Image")
+
         with gr.Tab("Console Output"):
-            logs = gr.Textbox(label="Console Output")
+            logs = gr.Textbox(label="Console Output", lines=15)
         with gr.Tab("Report"):
-            resport_text = gr.Textbox(label="Report")
-    btn_run.click(run_optiattack, [host_address, port_number, input_image_path, image_width,
-                               image_height, max_evals], [final_image, line_image, matrix_overlay_image])
+            report_text = gr.Textbox(label="Report", lines=15)
+
+    def clear_input_outputs():
+        clear_log()
+        return {
+            host_address: "localhost",
+            port_number: 38000,
+            image_width: 224,
+            image_height: 224,
+            max_evals: 1000,
+            input_image_path:  None,
+            final_image:  None,
+            line_image: None,
+            matrix_overlay_image: None,
+            btn_clr: gr.update(interactive=True),
+            btn_run: gr.update(interactive=True),
+            report_text: "",
+            logs: ""
+        }
+
+
+    btn_run.click(fn=run_optiattack, inputs=[host_address, port_number, input_image_path, image_width,
+                               image_height, max_evals],
+                  outputs=[final_image, line_image, matrix_overlay_image, report_text])
+    btn_clr.click(fn=clear_input_outputs, inputs=[], outputs=[host_address, port_number, image_width, image_height,
+                                                              max_evals, input_image_path, final_image, line_image,
+                                                              matrix_overlay_image, btn_clr, btn_run, report_text, logs])
     t = gr.Timer(1, active=True)
     t.tick(read_logs, outputs=logs)
     web_app.unload(delete_cache)
