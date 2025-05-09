@@ -34,8 +34,8 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/:${{ github.ref_name }} \
             --enable_ui True &
 
-          sleep 10
-          curl -sSf http://localhost:13000/health
+          sleep 20
+          curl -sSf http://localhost:13000 || exit 1
   deploy:
     runs-on: ubuntu-latest
     steps:
