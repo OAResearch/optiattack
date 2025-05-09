@@ -190,9 +190,7 @@ docker run --rm \
     -v $(pwd)/images/:/app/images \
     -v $(pwd)/output:/app/output \
     oaresearch/optiattack \
-    --enable_ui True \
-    --nut_host host.docker.internal \
-    --seed 9
+    --enable_ui True
 ```
 
 ### Important Notes
