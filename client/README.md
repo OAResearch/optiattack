@@ -107,6 +107,3 @@ Contributions are welcome! Please open issues or pull requests for bug fixes, ne
 ## License
 
 This package is part of the OptiAttack project and is licensed under the GNU Lesser General Public License v3 (LGPLv3).
-
-```bash
-pip install -e .
