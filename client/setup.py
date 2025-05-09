@@ -9,7 +9,9 @@ setup(
     author="Omur Sahin",
     author_email="omur@erciyes.edu.tr",
     url="https://github.com/OAResearch/optiattack",
-    packages=find_packages(),
+    package_dir={"": "core"},
+    packages=find_packages(where="core"),
+    py_modules=["optiattack_client", "constants"],
     install_requires=[
         "fastapi",
         "uvicorn",

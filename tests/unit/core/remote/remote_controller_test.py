@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from client.optiattack_client import collect_info
+from client.core.optiattack_client import collect_info
 from main import OptiAttack
 from core.problem.base_module import BaseModule
 

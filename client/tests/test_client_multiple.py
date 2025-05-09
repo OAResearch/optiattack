@@ -5,9 +5,8 @@ from fastapi.testclient import TestClient
 from io import BytesIO
 import base64
 
-
-from client import constants
-from client.optiattack_client import collect_info
+from client.core import constants
+from client.core.optiattack_client import collect_info
 
 PROCESS_IMAGE_RESPONSE = {
     "predictions": [

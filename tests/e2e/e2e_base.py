@@ -50,7 +50,7 @@ class E2EBase:
     @staticmethod
     def get_collect_info_decorator() -> Callable:
         """Optional: Override to provide a custom collect_info decorator"""
-        from client.optiattack_client import collect_info
+        from client.core.optiattack_client import collect_info
         return collect_info
 
     @pytest.fixture
