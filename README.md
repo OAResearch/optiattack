@@ -146,7 +146,90 @@ OptiAttack is highly configurable. You can set parameters via command-line argum
 ```
 
 ---
+## Docker Usage
 
+OptiAttack can be run using Docker, which provides an isolated environment for running the application. You can either pull the pre-built image from Docker Hub or build it locally.
+
+### Pulling from Docker Hub
+
+The easiest way to get started is to pull the pre-built image from Docker Hub:
+
+```bash
+docker pull oaresearch/optiattack
+```
+
+### Running the Container
+
+After pulling the image, you can run it with:
+
+```bash
+docker run -v /path/to/images:/app/images -v /path/to/output:/app/output oaresearch/optiattack [options]
+```
+
+### Volume Mappings
+
+The Docker container requires two volume mappings:
+- `/app/images`: Directory containing input images
+- `/app/output`: Directory for storing output results
+
+### Example Command
+
+```bash
+docker run --rm \
+    -v $(pwd)/images/:/app/images \
+    -v $(pwd)/output:/app/output \
+    oaresearch/optiattack \
+    --input_image ./images/test_img.jpeg \
+    --nut_host host.docker.internal \
+    --seed 8
+```
+To run the container with the web UI:
+
+```bash
+docker run --rm \
+    -v $(pwd)/images/:/app/images \
+    -v $(pwd)/output:/app/output \
+    oaresearch/optiattack \
+    --enable_ui True \
+    --nut_host host.docker.internal \
+    --seed 9
+```
+
+### Important Notes
+
+1. **Volume Paths**:
+   - Use absolute paths for volume mappings
+   - Windows paths should use forward slashes (/) or escaped backslashes (\\)
+   - The paths should exist on your host machine
+
+2. **Network Access**:
+   - Use `host.docker.internal` to access services running on your host machine
+   - This is particularly important for the NUT (Network Under Test) connection
+
+3. **Common Parameters**:
+   - `--input_image`: Path to the input image (relative to the mounted images directory)
+   - `--nut_host`: Host address for the NUT (use `host.docker.internal` for local services)
+   - `--seed`: Random seed for reproducibility
+   - Other parameters can be added as needed
+
+### Building Locally
+
+If you need to build the Docker image locally instead of pulling from Docker Hub:
+
+```bash
+docker-compose build
+```
+
+### Running with Docker Compose
+
+For development or testing, you can use Docker Compose:
+
+```bash
+docker-compose up
+```
+
+This will use the configuration from `docker-compose.yml` and automatically set up the required volumes and environment variables.
+---
 ## Contributing
 
 Contributions are welcome! Please open issues or pull requests for bug fixes, new features, or documentation improvements.

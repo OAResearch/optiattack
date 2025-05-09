@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  optiattack:
+    build: .
+    ports:
+      - "13000:13000"
+    volumes:
+      - ./output:/app/output
+      - ./images:/app/images
+    command: >
+      --input_image ./images/test_img.jpeg
+      --nut_host host.docker.internal
+      --nut_port 38000
+      --max_evaluations 1000
+      --seed 4
