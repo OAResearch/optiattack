@@ -10,7 +10,7 @@ import threading
 from pydantic import BaseModel
 
 try:
-    from client import constants
+    from client.core import constants
 except ImportError:
     import constants
 

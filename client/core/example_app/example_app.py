@@ -1,6 +1,6 @@
 """Example app to test the client."""
 
-from client.optiattack_client import collect_info
+from client.core.optiattack_client import collect_info
 
 
 @collect_info()
