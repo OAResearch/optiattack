@@ -244,6 +244,11 @@ Contributions are welcome! Please open issues or pull requests for bug fixes, ne
 This project is licensed under the GNU Lesser General Public License v3 (LGPLv3). See the [LICENSE](LICENSE) file for details.
 
 ---
+## Funding
+
+This work was supported by the Erciyes University Scientific Research Fund (ERU-BAP, Project No: FBA-2024-13536).
+
+---
 
 ## Acknowledgements
 
