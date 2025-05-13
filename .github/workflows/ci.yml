@@ -27,17 +27,19 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
       - name: Install dependencies
         run: pip install pytest pytest-cov
-
       - name: Run tests
         run: pytest --cov --cov-branch --cov-report=xml
-
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          
+
   linters:
     name: Run linters
     runs-on: ubuntu-latest
