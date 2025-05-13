@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run tests
-        run: pytest --cov --cov-branch --cov-report=xml
+        run: pytest --cov --cov-branch --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -43,7 +43,7 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          
+
   linters:
     name: Run linters
     runs-on: ubuntu-latest
