@@ -1,1 +1,1 @@
-"""Top-level package."""
+""".. include:: ../README.md"""
