@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run tests
-        run: coverage run -m pytest
+        run: pytest --cov --cov-report term --cov-report xml:coverage.xml
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
         with:
