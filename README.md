@@ -1,5 +1,10 @@
+![GitHub License](https://img.shields.io/github/license/oaresearch/optiattack)
 [![Run Tests](https://github.com/OAResearch/optiattack/actions/workflows/ci.yml/badge.svg)](https://github.com/OAResearch/optiattack/actions/workflows/ci.yml)
-
+[![PyPI version](https://badge.fury.io/py/optiattack-client.svg)](https://badge.fury.io/py/optiattack-client)
+[![Docker Pulls](https://img.shields.io/docker/pulls/oaresearch/optiattack.svg)](https://hub.docker.com/r/oaresearch/optiattack)
+![Docker Image Version](https://img.shields.io/docker/v/oaresearch/optiattack)
+![Docker Image Size](https://img.shields.io/docker/image-size/oaresearch/optiattack)
+[![PyPI Downloads](https://static.pepy.tech/badge/optiattack-client)](https://pepy.tech/projects/optiattack-client)
 # OptiAttack
 
 OptiAttack (OA) is an optimization-based adversarial example generation framework designed for network test generation. It provides a modular, extensible platform for generating adversarial examples using evolutionary and search-based algorithms, with a focus on image-based attacks. The project includes both a core engine and a client-server architecture for remote testing, as well as a modern web UI for interactive use.
