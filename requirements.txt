@@ -12,3 +12,4 @@ dependency-injector
 matplotlib
 pytest-cov
 Cython
+coverage
