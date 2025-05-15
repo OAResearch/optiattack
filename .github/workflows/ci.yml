@@ -20,24 +20,45 @@ jobs:
       - run: tox
         env:
           TOXENV: ${{ matrix.python-version }}
-
-  test-coverage: #activate when we make open-source
+  test-coverage:
     name: Run tests with coverage
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: '3.10'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest --cov --cov-report xml:coverage.xml
-      - name: Upload results to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Run tests and collect coverage
+        run: pytest --cov
+      - name: Upload coverage to Codecov (arg token)
+        uses: codecov/codecov-action@main
         with:
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+      - name: Upload coverage to Codecov (env token)
+        uses: codecov/codecov-action@main
+        with:
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage to Codecov (no token)
+        uses: codecov/codecov-action@main
+        with:
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload coverage to Codecov (oidc)
+        uses: codecov/codecov-action@main
+        with:
+          fail_ci_if_error: true
+          use_oidc: true
+          verbose: true
   linters:
     name: Run linters
     runs-on: ubuntu-latest

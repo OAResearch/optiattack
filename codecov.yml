@@ -1,12 +1,13 @@
-codecov:
-  require_ci_to_pass: yes
-  notify:
-    wait_for_ci: yes
+flag_management:
+  individual_flags:
+    - name: smart-tests
+      carryforward: true
+      carryforward_mode: "labels"
+      statuses:
+        - type: "project"
+        - type: "patch"
 
-ignore:
-  - "**/*.ipynb"
-  - docs
-  - docker
-  - binder
-  - .github
-  - .git
+cli:
+  plugins:
+    pycoverage:
+      report_type: "json"
