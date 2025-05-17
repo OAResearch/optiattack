@@ -6,7 +6,7 @@ from tests.e2e.e2e_base import E2EBase
 
 class TestUntargetedAttack(E2EBase):
     """End-to-End test for untargeted attack with dynamic behavior"""
-    COLLECT_INFO_PORT = 3430 + random.randint(0, 100)  # Add some randomness
+    COLLECT_INFO_PORT = 3431
     TEST_FOLDER = "untargeted_attack"
 
     @staticmethod
@@ -32,7 +32,7 @@ class TestUntargetedAttack(E2EBase):
             'dog': 0.0015
         }
 
-        counter = None  # External counter to simulate state evolution
+        counter = None
 
         def process_image(encoded_image: bytes) -> Dict:
             nonlocal counter
@@ -41,7 +41,6 @@ class TestUntargetedAttack(E2EBase):
             else:
                 counter += 1
 
-            # Evolve scores
             for animal in animal_energies:
                 base_change = trends[animal]
                 fluctuation = 0.0005 * random.random() * (counter % 3)
@@ -50,7 +49,6 @@ class TestUntargetedAttack(E2EBase):
 
             predictions = []
             for animal, score in animal_energies.items():
-                # Dip some scores after certain iteration
                 if counter > 10 and random.random() < 0.2:
                     score *= 0.9
 
@@ -59,7 +57,6 @@ class TestUntargetedAttack(E2EBase):
                     "score": round(score, 4)
                 })
 
-            # Occasionally sort by label instead of score
             if counter % 7 == 0:
                 predictions.sort(key=lambda x: x['label'])
             else:
