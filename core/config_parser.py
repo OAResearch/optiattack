@@ -17,7 +17,9 @@ def t_or_f(arg):
     else:
         raise argparse.ArgumentTypeError(f"Boolean value expected for {arg}")
 
+
 def nullable_string(val):
+    """Convert string to None or string."""
     if not val:
         return None
     return val
@@ -146,7 +148,7 @@ class ConfigParser:
         return 224
 
     @cfg("Target class for the targeted attack. If not specified, any misclassification is considered successful.")
-    def target(self) -> str | None:
+    def target(self):
         """Target class for the targeted attack."""
         return None
 

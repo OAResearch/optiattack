@@ -19,7 +19,7 @@ HOST = "localhost"
 PORT = 38030
 
 @collect_info(host=HOST, port=PORT)
-def process_image(encoded_image: bytes):
+def process_image(encoded_image: bytes, additional_data=None):
     return RESPONSE
 
 
@@ -63,6 +63,7 @@ def test_new_action(app):
 
     image_array = np.array(image)
     image.close()
+
 
     response = app.remote_controller.new_action(image_array)
     assert response.predictions[0].label == RESPONSE["predictions"][0]["label"]

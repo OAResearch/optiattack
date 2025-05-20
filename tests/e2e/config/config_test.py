@@ -10,7 +10,7 @@ class TestConfig(E2EBase):
         # Define the original process_image function
         counter = None
 
-        def process_image(encoded_image: bytes):
+        def process_image(encoded_image: bytes, additional_data=None):
             nonlocal counter
             if counter is None:
                 counter = 0

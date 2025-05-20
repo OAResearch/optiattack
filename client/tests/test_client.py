@@ -18,7 +18,7 @@ PROCESS_IMAGE_RESPONSE = {
 
 @collect_info(host=constants.DEFAULT_CONTROLLER_HOST,
               port=constants.DEFAULT_CONTROLLER_PORT)
-def process_image(image_array: np.ndarray):
+def process_image(image_array: np.ndarray, additional_data=None):
     return PROCESS_IMAGE_RESPONSE
 
 
@@ -68,6 +68,7 @@ def test_run_nut_endpoint(setup_test_app):
     assert response.json()["is_running"] is True
     assert response.json()["target"] is None
 
+
 def test_run_nut_endpoint_target(setup_test_app):
     image = get_test_image()
 
@@ -78,6 +79,7 @@ def test_run_nut_endpoint_target(setup_test_app):
     assert response.status_code == 200
     assert response.json()["is_running"] is True
     assert response.json()["target"] == "zebra"
+
 
 def test_new_action_endpoint():
     image = get_test_image()
