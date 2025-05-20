@@ -14,7 +14,6 @@ class NutRequest:
         self.max_score = max(self.predictions, key=lambda x: x.value)
         self.second_max_score = sorted(self.predictions, key=lambda x: x.value, reverse=True)[1]
 
-
     @staticmethod
     def request_to_label(prediction):
         """Converts a prediction dictionary to a Label object."""
