@@ -1,4 +1,5 @@
 import base64
+from typing import Optional
 
 import numpy as np
 import uvicorn
@@ -17,6 +18,7 @@ except ImportError:
 
 class MatrixModel(BaseModel):
     image: str
+    target: Optional[str] = None
 
 
 def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
@@ -35,6 +37,7 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
         # State dictionary to track method call counts
         state = {
             "is_running": False,
+            "target": None,
             "controller_host": "",
             "controller_port": None,
             "run_nut": constants.RUN_NUT_PATH,
@@ -61,10 +64,13 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
             state["is_running"] = True
             state["controller_host"] = host
             state["controller_port"] = port
+            state["target"] = data.target
             image_base64 = base64.b64decode(data.image)
             array_data = np.frombuffer(image_base64, np.uint8)
-
-            state["predictions"] = func(array_data)["predictions"]
+            additional_data = {
+                "target": data.target,
+            }
+            state["predictions"] = func(array_data, additional_data)["predictions"]
 
             return state
 
@@ -79,8 +85,10 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
         async def new_action(data: MatrixModel):
             image_base64 = base64.b64decode(data.image)
             array_data = np.frombuffer(image_base64, np.uint8)
-
-            return func(array_data)
+            additional_data = {
+                "target": state["target"]
+            }
+            return func(array_data, additional_data)
 
         def start_server():
             uvicorn.run(app, host=host, port=port)

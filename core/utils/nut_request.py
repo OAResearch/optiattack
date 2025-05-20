@@ -14,7 +14,7 @@ class NutRequest:
         self.max_score = max(self.predictions, key=lambda x: x.value)
         self.second_max_score = sorted(self.predictions, key=lambda x: x.value, reverse=True)[1]
         # Get the score for the target class (if it exists in predictions)
-        if target and target != "None":
+        if target:
             self.targeted_score = next((label for label in self.predictions if label.label == target),
                                        Label(target, 0.0))  # Set to 0.0 if target not found
             print(self.targeted_score)

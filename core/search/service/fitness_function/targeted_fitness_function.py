@@ -27,7 +27,7 @@ class TargetedFitnessFunction(FitnessFunction):
         if individual is not None:
             img_array = individual.get_action_image(img_array)
 
-        result = self.remote_controller.new_action(img_array, target=self.target)
+        result = self.remote_controller.new_action(img_array)
         original_result = self.archive.get_original_prediction_results()
 
         fitness_value = result.max_score.value - result.targeted_score.value \

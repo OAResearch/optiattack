@@ -27,6 +27,7 @@ class RemoteController:
         # Create a session to keep the connection alive
         self.connection = requests.Session()
         self.stc = stc
+        self.target = config.get("target")
 
     def get_nut_info(self):
         """Get NUT info."""
@@ -43,7 +44,7 @@ class RemoteController:
             logging.info("Running NUT. Sending image to NUT for testing...")
             json_data = base64.b64encode(image_array).decode()
             return self.connection.post(self.NUT_ENDPOINTS["run"],
-                                        json={"image": json_data}).json()
+                                        json={"image": json_data, "target": self.target}).json()
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
             raise ConnectionError("Connection Error")
@@ -68,7 +69,7 @@ class RemoteController:
             logging.error("Connection Error")
             raise ConnectionError("Connection Error")
 
-    def new_action(self, image_array, target=None):
+    def new_action(self, image_array):
         """Send new action."""
         try:
             logging.info("Sending new action")
@@ -76,7 +77,7 @@ class RemoteController:
             self.stc.new_individual_evaluation()
             response = self.connection.post(self.NUT_ENDPOINTS["newAction"],
                                             json={"image": json_data}).json()
-            nut_request = NutRequest(response, target=target)
+            nut_request = NutRequest(response)
             return nut_request
 
         except requests.exceptions.ConnectionError:
