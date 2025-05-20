@@ -71,14 +71,14 @@ class WebApp:
                         with gr.Row():
                             global host_address, port_number
                             host_address = gr.Text(value=config_parser.nut_host, label="Host Address:")
-                            port_number = gr.Text(value=config_parser.nut_port, label="Port Number")
+                            port_number = gr.Text(value=config_parser.nut_port, label="Port Number:")
                         with gr.Row():
                             global image_width, image_height
-                            image_width = gr.Number(value=config_parser.image_width, label="Image Width")
-                            image_height = gr.Number(value=config_parser.image_height, label="Image Height")
+                            image_width = gr.Number(value=config_parser.image_width, label="Image Width:")
+                            image_height = gr.Number(value=config_parser.image_height, label="Image Height:")
                         with gr.Row():
                             global max_evals
-                            max_evals = gr.Number(value=config_parser.max_evaluations, label="Max Evaluations")
+                            max_evals = gr.Number(value=config_parser.max_evaluations, label="Max Evaluations:")
                     with gr.Column(scale=2, min_width=300):
                         gr.HTML('<h2 style="text-align:center">Input Image</h2>')
                         global input_image_path
@@ -168,10 +168,10 @@ class WebApp:
         clear_log()
         return {
             host_address: gr.Text(value=self.host_address, label="Host Address:"),
-            port_number: gr.Text(value=self.port_number, label="Host Address:"),
-            image_width: gr.Text(value=self.image_width, label="Host Address:"),
-            image_height: gr.Text(value=self.image_height, label="Host Address:"),
-            max_evals: gr.Text(value=self.max_evals, label="Host Address:"),
+            port_number: gr.Text(value=self.port_number, label="Port Number:"),
+            image_width: gr.Text(value=self.image_width, label="Image Width:"),
+            image_height: gr.Text(value=self.image_height, label="Image Height:"),
+            max_evals: gr.Text(value=self.max_evals, label="Max Evaluationss:"),
             input_image_path:  None,
             final_image:  None,
             line_image: None,
