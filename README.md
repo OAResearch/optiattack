@@ -1,4 +1,11 @@
+![GitHub License](https://img.shields.io/github/license/oaresearch/optiattack)
 [![Run Tests](https://github.com/OAResearch/optiattack/actions/workflows/ci.yml/badge.svg)](https://github.com/OAResearch/optiattack/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/optiattack-client.svg)](https://badge.fury.io/py/optiattack-client)
+[![Docker Pulls](https://img.shields.io/docker/pulls/oaresearch/optiattack.svg)](https://hub.docker.com/r/oaresearch/optiattack)
+![Docker Image Version](https://img.shields.io/docker/v/oaresearch/optiattack)
+![Docker Image Size](https://img.shields.io/docker/image-size/oaresearch/optiattack)
+[![PyPI Downloads](https://static.pepy.tech/badge/optiattack-client)](https://pepy.tech/projects/optiattack-client)
+[![codecov](https://codecov.io/gh/OAResearch/optiattack/graph/badge.svg?token=MOQRTG0OT1)](https://codecov.io/gh/OAResearch/optiattack)
 
 # OptiAttack
 
@@ -242,6 +249,11 @@ Contributions are welcome! Please open issues or pull requests for bug fixes, ne
 ## License
 
 This project is licensed under the GNU Lesser General Public License v3 (LGPLv3). See the [LICENSE](LICENSE) file for details.
+
+---
+## Funding
+
+This work was supported by the Erciyes University Scientific Research Fund (ERU-BAP, Project No: FBA-2024-13536).
 
 ---
 

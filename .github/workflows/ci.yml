@@ -9,8 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-#        os: [ ubuntu-latest, windows-latest, macos-latest ] will be activated after we make open-source
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
         python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
     steps:
       - uses: actions/checkout@v3
@@ -21,26 +20,35 @@ jobs:
       - run: tox
         env:
           TOXENV: ${{ matrix.python-version }}
-
-#  test-coverage: #activate when we make open-source
-#    name: Run tests with coverage
-#    runs-on: ubuntu-latest
-#    env:
-#      DEPENDENCY_INJECTOR_DEBUG_MODE: 1
-#      PIP_VERBOSE: 1
-#      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-#      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: actions/setup-python@v4
-#        with:
-#          python-version: 3.12
-#      - run: pip install tox 'cython>=3,<4'
-#      - run: make cythonize
-#      - run: tox -vv
-#        env:
-#          TOXENV: coveralls
-
+  test-coverage:
+    name: Run tests with coverage
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests and collect coverage
+        run: pytest --cov=core --cov-report=json
+      - name: Upload coverage to Codecov (arg token)
+        uses: codecov/codecov-action@main
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+      - name: Upload coverage to Codecov (env token)
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        run: | 
+         curl -Os https://uploader.codecov.io/latest/linux/codecov
+         find . -iregex "coverage.*"
+         chmod +x codecov 
+         ./codecov -t ${CODECOV_TOKEN}
   linters:
     name: Run linters
     runs-on: ubuntu-latest
