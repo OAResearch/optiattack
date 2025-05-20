@@ -134,9 +134,9 @@ if __name__ == "__main__":
     container = configure_container(container)
 
     if parsed_args.get("enable_ui"):
-        from gradio_ui import web_app
-
-        web_app.launch(pwa=True, server_port=13000, server_name="0.0.0.0")
+        from gradio_ui import WebApp
+        webapp = WebApp(config_parser)
+        webapp.web_app.launch(pwa=True, server_port=13000, server_name="0.0.0.0")
     else:
         app = OptiAttack()
         container.wire(modules=[app])
