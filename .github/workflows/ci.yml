@@ -1,9 +1,13 @@
 name: Tests and linters
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - '**'
 
 jobs:
-
   test-on-different-versions:
     name: Run tests
     runs-on: ${{ matrix.os }}
