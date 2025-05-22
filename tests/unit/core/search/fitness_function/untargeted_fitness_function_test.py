@@ -1,13 +1,16 @@
 import pytest
 from unittest.mock import MagicMock
 
-from core.search.service.fitness_function.untargeted_fitness_function import UntargetedFitnessFunction
 from core.remote.remote_controller import RemoteController
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
 from core.search.service.archive import Archive
+from core.search.service.fitness_function.untargeted_fitness_function import UntargetedFitnessFunction
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
+
+
+# Mock classes for dependencies
 class MockIndividual(Individual):
     def get_action_image(self, image):
         return "mock_image_array"
@@ -26,7 +29,7 @@ class MockRemoteController(RemoteController):
             second_max_score=MagicMock(value=0.1)
         )
 
-# Fixture for the UntargetedFitnessFunction instance
+# Fixture for the FitnessFunction instance
 @pytest.fixture
 def fitness_function():
     stc = MagicMock(spec=SearchTimeController)
