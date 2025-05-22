@@ -1,5 +1,6 @@
 import pytest
 
+from core.config_parser import ConfigParser
 from main import OptiAttack
 from core.problem.base_module import BaseModule
 

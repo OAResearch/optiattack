@@ -1,6 +1,7 @@
 """Configuration file for the Client."""
 import argparse
 import inspect
+import logging
 from typing import Any
 
 from core.utils.decorators import cfg
@@ -15,6 +16,13 @@ def t_or_f(arg):
         return False
     else:
         raise argparse.ArgumentTypeError(f"Boolean value expected for {arg}")
+
+
+def nullable_string(val):
+    """Convert string to None or string."""
+    if not val:
+        return None
+    return val
 
 
 class ConfigParser:
@@ -46,6 +54,12 @@ class ConfigParser:
                                      default=default,
                                      help=description,
                                      type=t_or_f,
+                                     **kwargs)
+        elif name == "target":
+            self.parser.add_argument(f"--{name}",
+                                     default=default,
+                                     help=description,
+                                     type=nullable_string,
                                      **kwargs)
         else:
             self.parser.add_argument(f"--{name}",
@@ -90,7 +104,11 @@ class ConfigParser:
     @staticmethod
     def validate_args(args):
         """Validate the arguments."""
-        pass
+        if args.attack_type == ConfigParser.AttackType.TARGETED and args.target is None:
+            raise ValueError("Target class is only valid for targeted attacks.")
+
+        if args.attack_type == ConfigParser.AttackType.UNTARGETED and args.target is not None:
+            logging.warning("Target class is not valid for untargeted attacks. Ignoring it.")
 
     # Define parameters using Cfg decorator
     @cfg("Host address for the NUT. Default is 'localhost'.")
@@ -132,7 +150,7 @@ class ConfigParser:
     @cfg("Target class for the targeted attack. If not specified, any misclassification is considered successful.")
     def target(self):
         """Target class for the targeted attack."""
-        return "None"
+        return None
 
     class AttackType:
 

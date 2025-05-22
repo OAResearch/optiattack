@@ -43,7 +43,9 @@ def configure_container(container):
         container.ff.override(providers.Singleton(TargetedFitnessFunction,
                                                   archive=container.archive,
                                                   remote_controller=container.remote_controller,
-                                                  stc=container.stc))
+                                                  stc=container.stc,
+                                                  target=container.config.get("target")
+                                                  ))
     else:
         container.ff.override(providers.Singleton(UntargetedFitnessFunction,
                                                   archive=container.archive,

@@ -25,13 +25,13 @@ PROCESS_IMAGE_RESPONSE_2 = {
 
 @collect_info(host="localhost",
               port=37000)
-def process_image(image_array: np.ndarray):
+def process_image(image_array: np.ndarray, additional_data=None):
     return PROCESS_IMAGE_RESPONSE
 
 
 @collect_info(host="localhost",
               port=38000)
-def process_image_new(image_array: np.ndarray):
+def process_image_new(image_array: np.ndarray, additional_data=None):
     return PROCESS_IMAGE_RESPONSE_2
 
 
