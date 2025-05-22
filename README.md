@@ -257,6 +257,13 @@ This work was supported by the Erciyes University Scientific Research Fund (ERU-
 
 ---
 
+## Publications  
+This project is accompanied by academic research. A list of publications can be found in [`docs/publications.md`](./docs/publications.md).  
+
+To cite our work, please refer to the relevant paper(s) listed there.  
+
+___
+
 ## Acknowledgements
 
 - Developed by OptiAttack Team.
