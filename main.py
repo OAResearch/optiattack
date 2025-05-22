@@ -106,6 +106,9 @@ class OptiAttack:
 
         self.logger.info("Image sent to remote controller successfully. Ready to run application")
 
+        if self.config.get("target"):
+            self.logger.info(f"Target class: {self.config.get('target')}")
+
     def run(self):
         """Run the application."""
 

@@ -96,7 +96,7 @@ class Archive:
 
     def set_original_prediction_results(self, results):
         """Set the original prediction results."""
-        self.original_predication_results = NutRequest(results)
+        self.original_predication_results = NutRequest(results, self.config.get("target"))
 
     def get_original_prediction_results(self):
         """Get the original prediction results."""

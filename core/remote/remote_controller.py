@@ -77,7 +77,7 @@ class RemoteController:
             self.stc.new_individual_evaluation()
             response = self.connection.post(self.NUT_ENDPOINTS["newAction"],
                                             json={"image": json_data}).json()
-            nut_request = NutRequest(response)
+            nut_request = NutRequest(response, self.target)
             return nut_request
 
         except requests.exceptions.ConnectionError:
