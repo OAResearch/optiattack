@@ -15,7 +15,7 @@ class NutRequest:
         self.second_max_score = sorted(self.predictions, key=lambda x: x.value, reverse=True)[1]
 
         self.target_score = next(
-            (label for label in self.predictions if label.label == target), 0.0
+            (label for label in self.predictions if label.label == target), Label(target, 0.0)
         ) if target else None
 
     @staticmethod
