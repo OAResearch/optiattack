@@ -1,6 +1,7 @@
 """Represents an action with a location, RGB color, noise calculation, and parent-child relationship."""
 from typing import Tuple
 import numpy as np
+from numpy import ndarray
 
 
 class Action:
@@ -77,3 +78,7 @@ class Action:
         action.set_parent(self.parent)
         action.noise = self.noise
         return action
+
+    def to_array(self):
+        """Returns the action's color as a NumPy array."""
+        return [self.location[0], self.location[1], self.get_color(), 0]

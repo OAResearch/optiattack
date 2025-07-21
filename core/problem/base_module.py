@@ -59,6 +59,7 @@ class BaseModule(containers.DeclarativeContainer):
     statistics = providers.Singleton(Statistics, stc=stc, archive=archive, config=config)
     sampler = providers.Singleton(Sampler,
                                   randomness=randomness,
+                                  archive=archive,
                                   config=config)
     pruner = providers.Singleton(Pruner,
                                  archive=archive,

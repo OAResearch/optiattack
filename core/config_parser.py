@@ -183,6 +183,13 @@ class ConfigParser:
 
         RANDOM_SEARCH = "random"
         MIO = "mio"
+        GA_DE = "ga_de"
+
+    @cfg("Population size for the search. Currently only used for MOSA algorithm.")
+    def population_size(self):
+        """Population size for the search."""
+        return 20
+
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
@@ -271,6 +278,7 @@ class ConfigParser:
         """Sampler type for the search."""
 
         RANDOM_SAMPLER = "random_sampler"
+        GAUSSIAN_SAMPLER = "gaussian_sampler"
 
     @cfg("Sampler type for the search.")
     def sampler(self):
