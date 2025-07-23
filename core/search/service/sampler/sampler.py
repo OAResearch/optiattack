@@ -10,7 +10,7 @@ class Sampler:
 
     """Abstract class for sampling individuals from the search space."""
 
-    def __init__(self, randomness: Randomness, archive:Archive, config: dict):
+    def __init__(self, randomness: Randomness, archive: Archive, config: dict):
         """Initialize the sampler."""
 
         self.randomness = randomness

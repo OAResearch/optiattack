@@ -14,7 +14,8 @@ def random_sampler():
         "image_width": 100,
         "image_height": 100
     }
-    return RandomSampler(randomness, config)
+    archive = MagicMock()  # Mock the archive if needed
+    return RandomSampler(randomness, archive, config)
 
 # Test cases
 def test_sample_random_action(random_sampler):

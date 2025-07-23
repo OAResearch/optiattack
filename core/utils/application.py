@@ -3,7 +3,8 @@
 from dependency_injector import providers
 
 from core.config_parser import ConfigParser
-from core.search.algorithms.gade_algorithm import GADEAlgorithm
+from core.search.algorithms.de_algorithm import DEAlgorithm
+from core.search.algorithms.agemoea_algorithm import AGEMOEAAlgorithm
 from core.search.algorithms.mio_algorithm import MioAlgorithm
 from core.search.algorithms.random_algorithm import RandomAlgorithm
 from core.search.service.mutator.one_zero_mutator import OneZeroMutator
@@ -77,8 +78,10 @@ def configure_container(container):
         algorithm = RandomAlgorithm
     elif current_algorithm == ConfigParser.Algorithms.MIO:
         algorithm = MioAlgorithm
-    elif current_algorithm == ConfigParser.Algorithms.GA_DE:
-        algorithm = GADEAlgorithm
+    elif current_algorithm == ConfigParser.Algorithms.DE:
+        algorithm = DEAlgorithm
+    elif current_algorithm == ConfigParser.Algorithms.AGEMOEA:
+        algorithm = AGEMOEAAlgorithm
     else:
         raise ValueError(f"Algorithm {current_algorithm} not supported")
 

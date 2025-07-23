@@ -1,3 +1,11 @@
+"""
+File is part of the following publication:
+
+Bartlett, A., Liem, C. C., & Panichella, A. (2024).
+Multi-objective differential evolution in the generation of adversarial examples.
+Science of Computer Programming, 238, 103169.
+"""
+
 # src/sampling.py
 from pymoo.core.sampling import Sampling
 import numpy as np
@@ -9,7 +17,11 @@ from core.search.algorithms.utils.mutations import add_gaussian_mutation
 # Modifies one pixel in this seed and adds it to our sample array along with the initial prediction value.
 class InitialImageSampling(Sampling):
 
+    """InitialImageSampling - Generates initial samples for the optimization problem."""
+
     def _do(self, problem, n_samples, **kwargs):
+        """Generates initial samples for the optimization problem."""
+
         samples = np.full((n_samples, 3), None, dtype=object)
 
         for i in range(n_samples):

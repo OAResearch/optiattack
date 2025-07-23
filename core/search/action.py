@@ -1,7 +1,6 @@
 """Represents an action with a location, RGB color, noise calculation, and parent-child relationship."""
 from typing import Tuple
 import numpy as np
-from numpy import ndarray
 
 
 class Action:

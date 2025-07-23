@@ -23,9 +23,11 @@ class GaussianSampler(Sampler):
     def sample_random_action(self):
         """Return a random action."""
         location = (self.randomness.next_int(0, self.config.get("image_height")),
-                     self.randomness.next_int(0, self.config.get("image_width")))
+                    self.randomness.next_int(0, self.config.get("image_width")))
         sigma = self.config.get("mutation_sigma")
-        delta = self.randomness.random_gaussian(0, sigma), self.randomness.random_gaussian(0, sigma), self.randomness.random_gaussian(0, sigma)
+        delta = (self.randomness.random_gaussian(0, sigma),
+                 self.randomness.random_gaussian(0, sigma),
+                 self.randomness.random_gaussian(0, sigma))
         color = self.archive.image.array[location] + delta
         color = self.check_limit_values(color)
         return Action(location, color[0], color[1], color[2])

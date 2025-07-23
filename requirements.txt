@@ -12,3 +12,5 @@ dependency-injector
 matplotlib
 pytest-cov
 Cython
+pymoo
+numba

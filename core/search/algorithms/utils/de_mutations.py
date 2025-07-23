@@ -1,3 +1,11 @@
+"""
+File is part of the following publication:
+
+Bartlett, A., Liem, C. C., & Panichella, A. (2024).
+Multi-objective differential evolution in the generation of adversarial examples.
+Science of Computer Programming, 238, 103169.
+"""
+
 # src/de_mutations.py
 
 # Contains all the different mutations for our program.
@@ -7,15 +15,20 @@ import random
 import numpy as np
 from pymoo.core.mutation import Mutation
 
+
 def contains(row, column, vector):
+    """Checks if the given row and column exist in the vector."""
     for index in range(len(vector)):
         if vector[index][0] == row and vector[index][1] == column:
             return index
     return -1
 
+
 # GuassianMutation - Takes each generation and overwrites a random pixel in each one.
 # We return the new seed along with its new fitness.
 def add_gaussian_mutation(problem, matrix):
+    """Adds a Gaussian mutation to the problem's image."""
+
     count = 0
     while random.random() <= math.pow(0.5, count):
         # indexes of the pixel to change
@@ -35,6 +48,9 @@ def add_gaussian_mutation(problem, matrix):
 
 
 def calculate_noise(pixel, delta):
+    """Calculates the noise introduced by the Gaussian mutation."""
+    # This function is currently not used in the code.
+
     # value = pixel + delta
     # noise = 0
     # Loop through and calculate the total amount of noise on the RGB channel
@@ -52,6 +68,8 @@ def calculate_noise(pixel, delta):
 
 
 def gaussian_noise(pixel):
+    """Generates a Gaussian noise value for the pixel."""
+
     delta = np.round(random.gauss(pixel * 0, 50))
 
     # the next if condition guarantees that at least a +1/-1 change has been made
@@ -74,6 +92,7 @@ def gaussian_noise(pixel):
 
 
 def delete_mutation(problem, matrix):
+    """Deletes a random mutation from the matrix."""
     # In case matrix is empty
     if len(matrix) >= 1:
         matrix.pop(random.randint(0, len(matrix) - 1))
@@ -82,7 +101,11 @@ def delete_mutation(problem, matrix):
 
 
 class PixelMutation(Mutation):
+
+    """PixelMutation - Applies a differential evolution mutation to the pixel values of an image."""
+
     def __init__(self):
+        """Initialize the mutation with specific parameters."""
         super().__init__()
         self.CR = 0.9
         self.F = 0.8
@@ -92,6 +115,8 @@ class PixelMutation(Mutation):
     # matrix - The change matrix we're modifying.
 
     def _do(self, problem, mutations, **kwargs):
+        """Applies the mutation to the given problem and mutations."""
+
         # for each individual
         for i in range(len(mutations)):
             predictions = mutations[i, 2] if mutations[i, 2] else []
@@ -156,6 +181,8 @@ class PixelMutation(Mutation):
         return mutations
 
     def get_pixel_values(self, row, column, donor):
+        """Retrieves the pixel values from the donor matrix based on the row and column."""
+
         pixel_index = contains(row, column, donor)
         if pixel_index == -1:
             A = [0, 0, 0]

@@ -183,13 +183,13 @@ class ConfigParser:
 
         RANDOM_SEARCH = "random"
         MIO = "mio"
-        GA_DE = "ga_de"
+        DE = "de"
+        AGEMOEA = "agemoea"
 
     @cfg("Population size for the search. Currently only used for MOSA algorithm.")
     def population_size(self):
         """Population size for the search."""
         return 20
-
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):

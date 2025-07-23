@@ -1,20 +1,31 @@
+"""
+File is part of the following publication:
+
+Bartlett, A., Liem, C. C., & Panichella, A. (2024).
+Multi-objective differential evolution in the generation of adversarial examples.
+Science of Computer Programming, 238, 103169.
+"""
+
 # src/crossovers.py
 from pymoo.core.crossover import Crossover
 import numpy as np
 import math
 import random
-import time
-
 
 
 # 4 way crossover where 1 changes all and 3 change sections
 # TODO: WIP: This is a WIP code is very dirty right now as I've just been playing with it.
 class T4ce(Crossover):
+
+    """A 4-way crossover implementation that modifies one parent fully and the others partially."""
+
     def __init__(self):
+        """Initialize the crossover with 4 parents and 4 offsprings."""
         # define the crossover: number of parents and number of offsprings
         super().__init__(4, 4)
 
     def _do(self, problem, children, **kwargs):
+        """Perform the crossover operation on the provided children."""
         # do some magic here
         _, n_matings, n_var = children.shape
 
@@ -92,21 +103,28 @@ class T4ce(Crossover):
                         cousins[3][d_i] = cousins[2][cousin_2_i]
                         cousins[2][cousin_2_i] = d[d_i]
 
-                crossovers[0, k, 2], crossovers[1, k, 2], crossovers[2, k, 2], crossovers[3, k, 2] = cousins[0], cousins[1], cousins[2], cousins[3]
+                (crossovers[0, k, 2], crossovers[1, k, 2], crossovers[2, k, 2],
+                 crossovers[3, k, 2]) = cousins[0], cousins[1], cousins[2], cousins[3]
 
         return crossovers
-
 
 
 # ArraySlice - Takes a chunk of an array that fits both children. For example array section from 3-6;
 # then swaps them over to create a new child.
 # Currently has a part commented out that attempts to make things more random.
 class ArraySlice(Crossover):
+
+    """A crossover implementation that swaps sections of two parent arrays to create offspring."""
+
     def __init__(self):
+        """Initialize the crossover with 2 parents and 2 offsprings."""
+
         # define the crossover: number of parents and number of offsprings
         super().__init__(2, 2)
 
     def _do(self, problem, children, **kwargs):
+        """Perform the crossover operation on the provided children."""
+
         # The input of has the following shape (n_parents, n_matings, n_var)
         _, n_matings, n_var = children.shape
 
