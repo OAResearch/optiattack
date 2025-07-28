@@ -39,6 +39,7 @@ class DEAlgorithm(PyMooAlgorithm):
                        crossover=crossover,
                        mutation=mutation,
                        eliminate_duplicates=eliminate_duplicates)
+        self.archive_based = False
         self.setup_after_init(algorithm=algorithm, population_size=population_size)
 
     def get_type(self):
@@ -49,7 +50,9 @@ class DEAlgorithm(PyMooAlgorithm):
         """Setup before starting the search."""
         self.problem.set_image_as_array(self.archive.get_image())
         self.problem.set_fitness_function(self.ff)
-        self.problem.set_archive(self.archive)
+
+        if self.archive_based:
+            self.problem.set_archive(self.archive)
 
     def search_once(self):
         """Execute one iteration of the search."""

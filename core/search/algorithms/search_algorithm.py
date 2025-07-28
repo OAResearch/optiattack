@@ -30,6 +30,7 @@ class SearchAlgorithm:
         self.mutator = mutator
         self.sampler = sampler
         self.apc = apc
+        self.archive_based = True
 
     def get_type(self):
         """Return the type of the search algorithm."""

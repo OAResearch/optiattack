@@ -50,6 +50,8 @@ class PixelChangeMinimise(ElementwiseProblem, ABC):
         for action in changes:
             individual.add_action(Action((action[0], action[1]), action[2][0], action[2][1], action[2][2]))
         ei = self.ff.calculate_fitness(individual)
-        self.archive.add_archive_if_needed(ei)
+
+        if self.archive is not None:
+            self.archive.add_archive_if_needed(ei)
 
         return ei
