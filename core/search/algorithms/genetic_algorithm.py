@@ -29,7 +29,7 @@ class GeneticAlgorithm(SearchAlgorithm):
                  apc: AdaptiveParameterControl):
         """Initialize the genetic algorithm."""
         super().__init__(ff, randomness, stc, archive, config, mutator, crossover, sampler, apc)
-        self.population = None
+        self.population = list[EvaluatedIndividual]()
         self.population_size = None
 
     def setup_before_search(self):
@@ -52,9 +52,9 @@ class GeneticAlgorithm(SearchAlgorithm):
         all_fitnesses = np.array([ind.fitness.value for ind in self.population])
         scaled_fitness = 1.0 - all_fitnesses
         selection_probs = np.exp(scaled_fitness) / np.sum(np.exp(scaled_fitness))
-        selected = self.randomness.random_choice(self.population, selection_probs=selection_probs)
+        selected = self.randomness.get_random_element(self.population, selection_probs=selection_probs)
         while parent1 == selected:
-            selected = self.randomness.random_choice(self.population, selection_probs=selection_probs)
+            selected = self.randomness.get_random_element(self.population, selection_probs=selection_probs)
         return selected.copy()
 
     def search_once(self):

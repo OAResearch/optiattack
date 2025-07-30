@@ -20,6 +20,6 @@ class Crossover:
         self.config = config
         self.apc = apc
 
-    def apply_crossover(self, parent1: Individual, parent2: Individual) -> (Individual, Individual):
+    def apply_crossover(self, parent1: Individual, parent2: Individual) -> None:
         """Applies crossover between two parents to create a new individual."""
         raise NotImplementedError("Crossover method must be implemented in subclass.")

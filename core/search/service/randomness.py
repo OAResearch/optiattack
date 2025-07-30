@@ -98,6 +98,25 @@ class Randomness:
             return self.random.choice(max_size)
         return self.random.choice(max_size, p=selection_probs)
 
+    def get_random_element(self, elements, selection_probs: Optional[List] = None):
+        """
+        Returns a random element from a list or based on a probability distribution.
+
+        Args
+        -------
+            elements (list): A list of elements to choose from.
+            selection_probs (list, optional): A list of probabilities for each element.
+                Defaults to None, meaning equal probability for all elements.
+
+        Returns
+        -------
+            Any: A randomly selected element from the list.
+
+        """
+        if selection_probs is None:
+            return self.random.choice(elements)
+        return self.random.choice(elements, p=selection_probs)
+
     def random_gaussian(self, mean: float, std: float):
         """
         Generates a random float value from a Gaussian distribution.
