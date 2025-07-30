@@ -1,4 +1,5 @@
 """Individual search functions."""
+from typing import Self
 
 
 class Individual:
@@ -53,6 +54,18 @@ class Individual:
             x, y = action.get_location()
             action_image[x, y] = action.get_color()
         return action_image
+
+    def crossover(self, other: Self, position1: int, position2: int):
+        """Perform crossover between two individuals."""
+        if position1 < 0 or position2 < 0 or position1 >= len(self.actions) or position2 >= len(other.actions):
+            raise ValueError("Invalid crossover positions")
+
+        if position1 < len(self.actions):
+            del self.actions[position1:]
+
+        for num in range(position2, len(other.actions)):
+            other_action = other.actions[num].copy()
+            self.actions.append(other_action)
 
     def __eq__(self, other):
         """Check if two individuals are equal."""

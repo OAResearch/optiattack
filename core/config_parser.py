@@ -183,11 +183,17 @@ class ConfigParser:
 
         RANDOM_SEARCH = "random"
         MIO = "mio"
+        GENETIC = "genetic"
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
         """Search algorithm for the optimization."""
         return ConfigParser.Algorithms.MIO
+
+    @cfg("Population size of the population-based algorithms.")
+    def population_size(self):
+        """Population size of the population-based algorithms."""
+        return 20
 
     @cfg("Maximum number of evaluations for the search.")
     def max_evaluations(self):
@@ -234,6 +240,17 @@ class ConfigParser:
         """Show plots."""
         return True
 
+    class Crossovers:
+
+        """Crossover operators for the search."""
+
+        SINGLE_POINT_CROSSOVER = "single_point_crossover"
+
+    @cfg("Crossover operator for the search.")
+    def crossover(self):
+        """Mutation operator for the search."""
+        return ConfigParser.Crossovers.SINGLE_POINT_CROSSOVER
+
     class Mutators:
 
         """Mutation operators for the search."""
@@ -271,6 +288,7 @@ class ConfigParser:
         """Sampler type for the search."""
 
         RANDOM_SAMPLER = "random_sampler"
+        GAUSSIAN_SAMPLER = "gaussian_sampler"
 
     @cfg("Sampler type for the search.")
     def sampler(self):

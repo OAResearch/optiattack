@@ -1,6 +1,7 @@
 """Abstract class for search algorithms."""
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
+from core.search.service.crossover.crossover import Crossover
 from core.search.service.fitness_function.fitness_function import FitnessFunction
 from core.search.service.mutator.mutator import Mutator
 from core.search.service.randomness import Randomness
@@ -18,6 +19,7 @@ class SearchAlgorithm:
                  archive: Archive,
                  config: dict,
                  mutator: Mutator,
+                 crossover: Crossover,
                  sampler: Sampler,
                  apc: AdaptiveParameterControl):
         """Initialize the search algorithm."""
@@ -28,6 +30,7 @@ class SearchAlgorithm:
         self.archive = archive
         self.config = config
         self.mutator = mutator
+        self.crossover = crossover
         self.sampler = sampler
         self.apc = apc
 

@@ -8,13 +8,14 @@ from core.search.service.sampler.random_sampler import RandomSampler
 @pytest.fixture
 def random_sampler():
     randomness = MagicMock()
+    archive = MagicMock()
     config = {
         "min_action_size": 1,
         "max_action_size": 5,
         "image_width": 100,
         "image_height": 100
     }
-    return RandomSampler(randomness, config)
+    return RandomSampler(randomness, archive, config)
 
 # Test cases
 def test_sample_random_action(random_sampler):

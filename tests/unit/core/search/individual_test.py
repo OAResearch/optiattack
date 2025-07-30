@@ -153,3 +153,30 @@ def test_get_action_image_multiple_actions_same_location(individual):
 
     # Assert that the image is modified correctly
     assert np.array_equal(result, expected_image)
+
+def test_individual_crossover():
+    individual = Individual()
+    other = Individual()
+    action1 = Action((1, 2), 100, 150, 200)
+    action2 = Action((3, 4), 50, 75, 100)
+    action3 = Action((5, 6), 200, 100, 50)
+    action4 = Action((7, 8), 255, 0, 0)
+    action5 = Action((9, 10), 255, 0, 0)
+    action6 = Action((11, 12), 0, 255, 0)
+
+    individual.add_action(action1)
+    individual.add_action(action2)
+    individual.add_action(action3)
+    other.add_action(action4)
+    other.add_action(action5)
+    other.add_action(action6)
+
+    assert individual.size() == 3
+    assert other.size() == 3
+
+    position1 = 1
+    position2 = 2
+
+    individual.crossover(other, position1, position2)
+    assert individual.size() == 2
+

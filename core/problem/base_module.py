@@ -9,6 +9,7 @@ from core.search.algorithms.search_algorithm import SearchAlgorithm
 from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
+from core.search.service.crossover.crossover import Crossover
 from core.search.service.fitness_function.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
@@ -56,6 +57,7 @@ class BaseModule(containers.DeclarativeContainer):
                                                 archive=archive)
     ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc)
     mutator = providers.Singleton(Mutator, randomness=randomness, stc=stc, config=config, apc=apc)
+    crossover = providers.Singleton(Crossover, randomness=randomness, stc=stc, config=config, apc=apc)
     statistics = providers.Singleton(Statistics, stc=stc, archive=archive, config=config)
     sampler = providers.Singleton(Sampler,
                                   randomness=randomness,
@@ -69,5 +71,6 @@ class BaseModule(containers.DeclarativeContainer):
                                     stc=stc, archive=archive,
                                     config=config,
                                     mutator=mutator,
+                                    crossover=crossover,
                                     sampler=sampler,
                                     apc=apc)
