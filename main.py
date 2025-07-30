@@ -10,12 +10,14 @@ from core.search.algorithms.search_algorithm import SearchAlgorithm
 from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.archive import Archive
+from core.search.service.crossover.crossover import Crossover
 from core.search.service.fitness_function.fitness_function import FitnessFunction
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
 from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
+from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
 from core.utils.application import configure_container
 from core.utils.images import read_image, resize_image, img_to_array, ProcessedImage
@@ -36,7 +38,9 @@ class OptiAttack:
                  search_status_updater: SearchStatusUpdater = Provide[BaseModule.search_status_updater],
                  ff: FitnessFunction = Provide[BaseModule.ff],
                  mutator: Mutator = Provide[BaseModule.mutator],
+                 crossover: Crossover = Provide[BaseModule.crossover],
                  statistics: Statistics = Provide[BaseModule.statistics],
+                 sampler: Sampler = Provide[BaseModule.sampler],
                  algorithm: SearchAlgorithm = Provide[BaseModule.algorithm],
                  apc: AdaptiveParameterControl = Provide[BaseModule.apc],
                  pruner: Pruner = Provide[BaseModule.pruner],
@@ -54,11 +58,13 @@ class OptiAttack:
         self.search_status_updater = search_status_updater
         self.ff = ff
         self.mutator = mutator
+        self.crossover = crossover
         self.statistics = statistics
         self.algorithm = algorithm
         self.apc = apc
         self.pruner = pruner
         self.pc = pc
+        self.sampler = sampler
 
     def startup(self):
         """Prepare the application."""

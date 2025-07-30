@@ -2,7 +2,7 @@ from tests.e2e.e2e_base import E2EBase
 
 
 class TestConfig(E2EBase):
-    COLLECT_INFO_PORT = 3410  # Override the default port
+    COLLECT_INFO_PORT = 34010  # Override the default port
     TEST_FOLDER = "config"
 
     @staticmethod

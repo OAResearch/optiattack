@@ -8,7 +8,7 @@ python-multipart
 numpy
 pytest-cov
 requests
-dependency-injector
+dependency-injector==4.46.0
 matplotlib
 pytest-cov
 Cython
