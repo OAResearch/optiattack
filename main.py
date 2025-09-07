@@ -131,7 +131,7 @@ class OptiAttack:
         self.pc.end()
         self.search_status_updater.search_end()
         self.statistics.write_statistics()
-        return self.statistics.directories
+        return self.statistics.output_dir
 
 
 if __name__ == "__main__":

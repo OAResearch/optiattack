@@ -220,6 +220,26 @@ class ConfigParser:
         """Path to the output directory."""
         return "./output"
 
+    @cfg("Final image name.")
+    def final_image_name(self):
+        """Final image name."""
+        return "final_image"
+
+    @cfg("Overlay matrix image name.")
+    def overlay_image_name(self):
+        """Overlay matrix image name."""
+        return "overlay_matrix"
+
+    @cfg("Line plot image name.")
+    def line_plot_name(self):
+        """Line plot image name."""
+        return "line_plot"
+
+    @cfg("Statistics file name.")
+    def statistics_file_name(self):
+        """Statistics file name."""
+        return "statistics"
+
     @cfg("Write the statistics to a file.")
     def write_statistics(self):
         """Write the results to a file."""

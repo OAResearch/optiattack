@@ -31,14 +31,6 @@ def statistics():
     }
     return Statistics(stc, archive, config)
 
-# Test cases
-def test_prepare_folders(statistics):
-    # Call the prepare_folders method
-    statistics.prepare_folders()
-
-    # Assert that the directories were created
-    for key in statistics.directories:
-        assert os.path.exists(statistics.directories[key])
 
 def test_new_action_evaluated_with_snapshot(statistics):
     # Set the snapshot threshold to trigger a snapshot
@@ -134,7 +126,7 @@ def test_save_final_image(statistics):
     statistics.save_final_image()
 
     # Assert that the image was saved
-    assert os.path.exists(f"{statistics.directories['images_folder']}/final_image.jpg")
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.final_image_name}.jpg")
 
 def test_save_matrix_overlay(statistics):
     # Mock the extract_solution method of the archive
@@ -149,7 +141,7 @@ def test_save_matrix_overlay(statistics):
     statistics.save_matrix_overlay()
 
     # Assert that the image was saved
-    assert os.path.exists(f"{statistics.directories['images_folder']}/matrix_overlay.png")
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.overlay_image_name}.png")
 
 def test_save_line_plot(statistics):
     # Mock the snapshots
@@ -163,9 +155,9 @@ def test_save_line_plot(statistics):
     statistics.save_line_plot()
 
     # Assert that the plot was saved
-    assert os.path.exists(f"{statistics.directories['images_folder']}/line.png")
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.line_plot_name}.png")
 
-def test_save_data_as_json(statistics):
+def test_save_statistics(statistics):
     # Mock the snapshots and stc methods
     solution = MagicMock(spec=Solution)
     solution.fitness_value = MagicMock(spec=FitnessValue)
@@ -179,13 +171,14 @@ def test_save_data_as_json(statistics):
     statistics.stc.current_fitness_value.value = 0.5
 
     # Call the save_data_as_json method
-    statistics.save_data_as_json()
+    statistics.save_statistics()
 
     # Assert that the JSON file was saved
-    assert os.path.exists(f"{statistics.directories['statistics_folder']}/data.json")
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.statistics_file_name}.json")
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.statistics_file_name}.csv")
 
     # Load the JSON file and verify its contents
-    with open(f"{statistics.directories['statistics_folder']}/data.json", "r") as file:
+    with open(f"{statistics.output_dir}/{statistics.statistics_file_name}.json", "r") as file:
         data = json.load(file)
         assert data["execution_time"] == 10
         assert data["eval_count"] == 100

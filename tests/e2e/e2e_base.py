@@ -104,22 +104,22 @@ class E2EBase:
         assert self._app_instance is not None, "App instance not available"
 
         output_folder = self._app_instance.config.get("output_dir")
-        experiments_folder = self._app_instance.config.get("experiment_label")
-        seed = self._app_instance.config.get("seed")
+        final_image_name = self._app_instance.config.get("final_image_name")
+        overlay_image_name = self._app_instance.config.get("overlay_image_name")
+        line_plot_name = self._app_instance.config.get("line_plot_name")
+        statistics_file_name = self._app_instance.config.get("statistics_file_name")
 
-        save_folder = f"{output_folder}/{experiments_folder}/{seed}"
         # Check if files exist
-        assert os.path.exists(save_folder)
-        assert os.path.exists(f"{save_folder}/images")
-        assert os.path.exists(f"{save_folder}/statistics")
+        assert os.path.exists(output_folder)
 
         # Check if the image is saved
-        assert os.path.exists(f"{save_folder}/images/final_image.jpg")
-        assert os.path.exists(f"{save_folder}/images/line.png")
-        assert os.path.exists(f"{save_folder}/images/matrix_overlay.png")
+        assert os.path.exists(f"{output_folder}/{final_image_name}.jpg")
+        assert os.path.exists(f"{output_folder}/{line_plot_name}.png")
+        assert os.path.exists(f"{output_folder}/{overlay_image_name}.png")
 
         # Check if the statistics are saved
-        assert os.path.exists(f"{save_folder}/statistics/data.json")
+        assert os.path.exists(f"{output_folder}/{statistics_file_name}.json")
+        assert os.path.exists(f"{output_folder}/{statistics_file_name}.csv")
 
         self.additional_assertions()
 

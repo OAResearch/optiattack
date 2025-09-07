@@ -1,4 +1,5 @@
 """Class to handle the statistics of the search process."""
+import csv
 import json
 import os
 
@@ -26,29 +27,15 @@ class Statistics(SearchListener):
         self.snapshots_interval = self.config.get("snapshot_interval")
         self.snapshot_threshold = self.snapshots_interval
         self.stc.add_listener(self)
-        seed = self.config.get("seed")
-        experiment_label = self.config.get("experiment_label")
 
-        output_dir = f"./{self.config.get('output_dir')}"
-        experiment_folder = f"{output_dir}/{experiment_label}"
-        exact_experiment_folder = f"{experiment_folder}/{seed}"
-        statistics_folder = f"{exact_experiment_folder}/statistics"
-        images_folder = f"{exact_experiment_folder}/images"
+        self.output_dir = f"{self.config.get('output_dir')}"
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
 
-        self.directories = {
-            "output_dir": output_dir,
-            "experiment_folder": experiment_folder,
-            "exact_experiment_folder": exact_experiment_folder,
-            "statistics_folder": statistics_folder,
-            "images_folder": images_folder
-        }
-        self.prepare_folders()
-
-    def prepare_folders(self):
-        """Create the folders for the statistics."""
-        for key in self.directories:
-            if not os.path.exists(self.directories[key]):
-                os.makedirs(self.directories[key])
+        self.final_image_name = self.config.get("final_image_name")
+        self.overlay_image_name = self.config.get("overlay_image_name")
+        self.line_plot_name = self.config.get("line_plot_name")
+        self.statistics_file_name = self.config.get("statistics_file_name")
 
     def new_action_evaluated(self):
         """Check if a snapshot should be taken."""
@@ -92,7 +79,7 @@ class Statistics(SearchListener):
 
     def report_statistics(self):
         """Report the statistics of the search."""
-        self.save_data_as_json()
+        self.save_statistics()
 
     def save_images(self):
         """Save generated images. It contains the final image and the matrix overlay."""
@@ -108,7 +95,7 @@ class Statistics(SearchListener):
         """Save the final image. It contains the actions of the archive."""
         img = self.archive.get_mutated_image()
         image = fromarray(img)
-        image.save(f"{self.directories['images_folder']}/final_image.jpg")
+        image.save(f"{self.output_dir}/{self.final_image_name}.jpg")
         if self.config.get("show_plots"):
             plt.imshow(img)
             plt.show()
@@ -124,7 +111,7 @@ class Statistics(SearchListener):
             img[point.get_location()[0]][point.get_location()[1]] = point.get_color()
 
         image = fromarray(img)
-        image.save(f"{self.directories['images_folder']}/matrix_overlay.png")
+        image.save(f"{self.output_dir}/{self.overlay_image_name}.png")
 
         if self.config.get("show_plots"):
             plt.imshow(img)
@@ -153,12 +140,12 @@ class Statistics(SearchListener):
         chart_box = ax.get_position()
         ax.set_position([chart_box.x0, chart_box.y0, chart_box.width * 0.8, chart_box.height])
         ax.legend(loc='upper center', bbox_to_anchor=(1.2, 0.8), shadow=True, ncol=1)
-        plt.savefig(f"{self.directories['images_folder']}/line.png", bbox_inches='tight')
+        plt.savefig(f"{self.output_dir}/{self.line_plot_name}.png", bbox_inches='tight')
 
         if self.config.get("show_plots"):
             plt.show()
 
-    def save_data_as_json(self):
+    def save_statistics(self):
         """Save the data as a json file."""
         data = {}
         data['execution_time'] = self.stc.get_elapsed_seconds()
@@ -205,9 +192,24 @@ class Statistics(SearchListener):
             data['not_minimized_changes'] = not_minimized_changes
         else:
             data['not_minimized_size'] = None
-            data['not_minimized_changes'] = None
+            data['not_minimized_changes'] = []
 
         data['config'] = self.config
 
-        with open(f"{self.directories['statistics_folder']}/data.json", 'w') as outfile:
+        with open(f"{self.output_dir}/{self.statistics_file_name}.json", 'w') as outfile:
             json.dump(data, outfile, indent=6, sort_keys=True, default=str)
+
+        filtered_data = {}
+
+        for k, v in data.items():
+            if isinstance(v, (dict, list)):
+                if k == "config" and isinstance(v, dict):
+                    for ck, cv in v.items():
+                        filtered_data[f"config_{ck}"] = cv
+            else:
+                filtered_data[k] = v
+
+        with open(f"{self.output_dir}/{self.statistics_file_name}.csv", "w", newline="") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=filtered_data.keys())
+            writer.writeheader()
+            writer.writerow(filtered_data)
