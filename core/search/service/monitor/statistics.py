@@ -1,4 +1,5 @@
 """Class to handle the statistics of the search process."""
+import csv
 import json
 import os
 
@@ -78,7 +79,7 @@ class Statistics(SearchListener):
 
     def report_statistics(self):
         """Report the statistics of the search."""
-        self.save_data_as_json()
+        self.save_statistics()
 
     def save_images(self):
         """Save generated images. It contains the final image and the matrix overlay."""
@@ -144,7 +145,7 @@ class Statistics(SearchListener):
         if self.config.get("show_plots"):
             plt.show()
 
-    def save_data_as_json(self):
+    def save_statistics(self):
         """Save the data as a json file."""
         data = {}
         data['execution_time'] = self.stc.get_elapsed_seconds()
@@ -191,9 +192,24 @@ class Statistics(SearchListener):
             data['not_minimized_changes'] = not_minimized_changes
         else:
             data['not_minimized_size'] = None
-            data['not_minimized_changes'] = None
+            data['not_minimized_changes'] = []
 
         data['config'] = self.config
 
         with open(f"{self.output_dir}/{self.statistics_file_name}.json", 'w') as outfile:
             json.dump(data, outfile, indent=6, sort_keys=True, default=str)
+
+        filtered_data = {}
+
+        for k, v in data.items():
+            if isinstance(v, (dict, list)):
+                if k == "config" and isinstance(v, dict):
+                    for ck, cv in v.items():
+                        filtered_data[f"config_{ck}"] = cv
+            else:
+                filtered_data[k] = v
+
+        with open(f"{self.output_dir}/{self.statistics_file_name}.csv", "w", newline="") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=filtered_data.keys())
+            writer.writeheader()
+            writer.writerow(filtered_data)
