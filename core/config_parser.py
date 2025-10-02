@@ -376,6 +376,13 @@ class ConfigParser:
         """Pruning method for the search."""
         return ConfigParser.PruningTypes.STANDARD
 
+    @cfg("Fitness threshold for stopping the search. Search stops when fitness <= this value. "
+         "Default is 0.0 (stop when solution is found). "
+         "Use negative values for stricter stopping criteria (e.g., -0.1).")
+    def fitness_threshold(self):
+        """Fitness threshold for stopping the search."""
+        return 0.0
+
 
 if __name__ == "__main__":
     config_parser = ConfigParser()

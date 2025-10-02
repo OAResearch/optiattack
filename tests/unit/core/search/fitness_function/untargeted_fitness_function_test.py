@@ -68,4 +68,4 @@ def test_evaluate_with_non_matching_labels(fitness_function):
 
     # Assert that the fitness value is 0 (labels do not match)
     assert isinstance(result, FitnessValue)
-    assert result.value == 0
+    assert result.value == -0.8
