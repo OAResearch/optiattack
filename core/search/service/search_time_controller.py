@@ -122,7 +122,8 @@ class SearchTimeController:
 
     def should_continue_search(self):
         """Check if the search should continue."""
-        return self.percentage_used_budget() < 1.0 and self.get_current_fitness_value() > 0.0
+        fitness_threshold = self.config.get('fitness_threshold', 0.0)
+        return self.percentage_used_budget() < 1.0 and self.get_current_fitness_value() > fitness_threshold
 
     def add_listener(self, listener):
         """Add a listener to the search time controller."""
