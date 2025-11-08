@@ -252,9 +252,7 @@ class ConfigParser:
 
     @cfg("Statistics column id.")
     def statistics_column_id(self):
-        """
-        Specifies the identifier of the column in the statistics file to be used for analysis or plotting.
-        """
+        """Specifies the identifier of the column in the statistics file to be used for analysis or plotting."""
         return "-"
 
     @cfg("Experiment label.")
