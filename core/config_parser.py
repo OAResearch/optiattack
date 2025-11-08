@@ -250,6 +250,11 @@ class ConfigParser:
         """Save the generated images."""
         return True
 
+    @cfg("Statistics column id")
+    def statistics_column_id(self):
+        """Statistics column id."""
+        return "-"
+
     @cfg("Experiment label.")
     def experiment_label(self):
         """Experiment label."""
