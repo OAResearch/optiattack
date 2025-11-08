@@ -252,7 +252,11 @@ class ConfigParser:
 
     @cfg("Statistics column id")
     def statistics_column_id(self):
-        """Statistics column id."""
+        """
+        Specifies the identifier of the column in the statistics file to be used for analysis or plotting.
+        This can be a column name or index, depending on the format of the statistics file.
+        The default value "-" indicates that no specific column is selected, and all columns may be considered.
+        """
         return "-"
 
     @cfg("Experiment label.")
