@@ -250,7 +250,7 @@ class ConfigParser:
         """Save the generated images."""
         return True
 
-    @cfg("Statistics column id")
+    @cfg("Statistics column id.")
     def statistics_column_id(self):
         """
         Specifies the identifier of the column in the statistics file to be used for analysis or plotting.
