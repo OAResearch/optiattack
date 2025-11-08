@@ -35,10 +35,20 @@
 - **Default Value**: 0.6
 - **Description**: The threshold value of the adaptive parameter control
 
+## attack_type
+
+- **Default Value**: untargeted
+- **Description**: Attack type for the search. Options: 'targeted' or 'untargeted'.
+
 ## base_endpoint
 
 - **Default Value**: /api/v1
 - **Description**: Base endpoint for the NUT. Default is '/api/v1'.
+
+## crossover
+
+- **Default Value**: single_point_crossover
+- **Description**: Crossover operator for the search.
 
 ## enable_pruning
 
@@ -54,6 +64,16 @@
 
 - **Default Value**: experiment
 - **Description**: Experiment label.
+
+## final_image_name
+
+- **Default Value**: final_image
+- **Description**: Final image name.
+
+## fitness_threshold
+
+- **Default Value**: 0.0
+- **Description**: Fitness threshold for stopping the search. Search stops when fitness <= this value. Default is 0.0 (stop when solution is found). Use negative values for stricter stopping criteria (e.g., -0.1).
 
 ## focused_search_activation_time
 
@@ -74,6 +94,11 @@
 
 - **Default Value**: ./tests/test_img.jpeg
 - **Description**: Path to the input image.
+
+## line_plot_name
+
+- **Default Value**: line_plot
+- **Description**: Line plot image name.
 
 ## max_action_size
 
@@ -120,6 +145,16 @@
 - **Default Value**: ./output
 - **Description**: Path to the output directory.
 
+## overlay_image_name
+
+- **Default Value**: overlay_matrix
+- **Description**: Overlay matrix image name.
+
+## population_size
+
+- **Default Value**: 20
+- **Description**: Population size of the population-based algorithms.
+
 ## pruning_method
 
 - **Default Value**: standard
@@ -159,6 +194,16 @@
 
 - **Default Value**: 5
 - **Description**: Snapshot interval for the search.
+
+## statistics_column_id
+
+- **Default Value**: -
+- **Description**: Statistics column id.
+
+## statistics_file_name
+
+- **Default Value**: statistics
+- **Description**: Statistics file name.
 
 ## stopping_criterion
 
