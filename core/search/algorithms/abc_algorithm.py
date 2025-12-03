@@ -29,7 +29,7 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
                  apc: AdaptiveParameterControl):
         """Initialize the ABC algorithm."""
         super().__init__(ff, randomness, stc, archive, config, mutator, crossover, sampler, apc)
-        self.food_sources = []
+        self.food_sources = list[EvaluatedIndividual]
         self.colony_size = None
         self.limit = None  # Abandon limit
         self.trial_counters = None

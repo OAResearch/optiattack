@@ -386,6 +386,7 @@ class ConfigParser:
     def abc_limit(self):
         """Abandon limit for ABC algorithm."""
         return 100
+
     @cfg("Fitness threshold for stopping the search. Search stops when fitness <= this value. "
          "Default is 0.0 (stop when solution is found). "
          "Use negative values for stricter stopping criteria (e.g., -0.1).")
