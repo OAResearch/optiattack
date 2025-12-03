@@ -29,7 +29,7 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
                  apc: AdaptiveParameterControl):
         """Initialize the ABC algorithm."""
         super().__init__(ff, randomness, stc, archive, config, mutator, crossover, sampler, apc)
-        self.food_sources = list[EvaluatedIndividual]()
+        self.food_sources = []
         self.colony_size = None
         self.limit = None  # Abandon limit
         self.trial_counters = None
@@ -57,9 +57,12 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
         """Employed bees explore food sources."""
         for i in range(self.colony_size):
             # Select a random food source different from current one
-            k = self.randomness.next_int(0, self.colony_size - 1)
-            while k == i:
+            if self.colony_size > 1:
                 k = self.randomness.next_int(0, self.colony_size - 1)
+                while k == i:
+                    k = self.randomness.next_int(0, self.colony_size - 1)
+            else:
+                k = i  # If only one food source, use itself
 
             # Create new candidate solution
             current = self.food_sources[i].copy()
@@ -81,14 +84,20 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
     def calculate_probabilities(self):
         """Calculate selection probabilities for onlooker bees."""
         all_fitnesses = np.array([fs.fitness.value for fs in self.food_sources])
-        # Convert to maximization (lower fitness is better, so we invert)
-        scaled_fitness = 1.0 - all_fitnesses
-        # Ensure non-negative values
-        scaled_fitness = np.maximum(scaled_fitness, 0)
+
+        # ABC minimization - lower fitness is better
+        # Use max fitness as offset to ensure non-negative probabilities
+        max_fitness = np.max(all_fitnesses)
+
+        # Transform fitnesses to [0, inf) range
+        # Add small epsilon to prevent division by zero
+        scaled_fitness = max_fitness - all_fitnesses + 1e-10
+
         total = np.sum(scaled_fitness)
-        if total == 0:
+        if total == 0 or np.isnan(total):
             # If all fitnesses are the same, use uniform probability
             return np.ones(self.colony_size) / self.colony_size
+
         return scaled_fitness / total
 
     def onlooker_bee_phase(self):
@@ -103,9 +112,12 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
             )
 
             # Select a random food source different from selected one
-            k = self.randomness.next_int(0, self.colony_size - 1)
-            while k == i:
+            if self.colony_size > 1:
                 k = self.randomness.next_int(0, self.colony_size - 1)
+                while k == i:
+                    k = self.randomness.next_int(0, self.colony_size - 1)
+            else:
+                k = i  # If only one food source, use itself
 
             # Create new candidate solution
             current = self.food_sources[i].copy()

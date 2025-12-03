@@ -380,3 +380,342 @@ def test_abc_limit_parameter(ff, randomness, stc, archive, mutator, crossover, s
     abc.setup_before_search()
 
     assert abc.limit == 50
+
+
+# Test edge case: colony_size = 1
+def test_colony_size_one(ff, randomness, stc, archive, mutator, crossover, sampler, apc):
+    """Test ABC algorithm with colony size of 1 (edge case for infinite loop prevention)."""
+    config = {
+        "seed": 42,
+        "image_height": 224,
+        "image_width": 224,
+        "population_size": 1,
+        "abc_limit": 10,
+        "max_evaluations": 100,
+        "stopping_criterion": ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS,
+        "mutation_sigma": 50,
+        "apc_pixel_start": 40,
+        "apc_pixel_end": 30,
+        "apc_location_start": 40,
+        "apc_location_end": 30,
+        "apc_start_time": 0.4,
+        "apc_threshold": 0.6,
+    }
+
+    abc = ArtificialBeeColonyAlgorithm(
+        ff=ff, randomness=randomness, stc=stc, archive=archive,
+        config=config, mutator=mutator, crossover=crossover,
+        sampler=sampler, apc=apc
+    )
+
+    abc.setup_before_search()
+
+    # This should not cause an infinite loop
+    abc.employed_bee_phase()
+    abc.onlooker_bee_phase()
+    abc.scout_bee_phase()
+
+    assert abc.colony_size == 1
+    assert len(abc.food_sources) == 1
+
+
+# Test calculate_probabilities with negative fitness values
+def test_calculate_probabilities_negative_fitness(abc_algorithm):
+    """Test probability calculation with negative fitness values."""
+    abc_algorithm.setup_before_search()
+
+    # Set negative fitness values (can happen in targeted attacks)
+    abc_algorithm.food_sources[0].fitness.value = -0.5
+    abc_algorithm.food_sources[1].fitness.value = -0.2
+    abc_algorithm.food_sources[2].fitness.value = -0.8
+    abc_algorithm.food_sources[3].fitness.value = -0.1
+    abc_algorithm.food_sources[4].fitness.value = -0.4
+
+    probabilities = abc_algorithm.calculate_probabilities()
+
+    # Assert probabilities sum to 1
+    assert pytest.approx(sum(probabilities), abs=0.001) == 1.0
+    # Assert all probabilities are non-negative
+    assert all(p >= 0 for p in probabilities)
+    # Assert best fitness (most negative) has highest probability
+    best_index = 2  # -0.8 is the best (lowest)
+    assert probabilities[best_index] == max(probabilities)
+
+
+# Test calculate_probabilities with high fitness values
+def test_calculate_probabilities_high_fitness(abc_algorithm):
+    """Test probability calculation with fitness values > 1.0."""
+    abc_algorithm.setup_before_search()
+
+    # Set high fitness values (can happen in some scenarios)
+    abc_algorithm.food_sources[0].fitness.value = 2.5
+    abc_algorithm.food_sources[1].fitness.value = 1.5
+    abc_algorithm.food_sources[2].fitness.value = 3.0
+    abc_algorithm.food_sources[3].fitness.value = 1.2
+    abc_algorithm.food_sources[4].fitness.value = 2.0
+
+    probabilities = abc_algorithm.calculate_probabilities()
+
+    # Assert probabilities sum to 1
+    assert pytest.approx(sum(probabilities), abs=0.001) == 1.0
+    # Assert all probabilities are non-negative
+    assert all(p >= 0 for p in probabilities)
+    # Assert best fitness (lowest value) has highest probability
+    best_index = 3  # 1.2 is the best (lowest)
+    assert probabilities[best_index] == max(probabilities)
+
+
+# Test calculate_probabilities with mixed positive and negative fitness
+def test_calculate_probabilities_mixed_fitness(abc_algorithm):
+    """Test probability calculation with mixed positive and negative fitness values."""
+    abc_algorithm.setup_before_search()
+
+    # Set mixed fitness values
+    abc_algorithm.food_sources[0].fitness.value = 0.5
+    abc_algorithm.food_sources[1].fitness.value = -0.2
+    abc_algorithm.food_sources[2].fitness.value = 0.8
+    abc_algorithm.food_sources[3].fitness.value = -0.5
+    abc_algorithm.food_sources[4].fitness.value = 0.0
+
+    probabilities = abc_algorithm.calculate_probabilities()
+
+    # Assert probabilities sum to 1
+    assert pytest.approx(sum(probabilities), abs=0.001) == 1.0
+    # Assert all probabilities are non-negative
+    assert all(p >= 0 for p in probabilities)
+    # Assert best fitness (most negative) has highest probability
+    best_index = 3  # -0.5 is the best (lowest)
+    assert probabilities[best_index] == max(probabilities)
+
+
+# Test employed bee phase with colony_size = 1
+def test_employed_bee_phase_single_colony(ff, randomness, stc, archive, mutator, crossover, sampler, apc):
+    """Test employed bee phase with single food source."""
+    config = {
+        "seed": 42,
+        "image_height": 224,
+        "image_width": 224,
+        "population_size": 1,
+        "abc_limit": 10,
+        "max_evaluations": 100,
+        "stopping_criterion": ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS,
+        "mutation_sigma": 50,
+        "apc_pixel_start": 40,
+        "apc_pixel_end": 30,
+        "apc_location_start": 40,
+        "apc_location_end": 30,
+        "apc_start_time": 0.4,
+        "apc_threshold": 0.6,
+    }
+
+    abc = ArtificialBeeColonyAlgorithm(
+        ff=ff, randomness=randomness, stc=stc, archive=archive,
+        config=config, mutator=mutator, crossover=crossover,
+        sampler=sampler, apc=apc
+    )
+
+    abc.setup_before_search()
+
+    # Should complete without infinite loop
+    abc.employed_bee_phase()
+
+    assert len(abc.food_sources) == 1
+    assert abc.ff.calculate_fitness.called
+
+
+# Test onlooker bee phase with colony_size = 1
+def test_onlooker_bee_phase_single_colony(ff, randomness, stc, archive, mutator, crossover, sampler, apc):
+    """Test onlooker bee phase with single food source."""
+    config = {
+        "seed": 42,
+        "image_height": 224,
+        "image_width": 224,
+        "population_size": 1,
+        "abc_limit": 10,
+        "max_evaluations": 100,
+        "stopping_criterion": ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS,
+        "mutation_sigma": 50,
+        "apc_pixel_start": 40,
+        "apc_pixel_end": 30,
+        "apc_location_start": 40,
+        "apc_location_end": 30,
+        "apc_start_time": 0.4,
+        "apc_threshold": 0.6,
+    }
+
+    abc = ArtificialBeeColonyAlgorithm(
+        ff=ff, randomness=randomness, stc=stc, archive=archive,
+        config=config, mutator=mutator, crossover=crossover,
+        sampler=sampler, apc=apc
+    )
+
+    abc.setup_before_search()
+
+    # Should complete without infinite loop
+    abc.onlooker_bee_phase()
+
+    assert len(abc.food_sources) == 1
+
+
+# Test crossover integration in employed bee phase
+def test_employed_bee_crossover_called(abc_algorithm):
+    """Test that crossover is called during employed bee phase."""
+    abc_algorithm.setup_before_search()
+
+    # Track crossover calls
+    abc_algorithm.crossover.apply_crossover = MagicMock()
+
+    abc_algorithm.employed_bee_phase()
+
+    # Assert crossover was called
+    assert abc_algorithm.crossover.apply_crossover.call_count == abc_algorithm.colony_size
+
+
+# Test mutation integration in employed bee phase
+def test_employed_bee_mutation_called(abc_algorithm):
+    """Test that mutation is called during employed bee phase."""
+    abc_algorithm.setup_before_search()
+
+    # Track mutation calls
+    mutation_call_count = 0
+    original_mutate = abc_algorithm.mutator.mutate
+
+    def count_mutate(ind):
+        nonlocal mutation_call_count
+        mutation_call_count += 1
+        return original_mutate(ind)
+
+    abc_algorithm.mutator.mutate = count_mutate
+
+    abc_algorithm.employed_bee_phase()
+
+    # Assert mutation was called for each food source
+    assert mutation_call_count == abc_algorithm.colony_size
+
+
+# Test crossover integration in onlooker bee phase
+def test_onlooker_bee_crossover_called(abc_algorithm):
+    """Test that crossover is called during onlooker bee phase."""
+    abc_algorithm.setup_before_search()
+
+    # Track crossover calls
+    abc_algorithm.crossover.apply_crossover = MagicMock()
+
+    abc_algorithm.onlooker_bee_phase()
+
+    # Assert crossover was called (once per onlooker bee)
+    assert abc_algorithm.crossover.apply_crossover.call_count == abc_algorithm.colony_size
+
+
+# Test trial counter increment consistency
+def test_trial_counter_consistency(abc_algorithm):
+    """Test that trial counters are managed consistently."""
+    abc_algorithm.setup_before_search()
+
+    # Set all fitness values to worse fitness
+    worse_ei = create_evaluated_individual(0.9)
+    abc_algorithm.ff.calculate_fitness = MagicMock(return_value=worse_ei)
+
+    # Run employed bee phase
+    abc_algorithm.employed_bee_phase()
+
+    # All trial counters should have incremented
+    assert all(counter >= 1 for counter in abc_algorithm.trial_counters)
+
+    # Run onlooker bee phase
+    initial_counters = abc_algorithm.trial_counters.copy()
+    abc_algorithm.onlooker_bee_phase()
+
+    # Trial counters should have incremented more
+    assert all(abc_algorithm.trial_counters[i] >= initial_counters[i]
+               for i in range(abc_algorithm.colony_size))
+
+
+# Test that better solutions reset trial counters
+def test_better_solution_resets_counter(abc_algorithm):
+    """Test that finding a better solution resets the trial counter."""
+    abc_algorithm.setup_before_search()
+
+    # Set initial trial counters to non-zero
+    abc_algorithm.trial_counters = [5, 3, 4, 2, 6]
+
+    # Set initial fitness values
+    for i, fs in enumerate(abc_algorithm.food_sources):
+        fs.fitness.value = 0.5
+
+    # Mock fitness function to return better fitness
+    better_ei = create_evaluated_individual(0.2)
+    abc_algorithm.ff.calculate_fitness = MagicMock(return_value=better_ei)
+
+    abc_algorithm.employed_bee_phase()
+
+    # All trial counters should be reset because all solutions improved
+    assert all(counter == 0 for counter in abc_algorithm.trial_counters)
+
+
+# Test scout phase abandons only exhausted food sources
+def test_scout_phase_selective_abandon(abc_algorithm):
+    """Test that scout phase only abandons exhausted food sources."""
+    abc_algorithm.setup_before_search()
+
+    # Set trial counters: some above limit, some below
+    abc_algorithm.trial_counters = [15, 5, 20, 3, 8]  # limit is 10
+
+    # Store initial food sources
+    initial_fs_1 = abc_algorithm.food_sources[1].copy()
+    initial_fs_3 = abc_algorithm.food_sources[3].copy()
+    initial_fs_4 = abc_algorithm.food_sources[4].copy()
+
+    # Mock sampler and fitness
+    abc_algorithm.sampler.sample = MagicMock(return_value=create_individual())
+    abc_algorithm.ff.calculate_fitness = MagicMock(
+        return_value=create_evaluated_individual(0.4)
+    )
+
+    abc_algorithm.scout_bee_phase()
+
+    # Assert that only indices 0 and 2 were replaced (had trial >= limit)
+    assert abc_algorithm.trial_counters[0] == 0
+    assert abc_algorithm.trial_counters[2] == 0
+    # Assert that other indices were not replaced
+    assert abc_algorithm.trial_counters[1] == 5
+    assert abc_algorithm.trial_counters[3] == 3
+    assert abc_algorithm.trial_counters[4] == 8
+
+
+# Test full search cycle
+def test_full_search_cycle(abc_algorithm):
+    """Test a complete search cycle with all phases."""
+    abc_algorithm.setup_before_search()
+
+    # Track all phase executions
+    employed_calls = []
+    onlooker_calls = []
+    scout_calls = []
+
+    original_employed = abc_algorithm.employed_bee_phase
+    original_onlooker = abc_algorithm.onlooker_bee_phase
+    original_scout = abc_algorithm.scout_bee_phase
+
+    def track_employed():
+        employed_calls.append(1)
+        original_employed()
+
+    def track_onlooker():
+        onlooker_calls.append(1)
+        original_onlooker()
+
+    def track_scout():
+        scout_calls.append(1)
+        original_scout()
+
+    abc_algorithm.employed_bee_phase = track_employed
+    abc_algorithm.onlooker_bee_phase = track_onlooker
+    abc_algorithm.scout_bee_phase = track_scout
+
+    abc_algorithm.search_once()
+
+    # Assert all phases were called exactly once
+    assert len(employed_calls) == 1
+    assert len(onlooker_calls) == 1
+    assert len(scout_calls) == 1
