@@ -122,13 +122,28 @@ class Statistics(SearchListener):
         plt.clf()
         legend = []
         data = {}
-        data_counter = 0
+
+        # First pass: collect all unique labels
+        all_labels = set()
         for val in self.snapshots:
             for s in val.fitness_value.predictions:
-                if s.label not in data:
-                    # if not exists on the beginning add zeros
-                    data[s.label] = [0] * data_counter
-                data[s.label].append(s.value)
+                all_labels.add(s.label)
+
+        # Initialize all labels with empty lists
+        for label in all_labels:
+            data[label] = []
+
+        # Second pass: populate data with values or zeros
+        for val in self.snapshots:
+            # Create a dict of current snapshot's predictions
+            current_predictions = {s.label: s.value for s in val.fitness_value.predictions}
+
+            # For each label, add the value if it exists, otherwise add 0
+            for label in all_labels:
+                if label in current_predictions:
+                    data[label].append(current_predictions[label])
+                else:
+                    data[label].append(0)
 
         for item in data:
             plt.plot(np.arange(len(data[item])), data[item], label=item)
@@ -158,14 +173,28 @@ class Statistics(SearchListener):
         else:
             data['flipped'] = False
 
-        predictions = {}
-        data_counter = 0
+        # First pass: collect all unique labels
+        all_labels = set()
         for val in self.snapshots:
             for s in val.fitness_value.predictions:
-                if s.label not in predictions:
-                    # if not exists on the beginning add zeros
-                    predictions[s.label] = [0] * data_counter
-                predictions[s.label].append(s.value)
+                all_labels.add(s.label)
+
+        # Initialize all labels with empty lists
+        predictions = {}
+        for label in all_labels:
+            predictions[label] = []
+
+        # Second pass: populate predictions with values or zeros
+        for val in self.snapshots:
+            # Create a dict of current snapshot's predictions
+            current_predictions = {s.label: s.value for s in val.fitness_value.predictions}
+
+            # For each label, add the value if it exists, otherwise add 0
+            for label in all_labels:
+                if label in current_predictions:
+                    predictions[label].append(current_predictions[label])
+                else:
+                    predictions[label].append(0)
 
         data['predictions'] = predictions
         data['action_size'] = len(self.archive.extract_solution().actions)

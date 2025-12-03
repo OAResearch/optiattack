@@ -35,4 +35,4 @@ class TestConfig(E2EBase):
         ]
 
     def additional_assertions(self):
-        assert self._app_instance.stc.current_fitness_value.value == 0.0
+        assert self._app_instance.stc.current_fitness_value.value <= 0.0

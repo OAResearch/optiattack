@@ -30,6 +30,6 @@ class TargetedFitnessFunction(FitnessFunction):
         result = self.remote_controller.new_action(img_array)
 
         fitness_value = result.max_score.value - result.target_score.value \
-            if result.max_score.label != self.target else 0.0
+            if result.max_score.label != self.target else result.target_score.value - result.max_score.value
 
         return FitnessValue(fitness_value, result.predictions)

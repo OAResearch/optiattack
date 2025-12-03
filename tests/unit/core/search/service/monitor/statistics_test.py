@@ -157,6 +157,40 @@ def test_save_line_plot(statistics):
     # Assert that the plot was saved
     assert os.path.exists(f"{statistics.output_dir}/{statistics.line_plot_name}.png")
 
+def test_save_line_plot_with_missing_labels(statistics):
+    # Create snapshots with different labels at different times
+    # Snapshot 1: has label1 and label2
+    solution1 = MagicMock(spec=Solution)
+    solution1.fitness_value = MagicMock(spec=FitnessValue)
+    pred1_1 = MagicMock(label="label1", value=0.1)
+    pred1_2 = MagicMock(label="label2", value=0.2)
+    solution1.fitness_value.predictions = [pred1_1, pred1_2]
+
+    # Snapshot 2: has only label1 (label2 is missing)
+    solution2 = MagicMock(spec=Solution)
+    solution2.fitness_value = MagicMock(spec=FitnessValue)
+    pred2_1 = MagicMock(label="label1", value=0.15)
+    solution2.fitness_value.predictions = [pred2_1]
+
+    # Snapshot 3: has label1, label2, and label3
+    solution3 = MagicMock(spec=Solution)
+    solution3.fitness_value = MagicMock(spec=FitnessValue)
+    pred3_1 = MagicMock(label="label1", value=0.3)
+    pred3_2 = MagicMock(label="label2", value=0.25)
+    pred3_3 = MagicMock(label="label3", value=0.4)
+    solution3.fitness_value.predictions = [pred3_1, pred3_2, pred3_3]
+
+    statistics.snapshots = [solution1, solution2, solution3]
+
+    # Call the save_line_plot method
+    statistics.save_line_plot()
+
+    # Assert that the plot was saved
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.line_plot_name}.png")
+
+    # The test passes if the function runs without error
+    # This ensures that missing labels are handled correctly with zeros
+
 def test_save_statistics(statistics):
     # Mock the snapshots and stc methods
     solution = MagicMock(spec=Solution)

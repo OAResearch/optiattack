@@ -59,11 +59,10 @@ def test_time(container):
 def search_time_controller():
     """Fixture to create a SearchTimeController instance with a mock config."""
     mock_config = MagicMock()
-    mock_config.get.return_value = 100  # Default value for max_evaluations
-    mock_config.get.side_effect = lambda key: {
+    mock_config.get.side_effect = lambda key, default=None: {
         'max_evaluations': 100,
         'stopping_criterion': ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS
-    }.get(key)
+    }.get(key, default)
     pc = PhaseController()
     return SearchTimeController(mock_config, pc=pc)
 
@@ -136,6 +135,65 @@ def test_should_continue_search(search_time_controller):
     for _ in range(100):
         search_time_controller.new_individual_evaluation()
     assert not search_time_controller.should_continue_search()
+
+def test_should_continue_search_with_fitness_threshold():
+    """Test that search stops when fitness threshold is reached."""
+    from core.search.fitness_value import FitnessValue
+
+    # Create controller with custom fitness threshold
+    mock_config = MagicMock()
+    mock_config.get.side_effect = lambda key, default=None: {
+        'max_evaluations': 100,
+        'stopping_criterion': ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS,
+        'fitness_threshold': -0.1  # Stop when fitness <= -0.1
+    }.get(key, default)
+
+    pc = PhaseController()
+    stc = SearchTimeController(mock_config, pc=pc)
+    stc.start_search()
+
+    # Set fitness to 0.5 - should continue
+    stc.set_current_fitness(FitnessValue(0.5, []))
+    assert stc.should_continue_search() is True
+
+    # Set fitness to 0.0 - should continue (threshold is -0.1)
+    stc.set_current_fitness(FitnessValue(0.0, []))
+    assert stc.should_continue_search() is True
+
+    # Set fitness to -0.05 - should continue (still above -0.1)
+    stc.set_current_fitness(FitnessValue(-0.05, []))
+    assert stc.should_continue_search() is True
+
+    # Set fitness to -0.1 - should stop (reached threshold)
+    stc.set_current_fitness(FitnessValue(-0.1, []))
+    assert stc.should_continue_search() is False
+
+    # Set fitness to -0.2 - should stop (below threshold)
+    stc.set_current_fitness(FitnessValue(-0.2, []))
+    assert stc.should_continue_search() is False
+
+def test_should_continue_search_with_default_threshold():
+    """Test that search stops at fitness 0 with default threshold."""
+    from core.search.fitness_value import FitnessValue
+
+    # Create controller with default fitness threshold (0.0)
+    mock_config = MagicMock()
+    mock_config.get.side_effect = lambda key, default=None: {
+        'max_evaluations': 100,
+        'stopping_criterion': ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS,
+    }.get(key, default)
+
+    pc = PhaseController()
+    stc = SearchTimeController(mock_config, pc=pc)
+    stc.start_search()
+
+    # Set fitness to 0.1 - should continue
+    stc.set_current_fitness(FitnessValue(0.1, []))
+    assert stc.should_continue_search() is True
+
+    # Set fitness to 0.0 - should stop (default threshold)
+    stc.set_current_fitness(FitnessValue(0.0, []))
+    assert stc.should_continue_search() is False
 
 def test_report_executed_individual_time(search_time_controller):
     """Test that executed individual times are reported correctly."""

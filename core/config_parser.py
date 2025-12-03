@@ -251,6 +251,11 @@ class ConfigParser:
         """Save the generated images."""
         return True
 
+    @cfg("Statistics column id.")
+    def statistics_column_id(self):
+        """Specifies the identifier of the column in the statistics file to be used for analysis or plotting."""
+        return "-"
+
     @cfg("Experiment label.")
     def experiment_label(self):
         """Experiment label."""
@@ -381,6 +386,12 @@ class ConfigParser:
     def abc_limit(self):
         """Abandon limit for ABC algorithm."""
         return 100
+    @cfg("Fitness threshold for stopping the search. Search stops when fitness <= this value. "
+         "Default is 0.0 (stop when solution is found). "
+         "Use negative values for stricter stopping criteria (e.g., -0.1).")
+    def fitness_threshold(self):
+        """Fitness threshold for stopping the search."""
+        return 0.0
 
 
 if __name__ == "__main__":
