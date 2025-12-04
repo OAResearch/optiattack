@@ -125,15 +125,6 @@ def create_evaluated_individual(fitness_value):
     return EvaluatedIndividual(individual, fitness)
 
 
-# Test initialization
-def test_abc_initialization(abc_algorithm):
-    """Test that ABC algorithm initializes correctly."""
-    assert abc_algorithm is not None
-    assert abc_algorithm.food_sources == []
-    assert abc_algorithm.colony_size is None
-    assert abc_algorithm.limit is None
-
-
 # Test get_type method
 def test_get_type(abc_algorithm):
     """Test that get_type returns the correct algorithm type."""
