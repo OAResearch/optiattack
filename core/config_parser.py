@@ -184,6 +184,7 @@ class ConfigParser:
         RANDOM_SEARCH = "random"
         MIO = "mio"
         GENETIC = "genetic"
+        ABC = "abc"
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
@@ -380,6 +381,11 @@ class ConfigParser:
     def pruning_method(self):
         """Pruning method for the search."""
         return ConfigParser.PruningTypes.STANDARD
+
+    @cfg("Abandon limit for ABC algorithm. Number of trials before a food source is abandoned.")
+    def abc_limit(self):
+        """Abandon limit for ABC algorithm."""
+        return 100
 
     @cfg("Fitness threshold for stopping the search. Search stops when fitness <= this value. "
          "Default is 0.0 (stop when solution is found). "

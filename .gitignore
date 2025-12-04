@@ -126,3 +126,4 @@ dmypy.json
 /output/
 test_output/
 output_*
+/targeted/

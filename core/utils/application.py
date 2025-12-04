@@ -3,6 +3,7 @@
 from dependency_injector import providers
 
 from core.config_parser import ConfigParser
+from core.search.algorithms.abc_algorithm import ArtificialBeeColonyAlgorithm
 from core.search.algorithms.genetic_algorithm import GeneticAlgorithm
 from core.search.algorithms.mio_algorithm import MioAlgorithm
 from core.search.algorithms.random_algorithm import RandomAlgorithm
@@ -90,6 +91,8 @@ def configure_container(container):
         algorithm = MioAlgorithm
     elif current_algorithm == ConfigParser.Algorithms.GENETIC:
         algorithm = GeneticAlgorithm
+    elif current_algorithm == ConfigParser.Algorithms.ABC:
+        algorithm = ArtificialBeeColonyAlgorithm
     else:
         raise ValueError(f"Algorithm {current_algorithm} not supported")
 
