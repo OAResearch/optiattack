@@ -101,7 +101,11 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
         return scaled_fitness / total
 
     def onlooker_bee_phase(self):
-        """Onlooker bees select food sources based on probability."""
+        """Onlooker bees select food sources based on probability.
+
+        Uses archive-based sampling for better exploration and diversity.
+        Instead of using neighbor from population, samples from archive.
+        """
         probabilities = self.calculate_probabilities()
 
         for _ in range(self.colony_size):
@@ -111,17 +115,25 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
                 selection_probs=probabilities
             )
 
-            # Select a random food source different from selected one
-            if self.colony_size > 1:
-                k = self.randomness.next_int(0, self.colony_size - 1)
-                while k == i:
-                    k = self.randomness.next_int(0, self.colony_size - 1)
-            else:
-                k = i  # If only one food source, use itself
+            # Sample from archive instead of population neighbor
+            # This provides better diversity and exploration
+            archive_sample = self.archive.sample_individual()
 
             # Create new candidate solution
             current = self.food_sources[i].copy()
-            neighbor = self.food_sources[k].copy()
+
+            if archive_sample is not None:
+                # Use archive sample as neighbor
+                neighbor = archive_sample.copy()
+            else:
+                # Fallback: use random food source if archive is empty
+                if self.colony_size > 1:
+                    k = self.randomness.next_int(0, self.colony_size - 1)
+                    while k == i:
+                        k = self.randomness.next_int(0, self.colony_size - 1)
+                else:
+                    k = i
+                neighbor = self.food_sources[k].copy()
 
             # Apply crossover between current and neighbor, then mutate
             self.crossover.apply_crossover(current.individual, neighbor.individual)
