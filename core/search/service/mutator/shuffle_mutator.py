@@ -40,6 +40,9 @@ class ShuffleMutator(Mutator):
         row = max(1, min(row, max_h - 2))
         col = max(1, min(col, max_w - 2))
 
+        if self.archive is None:
+            raise ValueError("Archive is required for shuffle mutation")
+
         # Extract and shuffle block
         seed = self.archive.image.array.copy()
         sub_seed = seed[row - 1:row + 2, col - 1:col + 2, :]
@@ -92,6 +95,11 @@ class ShuffleMutator(Mutator):
         """Create initial shuffled block"""
 
         individual = Individual()
+
+        # Add None check for archive
+        if self.archive is None:
+            raise ValueError("Archive is required for shuffle mutation")
+
         seed = self.archive.image.array.copy()
         max_h = self.config["image_height"]
         max_w = self.config["image_width"]
