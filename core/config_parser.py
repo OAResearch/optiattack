@@ -283,6 +283,7 @@ class ConfigParser:
 
         STANDARD_MUTATOR = "gaussian_mutator"
         ONE_ZERO_MUTATOR = "one_zero_mutator"
+        SHUFFLE_MUTATOR = "shuffle_mutator"
 
     @cfg("Mutation operator for the search.")
     def mutator(self):
@@ -315,6 +316,7 @@ class ConfigParser:
 
         RANDOM_SAMPLER = "random_sampler"
         GAUSSIAN_SAMPLER = "gaussian_sampler"
+        SHUFFLE_SAMPLER = "shuffle_sampler"
 
     @cfg("Sampler type for the search.")
     def sampler(self):
