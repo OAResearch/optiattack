@@ -211,6 +211,11 @@ class ConfigParser:
         """Sigma value for the gaussian noise."""
         return 50
 
+    @cfg("Block size for shuffle mutator. Must be odd number (e.g., 3, 5, 7).")
+    def shuffle_block_size(self):
+        """Block size for shuffle mutator."""
+        return 3
+
     @cfg("Snapshot interval for the search.")
     def snapshot_interval(self):
         """Snapshot interval for the search. If set -1 no snapshots are saved."""

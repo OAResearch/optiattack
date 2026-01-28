@@ -157,3 +157,95 @@ def test_shuffle_mutation_preserves_and_permutes_pixels(shuffle_mutator):
     changed_positions = sum(1 for loc in original_pixels
                             if original_pixels[loc] != mutated_pixels[loc])
     assert changed_positions > 0, "Shuffle should change at least some pixel positions"
+
+
+# ============== PARAMETRIC BLOCK SIZE TESTS ==============
+
+def create_mutator_with_block_size(block_size: int):
+    """Create a ShuffleMutator with a specific block size and appropriately sized image."""
+    time = MagicMock()
+    # Image size should be large enough to accommodate the block
+    image_size = max(10, block_size * 3)
+    config = {
+        "seed": 42,
+        "image_height": image_size,
+        "image_width": image_size,
+        "mutation_sigma": 0.1,
+        "apc_pixel_start": 0,
+        "apc_pixel_end": 255,
+        "start_time": 0.5,
+        "threshold": 1.0,
+        "shuffle_block_size": block_size,  # Parametric block size
+    }
+    randomness = Randomness(config)
+    stc = SearchTimeController(config, pc=PhaseController())
+    apc = AdaptiveParameterControl(stc, config)
+
+    # Create RGB image with unique pixel values
+    image_array = np.zeros((image_size, image_size, 3), dtype=np.uint8)
+    for i in range(image_size):
+        for j in range(image_size):
+            image_array[i, j] = [(i * 17) % 256, (j * 23) % 256, ((i + j) * 13) % 256]
+
+    processed_image = ProcessedImage(original=None, resized=None, array=image_array)
+    archive = Archive(stc, randomness, config)
+    archive.set_image(processed_image)
+
+    mutator = ShuffleMutator(randomness, time, config, apc)
+    mutator.archive = archive
+
+    return mutator, image_size
+
+
+@pytest.mark.parametrize("block_size", [2, 3, 4, 5, 6])
+def test_parametric_block_size_creates_correct_action_count(block_size):
+    """Test that mutator creates correct number of actions for different block sizes."""
+    mutator, _ = create_mutator_with_block_size(block_size)
+    
+    individual = Individual()
+    result = mutator.mutate(individual)
+    
+    expected_actions = block_size * block_size
+    assert len(result.get_actions()) == expected_actions, \
+        f"Block size {block_size}x{block_size} should create {expected_actions} actions"
+
+
+
+
+
+def test_block_size_2x2():
+    """Test specifically for 2x2 block size."""
+    mutator, _ = create_mutator_with_block_size(2)
+    
+    individual = Individual()
+    result = mutator.mutate(individual)
+    
+    assert len(result.get_actions()) == 4, "2x2 block should have 4 actions"
+
+
+def test_block_size_6x6():
+    """Test specifically for 6x6 block size (the failing case from bug report)."""
+    mutator, _ = create_mutator_with_block_size(6)
+    
+    individual = Individual()
+    result = mutator.mutate(individual)
+    
+    assert len(result.get_actions()) == 36, "6x6 block should have 36 actions"
+
+
+def test_get_block_size_helper():
+    """Test that _get_block_size returns correct value from config."""
+    mutator, _ = create_mutator_with_block_size(5)
+    assert mutator._get_block_size() == 5
+    
+    mutator2, _ = create_mutator_with_block_size(6)
+    assert mutator2._get_block_size() == 6
+
+
+def test_is_odd_block_helper():
+    """Test that _is_odd_block correctly identifies odd/even block sizes."""
+    mutator_odd, _ = create_mutator_with_block_size(5)
+    assert mutator_odd._is_odd_block() is True
+    
+    mutator_even, _ = create_mutator_with_block_size(6)
+    assert mutator_even._is_odd_block() is False

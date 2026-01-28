@@ -10,16 +10,105 @@ class ShuffleMutator(Mutator):
 
     """Shuffle mutator - block shuffling with Gaussian shift."""
 
+    def _get_block_size(self) -> int:
+        """Get block size from config, default is 3."""
+        return self.config.get("shuffle_block_size", 3)
+
+    def _get_half_size(self) -> int:
+        """Get half block size for offset calculations."""
+        return self._get_block_size() // 2
+
+    def _is_odd_block(self) -> bool:
+        """Check if block size is odd."""
+        return self._get_block_size() % 2 == 1
+
+    def _clamp_position(self, row: int, col: int) -> tuple[int, int]:
+        """Clamp block center position to valid image bounds."""
+        half = self._get_half_size()
+        max_h = self.config["image_height"]
+        max_w = self.config["image_width"]
+
+        if self._is_odd_block():
+            # For odd: block goes from row-half to row+half (inclusive)
+            row = max(half, min(row, max_h - half - 1))
+            col = max(half, min(col, max_w - half - 1))
+        else:
+            # For even: block goes from row-half to row+half-1 (inclusive)
+            # Need room for 'half' pixels above and 'half' pixels below (including center-ish)
+            row = max(half, min(row, max_h - half))
+            col = max(half, min(col, max_w - half))
+
+        return row, col
+
+    def _extract_block(self, seed: np.ndarray, row: int, col: int) -> np.ndarray:
+        """Extract a block from the image centered at (row, col)."""
+        half = self._get_half_size()
+
+        if self._is_odd_block():
+            # Odd: [row-half : row+half+1] gives exactly block_size elements
+            return seed[row - half:row + half + 1, col - half:col + half + 1, :]
+        else:
+            # Even: [row-half : row+half] gives exactly block_size elements
+            return seed[row - half:row + half, col - half:col + half, :]
+
+    def _shuffle_block(self, block: np.ndarray) -> np.ndarray:
+        """Shuffle pixels within a block."""
+        block_size = self._get_block_size()
+        # Flatten to (N*N, 3), shuffle, reshape back
+        flat = np.reshape(block, (-1, 3))
+        self.randomness.random.shuffle(flat)
+        return np.reshape(flat, (block_size, block_size, 3))
+
+    def _is_float_image(self, block: np.ndarray) -> bool:
+        """Check if image uses float (0-1) range."""
+        return block.dtype.kind == 'f' and np.max(block) <= 1.0
+
+    def _get_offset_range(self) -> range:
+        """Get the offset range for iterating over block pixels."""
+
+        half = self._get_half_size()
+        if self._is_odd_block():
+            return range(-half, half + 1)
+        else:
+            return range(-half, half)
+
+    def _create_actions_from_block(self, individual: Individual, block: np.ndarray,
+                                   row: int, col: int, is_float: bool) -> None:
+        """Create actions from a block and add them to an individual."""
+        offset_range = self._get_offset_range()
+
+        for i, dr in enumerate(offset_range):
+            for j, dc in enumerate(offset_range):
+                try:
+                    r = block[i, j, 0]
+                    g = block[i, j, 1]
+                    b = block[i, j, 2]
+                except IndexError:
+                    continue
+
+                # Convert to 0-255 int for Action
+                if is_float:
+                    r, g, b = int(r * 255), int(g * 255), int(b * 255)
+                else:
+                    r, g, b = int(r), int(g), int(b)
+
+                individual.add_action(
+                    Action(
+                        location=(row + dr, col + dc),
+                        red=r,
+                        green=g,
+                        blue=b,
+                    )
+                )
+
     def mutate(self, individual: Individual) -> Individual:
         """Apply Gaussian shift to block center and reshuffle."""
-
         if len(individual.get_actions()) == 0:
             return self.add_shuffle_mutation()
 
-        # Find block center
+        # Find block center from existing actions
         actions = individual.get_actions()
         locations = [a.get_location() for a in actions]
-        # Actions are stored as (row, col) due to Archive[x, y] access
         rows = [loc[0] for loc in locations]
         cols = [loc[1] for loc in locations]
 
@@ -34,82 +123,41 @@ class ShuffleMutator(Mutator):
         row = int(np.round(self.randomness.random_gaussian(row, sigma)))
         col = int(np.round(self.randomness.random_gaussian(col, sigma)))
 
-        # Boundary checks (block: row-1 to row+1, col-1 to col+1)
-        max_h = self.config["image_height"]
-        max_w = self.config["image_width"]
-        row = max(1, min(row, max_h - 2))
-        col = max(1, min(col, max_w - 2))
+        # Clamp to valid bounds
+        row, col = self._clamp_position(row, col)
 
         if self.archive is None:
             raise ValueError("Archive is required for shuffle mutation")
 
-        # Extract and shuffle block
+        # Extract, shuffle, and create new individual
         seed = self.archive.image.array.copy()
-        sub_seed = seed[row - 1:row + 2, col - 1:col + 2, :]
+        block = self._extract_block(seed, row, col)
+        is_float = self._is_float_image(block)
+        shuffled_block = self._shuffle_block(block)
 
-        # Check if float image (0-1 range)
-        is_float = False
-        if sub_seed.dtype.kind == 'f' and np.max(sub_seed) <= 1.0:
-            is_float = True
-
-        rnd = np.reshape(sub_seed, (-1, 3))
-        self.randomness.random.shuffle(rnd)
-        sub_seed = np.reshape(rnd, (3, 3, 3))
-
-        # Create new individual with shuffled block
-        # Create new instance to effectively remove old actions for this block
         new_individual = Individual()
-        for dr in range(-1, 2):
-            for dc in range(-1, 2):
-
-                # Get color values
-                try:
-                    r = sub_seed[dr + 1, dc + 1, 0]
-                    g = sub_seed[dr + 1, dc + 1, 1]
-                    b = sub_seed[dr + 1, dc + 1, 2]
-                except IndexError:
-                    continue
-
-                # Convert to 0-255 int for Action
-                if is_float:
-                    r = int(r * 255)
-                    g = int(g * 255)
-                    b = int(b * 255)
-                else:
-                    r = int(r)
-                    g = int(g)
-                    b = int(b)
-
-                new_individual.add_action(
-                    Action(
-                        location=(row + dr, col + dc),
-                        red=r,
-                        green=g,
-                        blue=b,
-                    )
-                )
+        self._create_actions_from_block(new_individual, shuffled_block, row, col, is_float)
 
         return new_individual
 
     def add_shuffle_mutation(self) -> Individual:
-        """Create initial shuffled block"""
-
+        """Create initial shuffled block at random non-colliding position."""
         individual = Individual()
 
-        # Add None check for archive
         if self.archive is None:
             raise ValueError("Archive is required for shuffle mutation")
 
         seed = self.archive.image.array.copy()
         max_h = self.config["image_height"]
         max_w = self.config["image_width"]
+        half = self._get_half_size()
+        block_size = self._get_block_size()
 
-        # Conflict Check Addition
+        # Find non-colliding position
         collision = True
         attempts = 0
         row, col = 0, 0
 
-        # Get existing actions from archive for collision check
         archive_actions = []
         if self.archive and not self.archive.is_empty():
             archive_actions = self.archive.get_actions()
@@ -118,14 +166,17 @@ class ShuffleMutator(Mutator):
             collision = False
             attempts += 1
 
-            # Random position with even alignment
-            row = self.randomness.next_int(2, max_h - 3)
-            col = self.randomness.next_int(2, max_w - 3)
+            # Random position ensuring block fits within image
+            if self._is_odd_block():
+                row = self.randomness.next_int(half + 1, max_h - half - 2)
+                col = self.randomness.next_int(half + 1, max_w - half - 2)
+            else:
+                row = self.randomness.next_int(half + 1, max_h - half - 1)
+                col = self.randomness.next_int(half + 1, max_w - half - 1)
 
-            if row % 2 == 1:
-                row += 1
-            if col % 2 == 1:
-                col += 1
+            # Align to block_size grid for even distribution
+            row = (row // block_size) * block_size + half
+            col = (col // block_size) * block_size + half
 
             # Check collision with existing block centers
             for action in archive_actions:
@@ -134,47 +185,14 @@ class ShuffleMutator(Mutator):
                     collision = True
                     break
 
-        # Shuffle Logic
+        # Clamp to valid bounds
+        row, col = self._clamp_position(row, col)
 
-        sub_seed = seed[row - 1:row + 2, col - 1:col + 2, :]
+        # Extract, shuffle, and create actions
+        block = self._extract_block(seed, row, col)
+        is_float = self._is_float_image(block)
+        shuffled_block = self._shuffle_block(block)
 
-        # Check if float image (0-1 range)
-        is_float = False
-        if sub_seed.dtype.kind == 'f' and np.max(sub_seed) <= 1.0:
-            is_float = True
-
-        rnd = np.reshape(sub_seed, (-1, 3))
-        self.randomness.random.shuffle(rnd)
-        sub_seed = np.reshape(rnd, (3, 3, 3))
-
-        for dr in range(-1, 2):
-            for dc in range(-1, 2):
-
-                # Get color values
-                try:
-                    r = sub_seed[dr + 1, dc + 1, 0]
-                    g = sub_seed[dr + 1, dc + 1, 1]
-                    b = sub_seed[dr + 1, dc + 1, 2]
-                except IndexError:
-                    continue
-
-                # Convert to 0-255 int for Action
-                if is_float:
-                    r = int(r * 255)
-                    g = int(g * 255)
-                    b = int(b * 255)
-                else:
-                    r = int(r)
-                    g = int(g)
-                    b = int(b)
-
-                individual.add_action(
-                    Action(
-                        location=(row + dr, col + dc),
-                        red=r,
-                        green=g,
-                        blue=b,
-                    )
-                )
+        self._create_actions_from_block(individual, shuffled_block, row, col, is_float)
 
         return individual
