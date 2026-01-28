@@ -14,7 +14,7 @@ from core.search.service.sampler.sampler import Sampler
 from core.search.service.search_time_controller import SearchTimeController
 
 
-class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
+class ModifiedArtificialBeeColonyAlgorithm(SearchAlgorithm):
 
     """Artificial Bee Colony algorithm implementation."""
 
@@ -51,7 +51,7 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
 
     def get_type(self):
         """Return the type of the search algorithm."""
-        return ConfigParser.Algorithms.ABC
+        return ConfigParser.Algorithms.MABC
 
     def employed_bee_phase(self):
         """Employed bees explore food sources."""

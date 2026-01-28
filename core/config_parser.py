@@ -185,6 +185,7 @@ class ConfigParser:
         MIO = "mio"
         GENETIC = "genetic"
         ABC = "abc"
+        MABC = "mabc"
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
@@ -194,7 +195,7 @@ class ConfigParser:
     @cfg("Population size of the population-based algorithms.")
     def population_size(self):
         """Population size of the population-based algorithms."""
-        return 20
+        return 10
 
     @cfg("Maximum number of evaluations for the search.")
     def max_evaluations(self):
@@ -392,7 +393,7 @@ class ConfigParser:
     @cfg("Abandon limit for ABC algorithm. Number of trials before a food source is abandoned.")
     def abc_limit(self):
         """Abandon limit for ABC algorithm."""
-        return 100
+        return 10
 
     @cfg("Fitness threshold for stopping the search. Search stops when fitness <= this value. "
          "Default is 0.0 (stop when solution is found). "
