@@ -185,6 +185,7 @@ class ConfigParser:
         MIO = "mio"
         GENETIC = "genetic"
         ABC = "abc"
+        MABC = "mabc"
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
