@@ -6,6 +6,7 @@ from core.search.service.adaptive_parameter_control import AdaptiveParameterCont
 from core.search.service.archive import Archive
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
+from typing import Optional
 
 
 class Mutator:
@@ -15,12 +16,14 @@ class Mutator:
     def __init__(self, randomness: Randomness,
                  stc: SearchTimeController,
                  config: dict,
-                 apc: AdaptiveParameterControl):
+                 apc: AdaptiveParameterControl,
+                 archive: Optional[Archive] = None):
         """Initializes the mutator with the randomness, time controller, and configuration."""
         self.randomness = randomness
         self.stc = stc
         self.config = config
         self.apc = apc
+        self.archive = archive
 
     def mutate(self, individual: Individual):
         """Mutates the individual."""

@@ -10,9 +10,11 @@ from core.search.algorithms.random_algorithm import RandomAlgorithm
 from core.search.service.crossover.single_point_crossover import SinglePointCrossover
 from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.mutator.standard_mutator import StandardMutator
+from core.search.service.mutator.shuffle_mutator import ShuffleMutator
 from core.search.service.pruner.standard_pruner import StandardPruner
 from core.search.service.sampler.gaussian_sampler import GaussianSampler
 from core.search.service.sampler.random_sampler import RandomSampler
+from core.search.service.sampler.shuffle_sampler import ShuffleSampler
 from core.search.service.fitness_function.untargeted_fitness_function import UntargetedFitnessFunction
 from core.search.service.fitness_function.targeted_fitness_function import TargetedFitnessFunction
 
@@ -32,6 +34,17 @@ def configure_container(container):
                                                        stc=container.stc,
                                                        config=container.config,
                                                        apc=container.apc))
+    elif container.config.get("mutator") == ConfigParser.Mutators.SHUFFLE_MUTATOR:
+        container.mutator.override(providers.Singleton(ShuffleMutator,
+                                                       randomness=container.randomness,
+                                                       stc=container.stc,
+                                                       config=container.config,
+                                                       apc=container.apc,
+                                                       archive=container.archive))
+        container.sampler.override(providers.Singleton(ShuffleSampler,
+                                                       randomness=container.randomness,
+                                                       config=container.config,
+                                                       archive=container.archive))
     else:
         raise ValueError(f"Mutator {container.config.get('mutator')} not supported")
 
@@ -44,21 +57,28 @@ def configure_container(container):
     else:
         raise ValueError(f"Crossover {container.config.get('crossover')} not supported")
 
-    if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
-        container.sampler.override(providers.Singleton(RandomSampler,
-                                                       randomness=container.randomness,
-                                                       config=container.config,
-                                                       archive=container.archive
-                                                       ))
-    elif container.config.get("sampler") == ConfigParser.SamplerType.GAUSSIAN_SAMPLER:
+    if container.config.get("mutator") != ConfigParser.Mutators.SHUFFLE_MUTATOR:
+        if container.config.get("sampler") == ConfigParser.SamplerType.RANDOM_SAMPLER:
+            container.sampler.override(providers.Singleton(RandomSampler,
+                                                           randomness=container.randomness,
+                                                           config=container.config,
+                                                           archive=container.archive
+                                                           ))
+        elif container.config.get("sampler") == ConfigParser.SamplerType.GAUSSIAN_SAMPLER:
 
-        container.sampler.override(providers.Singleton(GaussianSampler,
-                                                       randomness=container.randomness,
-                                                       config=container.config,
-                                                       archive=container.archive
-                                                       ))
-    else:
-        raise ValueError(f"Sampler {container.config.get('sampler')} not supported")
+            container.sampler.override(providers.Singleton(GaussianSampler,
+                                                           randomness=container.randomness,
+                                                           config=container.config,
+                                                           archive=container.archive
+                                                           ))
+        elif container.config.get("sampler") == ConfigParser.SamplerType.SHUFFLE_SAMPLER:
+            container.sampler.override(providers.Singleton(ShuffleSampler,
+                                                           randomness=container.randomness,
+                                                           config=container.config,
+                                                           archive=container.archive
+                                                           ))
+        else:
+            raise ValueError(f"Sampler {container.config.get('sampler')} not supported")
 
     if container.config.get("attack_type") == ConfigParser.AttackType.TARGETED:
         container.ff.override(providers.Singleton(TargetedFitnessFunction,
