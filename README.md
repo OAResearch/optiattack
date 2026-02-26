@@ -9,7 +9,7 @@
 
 # OptiAttack
 
-OptiAttack (OA) is an optimization-based adversarial example generation framework designed for network test generation. It provides a modular, extensible platform for generating adversarial examples using evolutionary and search-based algorithms, with a focus on image-based attacks. The project includes both a core engine and a client-server architecture for remote testing, as well as a modern web UI for interactive use.
+OptiAttack (OA) is an optimization-based framework for adversarial example generation designed for network test generation. It provides a modular, extensible platform for generating adversarial examples using evolutionary and search-based algorithms, with a focus on image-based attacks. The project includes both a core engine and a client-server architecture for remote testing, as well as a modern web UI for interactive use.
 
 ---
 
