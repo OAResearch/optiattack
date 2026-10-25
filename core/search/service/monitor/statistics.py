@@ -92,10 +92,11 @@ class Statistics(SearchListener):
         pass
 
     def save_final_image(self):
-        """Save the final image. It contains the actions of the archive."""
-        img = self.archive.get_mutated_image()
+        """Save the final image. It contains the actions of the (minimized) solution."""
+        # PNG is used because lossy formats such as JPEG can destroy sparse adversarial perturbations
+        img = self.archive.get_mutated_image(self.archive.extract_solution().actions)
         image = fromarray(img)
-        image.save(f"{self.output_dir}/{self.final_image_name}.jpg")
+        image.save(f"{self.output_dir}/{self.final_image_name}.png")
         if self.config.get("show_plots"):
             plt.imshow(img)
             plt.show()
@@ -217,11 +218,15 @@ class Statistics(SearchListener):
                     'color': point.get_color()
                 })
 
-            data['not_minimized__size'] = len(not_minimized_changes)
+            data['not_minimized_size'] = len(not_minimized_changes)
             data['not_minimized_changes'] = not_minimized_changes
+            data['pruning_eval_count'] = self.stc.get_evaluated_individuals_in_pruning()
+            data['pruned_fitness'] = self.stc.get_pruned_fitness_value()
         else:
             data['not_minimized_size'] = None
             data['not_minimized_changes'] = []
+            data['pruning_eval_count'] = 0
+            data['pruned_fitness'] = None
 
         data['config'] = self.config
 

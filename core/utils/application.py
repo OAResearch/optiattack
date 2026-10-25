@@ -98,7 +98,8 @@ def configure_container(container):
         container.pruner.override(providers.Singleton(StandardPruner,
                                                       archive=container.archive,
                                                       ff=container.ff,
-                                                      ssu=container.search_status_updater))
+                                                      ssu=container.search_status_updater,
+                                                      config=container.config))
     else:
         raise ValueError(f"Pruning method {container.config.get('pruning_method')} not supported")
 

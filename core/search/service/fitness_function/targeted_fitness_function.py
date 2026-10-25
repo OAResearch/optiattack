@@ -29,7 +29,8 @@ class TargetedFitnessFunction(FitnessFunction):
 
         result = self.remote_controller.new_action(img_array)
 
+        # Not reached: distance of the target to the top. Reached: negative margin to the runner-up.
         fitness_value = result.max_score.value - result.target_score.value \
-            if result.max_score.label != self.target else result.target_score.value - result.max_score.value
+            if result.max_score.label != self.target else result.second_max_score.value - result.target_score.value
 
         return FitnessValue(fitness_value, result.predictions)

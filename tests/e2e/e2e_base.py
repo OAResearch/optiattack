@@ -113,7 +113,7 @@ class E2EBase:
         assert os.path.exists(output_folder)
 
         # Check if the image is saved
-        assert os.path.exists(f"{output_folder}/{final_image_name}.jpg")
+        assert os.path.exists(f"{output_folder}/{final_image_name}.png")
         assert os.path.exists(f"{output_folder}/{line_plot_name}.png")
         assert os.path.exists(f"{output_folder}/{overlay_image_name}.png")
 

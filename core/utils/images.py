@@ -17,8 +17,8 @@ class ProcessedImage:
 
 
 def read_image(image_path):
-    """Read an image from a file."""
-    return Image.open(image_path)
+    """Read an image from a file as RGB, since the NUT expects three channels."""
+    return Image.open(image_path).convert("RGB")
 
 
 def resize_image(image, width, height):

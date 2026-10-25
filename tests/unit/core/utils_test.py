@@ -35,6 +35,16 @@ def test_image_img_to_array():
     assert image_array.shape == (100, 100, 3)
     assert image_array.dtype == np.uint8
 
+@pytest.mark.parametrize("mode", ["L", "RGBA", "P"])
+def test_read_image_converts_non_rgb_images_to_three_channels(tmp_path, mode):
+    # The NUT expects height x width x 3 bytes, e.g. grayscale ImageNet images must become RGB
+    image_path = tmp_path / f"image_{mode}.png"
+    Image.new(mode, (30, 10)).save(image_path)
+
+    image_array = img_to_array(resize_image(read_image(str(image_path)), 30, 10))
+
+    assert image_array.shape == (10, 30, 3)
+
 
 def test_incremental_average():
     avg = IncrementalAverage()

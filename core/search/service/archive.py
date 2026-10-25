@@ -112,12 +112,15 @@ class Archive:
         if self.minimized_solution is not None and not not_minimized:
             return self.minimized_solution
 
-        actions = self.get_actions().copy()
-
-        for action in actions:
+        # Later actions overwrite earlier ones at the same location (see get_mutated_image),
+        # so keep only the last action per location, in order of their last occurrence.
+        seen_locations = set()
+        actions = []
+        for action in reversed(self.get_actions()):
             location = action.get_location()
-            number_of_locations = len([a for a in actions if a.get_location() == location])
-            if number_of_locations > 1:
-                actions.remove(action)
+            if location not in seen_locations:
+                seen_locations.add(location)
+                actions.append(action)
+        actions.reverse()
 
         return Solution(actions, self.stc.get_current_fitness())

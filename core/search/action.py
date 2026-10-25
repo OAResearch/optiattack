@@ -25,12 +25,12 @@ class Action:
         return self.parent
 
     def get_location(self):
-        """Returns the location of the action as a tuple (x, y)."""
+        """Returns the location of the action as a (row, col) tuple of image array indices."""
         return self.location
 
-    def set_location(self, x, y):
-        """Sets the location of the action to the provided x and y values."""
-        self.location = (x, y)
+    def set_location(self, row, col):
+        """Sets the location of the action to the provided row and col indices."""
+        self.location = (row, col)
 
     def get_color(self):
         """Returns the RGB color of the action as a NumPy array [red, green, blue]."""

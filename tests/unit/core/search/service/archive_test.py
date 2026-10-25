@@ -182,3 +182,18 @@ def test_archive_extract(archive):
     assert solution.actions == [action2, action3]
 
 
+def test_extract_solution_reproduces_evaluated_image(archive):
+    # The same pixel is overwritten three times; the last write is what the NUT sees
+    archive.image = MagicMock(spec=ProcessedImage)
+    archive.image.array = np.zeros((4, 4, 3), dtype=np.uint8)
+    for color in [(10, 10, 10), (20, 20, 20), (30, 30, 30)]:
+        individual = Individual()
+        individual.add_action(Action((1, 1), *color))
+        archive.populations.append(EvaluatedIndividual(individual, MagicMock(spec=FitnessValue)))
+
+    solution = archive.extract_solution()
+
+    assert len(solution.actions) == 1
+    assert np.array_equal(archive.get_mutated_image(solution.actions), archive.get_mutated_image())
+
+

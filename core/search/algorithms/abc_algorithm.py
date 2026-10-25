@@ -43,6 +43,8 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
 
         # Initialize food sources (employed bees phase)
         for _ in range(self.colony_size):
+            if not self.stc.should_continue_search():
+                return
             individual = self.sampler.sample()
             ei = self.ff.calculate_fitness(individual)
             self.archive.add_archive_if_needed(ei)
@@ -53,16 +55,22 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
         """Return the type of the search algorithm."""
         return ConfigParser.Algorithms.ABC
 
+    def select_neighbor(self, i):
+        """Select a random food source index uniformly among all sources except i (i itself if it is the only one)."""
+        if self.colony_size == 1:
+            return i
+        # next_int excludes the upper bound: draw from colony_size - 1 candidates and skip i
+        k = self.randomness.next_int(0, self.colony_size - 1)
+        return k if k < i else k + 1
+
     def employed_bee_phase(self):
         """Employed bees explore food sources."""
         for i in range(self.colony_size):
+            # Check before every evaluation so that the budget is never exceeded
+            if not self.stc.should_continue_search():
+                return
             # Select a random food source different from current one
-            if self.colony_size > 1:
-                k = self.randomness.next_int(0, self.colony_size - 1)
-                while k == i:
-                    k = self.randomness.next_int(0, self.colony_size - 1)
-            else:
-                k = i  # If only one food source, use itself
+            k = self.select_neighbor(i)
 
             # Create new candidate solution
             current = self.food_sources[i].copy()
@@ -106,6 +114,8 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
         probabilities = self.calculate_probabilities()
 
         for _ in range(self.colony_size):
+            if not self.stc.should_continue_search():
+                return
             # Roulette wheel selection
             i = self.randomness.get_random_element(
                 list(range(self.colony_size)),
@@ -124,12 +134,7 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
                 neighbor = archive_sample.copy()
             else:
                 # Fallback: use random food source if archive is empty
-                if self.colony_size > 1:
-                    k = self.randomness.next_int(0, self.colony_size - 1)
-                    while k == i:
-                        k = self.randomness.next_int(0, self.colony_size - 1)
-                else:
-                    k = i
+                k = self.select_neighbor(i)
                 neighbor = self.food_sources[k].copy()
 
             # Apply crossover between current and neighbor, then mutate
@@ -148,6 +153,8 @@ class ArtificialBeeColonyAlgorithm(SearchAlgorithm):
     def scout_bee_phase(self):
         """Scout bees abandon exhausted food sources and discover new ones."""
         for i in range(self.colony_size):
+            if not self.stc.should_continue_search():
+                return
             if self.trial_counters[i] >= self.limit:
                 # Abandon the food source and generate a new one
                 new_individual = self.sampler.sample()

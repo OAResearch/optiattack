@@ -12,8 +12,9 @@ class GaussianSampler(Sampler):
     def sample(self):
         """Sample an individual randomly."""
         individual = Individual()
+        # next_int excludes the upper bound; max_action_size is inclusive
         number_of_actions = self.randomness.next_int(self.config.get("min_action_size"),
-                                                     self.config.get("max_action_size"))
+                                                     self.config.get("max_action_size") + 1)
         for _ in range(number_of_actions):
             action = self.sample_random_action()
             while not individual.add_action(action, replace=False):

@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 from core.config_parser import ConfigParser
 from core.search.action import Action
 from core.search.algorithms.abc_algorithm import ArtificialBeeColonyAlgorithm
+from core.search.algorithms.mabc_algorithm import ModifiedArtificialBeeColonyAlgorithm
 from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
@@ -710,3 +711,26 @@ def test_full_search_cycle(abc_algorithm):
     assert len(employed_calls) == 1
     assert len(onlooker_calls) == 1
     assert len(scout_calls) == 1
+
+@pytest.mark.parametrize("algorithm_class", [ArtificialBeeColonyAlgorithm, ModifiedArtificialBeeColonyAlgorithm])
+@pytest.mark.parametrize("colony_size", [2, 3, 5])
+def test_select_neighbor_covers_every_other_food_source(algorithm_class, colony_size, ff, randomness, stc,
+                                                          archive, config, mutator, crossover, sampler, apc):
+    """Every other food source, including the last one, can be chosen as a neighbor; never the source itself."""
+    algorithm = algorithm_class(ff=ff, randomness=randomness, stc=stc, archive=archive, config=config,
+                                mutator=mutator, crossover=crossover, sampler=sampler, apc=apc)
+    algorithm.colony_size = colony_size
+
+    for i in range(colony_size):
+        neighbors = {algorithm.select_neighbor(i) for _ in range(200)}
+        assert neighbors == set(range(colony_size)) - {i}
+
+
+@pytest.mark.parametrize("algorithm_class", [ArtificialBeeColonyAlgorithm, ModifiedArtificialBeeColonyAlgorithm])
+def test_select_neighbor_with_single_food_source_returns_itself(algorithm_class, ff, randomness, stc, archive,
+                                                                config, mutator, crossover, sampler, apc):
+    algorithm = algorithm_class(ff=ff, randomness=randomness, stc=stc, archive=archive, config=config,
+                                mutator=mutator, crossover=crossover, sampler=sampler, apc=apc)
+    algorithm.colony_size = 1
+
+    assert algorithm.select_neighbor(0) == 0

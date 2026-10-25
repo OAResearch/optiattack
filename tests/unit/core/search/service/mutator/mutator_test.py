@@ -7,6 +7,7 @@ from core.search.individual import Individual
 from core.search.phase_controller import PhaseController
 from core.search.service.adaptive_parameter_control import AdaptiveParameterControl
 from core.search.service.mutator.standard_mutator import StandardMutator
+from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from tests.utils import run_multiple
@@ -83,3 +84,20 @@ def not_test_apply_gaussian_mutation_with_limit_values(standard_mutator):
 
     # Assert that the color was clamped to the limit values
     assert result.get_color() == pytest.approx([255, 255, 255])
+
+
+@pytest.mark.parametrize("mutator_class", [StandardMutator, OneZeroMutator])
+def test_mutated_location_stays_inside_non_square_image(mutator_class):
+    # Locations are (row, col): a huge gaussian shift must clamp to (height - 1, width - 1)
+    config = {"image_height": 10, "image_width": 30, "one_mutation_rate": 0.0, "zero_mutation_rate": 0.0}
+    randomness = MagicMock()
+    randomness.next_int.return_value = 0
+    randomness.next_bool.return_value = False
+    randomness.random_gaussian.side_effect = lambda mean, std: mean + 1000
+    mutator = mutator_class(randomness, MagicMock(), config, MagicMock())
+    individual = Individual()
+    individual.add_action(Action((5, 5), 0, 0, 0))
+
+    mutated = mutator.mutate(individual)
+
+    assert mutated.get_actions()[0].get_location() == (9, 29)

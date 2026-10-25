@@ -32,7 +32,8 @@ class StandardPruner(Pruner):
             removed_action = current_actions.pop(counter)
             result = self.ff.calculate_fitness_with_actions(current_actions)
 
-            if result.value == 0:
+            # The attack is still successful without this action
+            if result.value <= self.fitness_threshold:
                 self.ssu.remove_action(remove_counter, total_length, removed_action)
                 actions_length -= 1
                 counter -= 1

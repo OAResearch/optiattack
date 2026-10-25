@@ -4,8 +4,11 @@ import json
 import numpy as np
 from unittest.mock import MagicMock
 
+from PIL import Image
 
+from core.search.action import Action
 from core.search.evaluated_individual import EvaluatedIndividual
+from core.search.individual import Individual
 from core.search.fitness_value import FitnessValue
 from core.search.service.archive import Archive
 from core.search.service.monitor.statistics import Statistics
@@ -117,7 +120,9 @@ def test_write_statistics(statistics):
     statistics.report_statistics.assert_called_once()
     statistics.save_images.assert_called_once()
 
-def test_save_final_image(statistics):
+def test_save_final_image(statistics, tmp_path):
+    # Use a fresh directory so files left by other tests cannot satisfy the assertion
+    statistics.output_dir = str(tmp_path)
     # Mock the get_mutated_image method of the archive
     img_array = np.zeros((100, 100, 3), dtype=np.uint8)
     statistics.archive.get_mutated_image.return_value = img_array
@@ -126,7 +131,28 @@ def test_save_final_image(statistics):
     statistics.save_final_image()
 
     # Assert that the image was saved
-    assert os.path.exists(f"{statistics.output_dir}/{statistics.final_image_name}.jpg")
+    assert os.path.exists(f"{statistics.output_dir}/{statistics.final_image_name}.png")
+
+
+def test_save_final_image_stores_minimized_solution_losslessly(tmp_path):
+    # The saved file must be exactly the reported (pruned) adversarial image
+    archive = Archive(MagicMock(), MagicMock(), {})
+    archive.set_image(MagicMock(array=np.full((8, 8, 3), 100, dtype=np.uint8)))
+    kept = Action((1, 1), 7, 200, 13)
+    pruned = Action((5, 5), 255, 255, 255)
+    individual = Individual()
+    individual.add_action(kept)
+    individual.add_action(pruned)
+    archive.populations.append(EvaluatedIndividual(individual, MagicMock(spec=FitnessValue)))
+    archive.set_minimized_solution(Solution([kept], MagicMock(spec=FitnessValue)))
+    config = {"snapshot_interval": 10, "output_dir": str(tmp_path), "show_plots": False,
+              "final_image_name": "final_image"}
+    statistics = Statistics(MagicMock(spec=SearchTimeController), archive, config)
+
+    statistics.save_final_image()
+
+    saved = np.array(Image.open(tmp_path / "final_image.png"))
+    assert np.array_equal(saved, archive.get_mutated_image([kept]))
 
 def test_save_matrix_overlay(statistics):
     # Mock the extract_solution method of the archive
@@ -222,3 +248,43 @@ def test_save_statistics(statistics):
         # assert data["action_size"] == 1
         # assert data["changes"] == [{"location": (50, 50), "color": [255, 0, 0]}]
         assert data["config"] == statistics.config
+
+
+def _prepare_statistics_for_saving(statistics):
+    statistics.snapshots = []
+    statistics.stc.get_elapsed_seconds.return_value = 10
+    statistics.stc.get_evaluated_individuals.return_value = 100
+    statistics.stc.get_evaluated_individuals_in_pruning.return_value = 42
+    statistics.stc.get_pruned_fitness_value.return_value = -0.2
+    statistics.stc.current_fitness_value = MagicMock(spec=FitnessValue)
+    statistics.stc.current_fitness_value.value = -0.3
+
+
+def _load_saved_statistics(statistics):
+    with open(f"{statistics.output_dir}/{statistics.statistics_file_name}.json", "r") as file:
+        return json.load(file)
+
+
+def test_save_statistics_reports_pruning_cost_and_result(statistics):
+    statistics.config["enable_pruning"] = True
+    _prepare_statistics_for_saving(statistics)
+
+    statistics.save_statistics()
+
+    data = _load_saved_statistics(statistics)
+    assert data["pruning_eval_count"] == 42
+    assert data["pruned_fitness"] == -0.2
+    assert "not_minimized_size" in data
+    assert "not_minimized__size" not in data
+
+
+def test_save_statistics_has_same_pruning_columns_when_pruning_disabled(statistics):
+    statistics.config["enable_pruning"] = False
+    _prepare_statistics_for_saving(statistics)
+
+    statistics.save_statistics()
+
+    data = _load_saved_statistics(statistics)
+    assert data["pruning_eval_count"] == 0
+    assert data["pruned_fitness"] is None
+    assert data["not_minimized_size"] is None
