@@ -36,7 +36,9 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-baselines.txt
       - name: Run tests and collect coverage
         run: pytest --cov=core --cov-report=json
       - name: Upload coverage to Codecov (arg token)

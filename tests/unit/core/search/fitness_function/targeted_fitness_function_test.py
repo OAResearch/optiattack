@@ -71,3 +71,35 @@ def test_evaluate_with_non_matching_labels(fitness_function):
     # The target is on top: fitness is the negative margin to the runner-up
     assert isinstance(result, FitnessValue)
     assert result.value == pytest.approx(-0.2)  # 0.3 (second) - 0.5 (target)
+
+
+def test_fitness_from_result_target_not_on_top(fitness_function):
+    result = MagicMock(
+        max_score=MagicMock(value=0.7, label="other_label"),
+        second_max_score=MagicMock(value=0.2, label="target_label"),
+        target_score=MagicMock(value=0.2, label="target_label"),
+        predictions=[0.7, 0.2],
+    )
+    assert fitness_function.fitness_from_result(result) == pytest.approx(0.5)  # max - target
+
+
+def test_fitness_from_result_target_on_top(fitness_function):
+    result = MagicMock(
+        max_score=MagicMock(value=0.6, label="target_label"),
+        second_max_score=MagicMock(value=0.3, label="other_label"),
+        target_score=MagicMock(value=0.6, label="target_label"),
+        predictions=[0.6, 0.3],
+    )
+    assert fitness_function.fitness_from_result(result) == pytest.approx(-0.3)  # second - target
+
+
+def test_evaluate_matches_fitness_from_result(fitness_function):
+    result = MagicMock(
+        max_score=MagicMock(value=0.6, label="target_label"),
+        second_max_score=MagicMock(value=0.3, label="other_label"),
+        target_score=MagicMock(value=0.6, label="target_label"),
+        predictions=[0.6, 0.3],
+    )
+    fitness_function.remote_controller.new_action = MagicMock(return_value=result)
+    value = fitness_function.evaluate(MockIndividual())
+    assert value.value == fitness_function.fitness_from_result(result)

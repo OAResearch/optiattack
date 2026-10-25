@@ -6,6 +6,7 @@ from core.search.action import Action
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
 from core.search.service.fitness_function.fitness_function import FitnessFunction
+from core.utils.nut_request import NutRequest
 
 T = TypeVar('T', bound=Individual)
 
@@ -29,8 +30,10 @@ class TargetedFitnessFunction(FitnessFunction):
 
         result = self.remote_controller.new_action(img_array)
 
-        # Not reached: distance of the target to the top. Reached: negative margin to the runner-up.
-        fitness_value = result.max_score.value - result.target_score.value \
-            if result.max_score.label != self.target else result.second_max_score.value - result.target_score.value
+        return FitnessValue(self.fitness_from_result(result), result.predictions)
 
-        return FitnessValue(fitness_value, result.predictions)
+    def fitness_from_result(self, result: NutRequest) -> float:
+        """Compute the targeted fitness value from a NUT result."""
+        # Not reached: distance of the target to the top. Reached: negative margin to the runner-up.
+        return result.max_score.value - result.target_score.value \
+            if result.max_score.label != self.target else result.second_max_score.value - result.target_score.value

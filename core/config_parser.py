@@ -186,6 +186,7 @@ class ConfigParser:
         GENETIC = "genetic"
         ABC = "abc"
         MABC = "mabc"
+        BASELINE = "baseline"
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
@@ -401,6 +402,121 @@ class ConfigParser:
     def fitness_threshold(self):
         """Fitness threshold for stopping the search."""
         return 0.0
+
+    @cfg("ART baseline attack used by the 'baseline' algorithm. Options: 'square', 'hsj', 'simba', 'pixel'.")
+    def baseline_attack(self):
+        """ART baseline attack used by the 'baseline' algorithm."""
+        return "square"
+
+    @cfg("Stop the baseline attack at the first successful query. 'auto' uses the attack default (square, "
+         "simba, pixel: true; hsj: false, it uses the whole budget and reports the smallest successful "
+         "perturbation). Options: 'auto', 'true', 'false'.")
+    def baseline_stop_at_success(self):
+        """Stop the baseline attack at the first successful query."""
+        return "auto"
+
+    @cfg("Norm of the Square attack. Options: 'inf' or '2'.")
+    def square_norm(self):
+        """Norm of the Square attack."""
+        return "inf"
+
+    @cfg("Maximum perturbation of the Square attack on the 0-255 scale (ART default 0.3 is on 0-1).")
+    def square_eps(self):
+        """Maximum perturbation of the Square attack on the 0-255 scale (ART default 0.3 is on 0-1)."""
+        return 8.0
+
+    @cfg("Initial fraction of the image changed by a Square attack update (ART default).")
+    def square_p_init(self):
+        """Initial fraction of the image changed by a Square attack update (ART default)."""
+        return 0.8
+
+    @cfg("Number of restarts of the Square attack (ART default).")
+    def square_nb_restarts(self):
+        """Number of restarts of the Square attack (ART default)."""
+        return 1
+
+    @cfg("Iteration limit of the Square attack; its square size schedule is relative to it. "
+         "0 (auto): max_evaluations for the 'individual_evaluations' criterion, 10000 for 'time'.")
+    def square_max_iter(self):
+        """Iteration limit of the Square attack (0: auto)."""
+        return 0
+
+    @cfg("Norm of the HopSkipJump attack. Options: '2' or 'inf'.")
+    def hsj_norm(self):
+        """Norm of the HopSkipJump attack."""
+        return "2"
+
+    @cfg("Maximum number of iterations of the HopSkipJump attack (ART default).")
+    def hsj_max_iter(self):
+        """Maximum number of iterations of the HopSkipJump attack (ART default)."""
+        return 50
+
+    @cfg("Maximum number of evaluations for gradient estimation in HopSkipJump (ART default).")
+    def hsj_max_eval(self):
+        """Maximum number of evaluations for gradient estimation in HopSkipJump (ART default)."""
+        return 10000
+
+    @cfg("Initial number of evaluations for gradient estimation in HopSkipJump (ART default).")
+    def hsj_init_eval(self):
+        """Initial number of evaluations for gradient estimation in HopSkipJump (ART default)."""
+        return 100
+
+    @cfg("Maximum number of random trials for the initial adversarial image of HopSkipJump (ART default).")
+    def hsj_init_size(self):
+        """Maximum number of random trials for the initial adversarial image of HopSkipJump (ART default)."""
+        return 100
+
+    @cfg("Path to an image used as the initial adversarial image of HopSkipJump (e.g. an image of the target "
+         "class). Empty: random initialisation.")
+    def hsj_init_image(self):
+        """Path to an image used as the initial adversarial image of HopSkipJump."""
+        return ""
+
+    @cfg("SimBA basis. Options: 'px' or 'dct' (ART default; its steps are spread over the whole image and can "
+         "vanish when rounded to uint8 on large images unless simba_epsilon is large).")
+    def simba_attack(self):
+        """Basis of the SimBA attack."""
+        return "px"
+
+    @cfg("SimBA step size on the 0-255 scale (ART default 0.1 is on 0-1).")
+    def simba_epsilon(self):
+        """Step size of the SimBA attack on the 0-255 scale."""
+        return 25.5
+
+    @cfg("Iteration limit of SimBA. High so that max_evaluations is the real limit.")
+    def simba_max_iter(self):
+        """Iteration limit of SimBA."""
+        return 100000
+
+    @cfg("SimBA order of the basis directions. Options: 'random' or 'diag' (ART default 'random').")
+    def simba_order(self):
+        """Order of the basis directions of the SimBA attack."""
+        return "random"
+
+    @cfg("SimBA low frequency dimension for the 'dct' basis (ART default).")
+    def simba_freq_dim(self):
+        """Low frequency dimension of the SimBA 'dct' basis."""
+        return 4
+
+    @cfg("SimBA stride for the 'dct' basis with 'diag' order (ART default).")
+    def simba_stride(self):
+        """Stride of the SimBA 'dct' basis."""
+        return 1
+
+    @cfg("Number of pixels changed by the PixelAttack.")
+    def pixel_th(self):
+        """Number of pixels changed by the PixelAttack."""
+        return 10
+
+    @cfg("Optimiser of the PixelAttack. 0: CMA-ES, 1: differential evolution (ART default).")
+    def pixel_es(self):
+        """Optimiser of the PixelAttack."""
+        return 1
+
+    @cfg("Maximum number of optimiser iterations of the PixelAttack (ART default).")
+    def pixel_max_iter(self):
+        """Maximum number of optimiser iterations of the PixelAttack (ART default)."""
+        return 100
 
 
 if __name__ == "__main__":

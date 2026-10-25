@@ -92,6 +92,7 @@ class E2EBase:
         self._app_instance = app  # Store the instance
         yield app
         self._app_instance = None  # Clean up
+        container.unwire()  # Do not leak this container's providers into the next test
 
     @run_multiple(times=REPEAT)
     def test_run_nut(self, app):

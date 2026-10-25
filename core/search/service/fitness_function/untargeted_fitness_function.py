@@ -6,6 +6,7 @@ from core.search.action import Action
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
 from core.search.service.fitness_function.fitness_function import FitnessFunction
+from core.utils.nut_request import NutRequest
 
 T = TypeVar('T', bound=Individual)
 
@@ -23,10 +24,13 @@ class UntargetedFitnessFunction(FitnessFunction):
             img_array = individual.get_action_image(img_array)
 
         result = self.remote_controller.new_action(img_array)
+
+        return FitnessValue(self.fitness_from_result(result), result.predictions)
+
+    def fitness_from_result(self, result: NutRequest) -> float:
+        """Compute the untargeted fitness value from a NUT result."""
         original_result = self.archive.get_original_prediction_results()
 
-        fitness_value = result.max_score.value - result.second_max_score.value \
+        return result.max_score.value - result.second_max_score.value \
             if result.max_score.label == original_result.max_score.label \
             else result.second_max_score.value - result.max_score.value
-
-        return FitnessValue(fitness_value, result.predictions)

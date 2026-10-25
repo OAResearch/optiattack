@@ -258,6 +258,7 @@ def _prepare_statistics_for_saving(statistics):
     statistics.stc.get_pruned_fitness_value.return_value = -0.2
     statistics.stc.current_fitness_value = MagicMock(spec=FitnessValue)
     statistics.stc.current_fitness_value.value = -0.3
+    statistics.stc.get_first_success_eval.return_value = 17
 
 
 def _load_saved_statistics(statistics):
@@ -276,6 +277,15 @@ def test_save_statistics_reports_pruning_cost_and_result(statistics):
     assert data["pruned_fitness"] == -0.2
     assert "not_minimized_size" in data
     assert "not_minimized__size" not in data
+
+
+def test_save_statistics_writes_first_success_eval(statistics):
+    _prepare_statistics_for_saving(statistics)
+
+    statistics.save_statistics()
+
+    data = _load_saved_statistics(statistics)
+    assert data["first_success_eval"] == 17
 
 
 def test_save_statistics_has_same_pruning_columns_when_pruning_disabled(statistics):

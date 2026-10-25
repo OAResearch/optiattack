@@ -1,5 +1,10 @@
 # Configuration Parameters
 
+## abc_limit
+
+- **Default Value**: 10
+- **Description**: Abandon limit for ABC algorithm. Number of trials before a food source is abandoned.
+
 ## algorithm
 
 - **Default Value**: mio
@@ -45,6 +50,16 @@
 - **Default Value**: /api/v1
 - **Description**: Base endpoint for the NUT. Default is '/api/v1'.
 
+## baseline_attack
+
+- **Default Value**: square
+- **Description**: ART baseline attack used by the 'baseline' algorithm. Options: 'square', 'hsj', 'simba', 'pixel'.
+
+## baseline_stop_at_success
+
+- **Default Value**: auto
+- **Description**: Stop the baseline attack at the first successful query. 'auto' uses the attack default (square, simba, pixel: true; hsj: false, it uses the whole budget and reports the smallest successful perturbation). Options: 'auto', 'true', 'false'.
+
 ## crossover
 
 - **Default Value**: single_point_crossover
@@ -79,6 +94,36 @@
 
 - **Default Value**: 0.8
 - **Description**: The percentage of passed search before starting a more focused, less exploratory one
+
+## hsj_init_eval
+
+- **Default Value**: 100
+- **Description**: Initial number of evaluations for gradient estimation in HopSkipJump (ART default).
+
+## hsj_init_image
+
+- **Default Value**: 
+- **Description**: Path to an image used as the initial adversarial image of HopSkipJump (e.g. an image of the target class). Empty: random initialisation.
+
+## hsj_init_size
+
+- **Default Value**: 100
+- **Description**: Maximum number of random trials for the initial adversarial image of HopSkipJump (ART default).
+
+## hsj_max_eval
+
+- **Default Value**: 10000
+- **Description**: Maximum number of evaluations for gradient estimation in HopSkipJump (ART default).
+
+## hsj_max_iter
+
+- **Default Value**: 50
+- **Description**: Maximum number of iterations of the HopSkipJump attack (ART default).
+
+## hsj_norm
+
+- **Default Value**: 2
+- **Description**: Norm of the HopSkipJump attack. Options: '2' or 'inf'.
 
 ## image_height
 
@@ -150,9 +195,24 @@
 - **Default Value**: overlay_matrix
 - **Description**: Overlay matrix image name.
 
+## pixel_es
+
+- **Default Value**: 1
+- **Description**: Optimiser of the PixelAttack. 0: CMA-ES, 1: differential evolution (ART default).
+
+## pixel_max_iter
+
+- **Default Value**: 100
+- **Description**: Maximum number of optimiser iterations of the PixelAttack (ART default).
+
+## pixel_th
+
+- **Default Value**: 10
+- **Description**: Number of pixels changed by the PixelAttack.
+
 ## population_size
 
-- **Default Value**: 20
+- **Default Value**: 10
 - **Description**: Population size of the population-based algorithms.
 
 ## pruning_method
@@ -190,10 +250,70 @@
 - **Default Value**: True
 - **Description**: Show progress of the search.
 
+## shuffle_block_size
+
+- **Default Value**: 3
+- **Description**: Block size for shuffle mutator. Must be odd number (e.g., 3, 5, 7).
+
+## simba_attack
+
+- **Default Value**: px
+- **Description**: SimBA basis. Options: 'px' or 'dct' (ART default; its steps are spread over the whole image and can vanish when rounded to uint8 on large images unless simba_epsilon is large).
+
+## simba_epsilon
+
+- **Default Value**: 25.5
+- **Description**: SimBA step size on the 0-255 scale (ART default 0.1 is on 0-1).
+
+## simba_freq_dim
+
+- **Default Value**: 4
+- **Description**: SimBA low frequency dimension for the 'dct' basis (ART default).
+
+## simba_max_iter
+
+- **Default Value**: 100000
+- **Description**: Iteration limit of SimBA. High so that max_evaluations is the real limit.
+
+## simba_order
+
+- **Default Value**: random
+- **Description**: SimBA order of the basis directions. Options: 'random' or 'diag' (ART default 'random').
+
+## simba_stride
+
+- **Default Value**: 1
+- **Description**: SimBA stride for the 'dct' basis with 'diag' order (ART default).
+
 ## snapshot_interval
 
 - **Default Value**: 5
 - **Description**: Snapshot interval for the search.
+
+## square_eps
+
+- **Default Value**: 8.0
+- **Description**: Maximum perturbation of the Square attack on the 0-255 scale (ART default 0.3 is on 0-1).
+
+## square_max_iter
+
+- **Default Value**: 0
+- **Description**: Iteration limit of the Square attack; its square size schedule is relative to it. 0 (auto): max_evaluations for the 'individual_evaluations' criterion, 10000 for 'time'.
+
+## square_nb_restarts
+
+- **Default Value**: 1
+- **Description**: Number of restarts of the Square attack (ART default).
+
+## square_norm
+
+- **Default Value**: inf
+- **Description**: Norm of the Square attack. Options: 'inf' or '2'.
+
+## square_p_init
+
+- **Default Value**: 0.8
+- **Description**: Initial fraction of the image changed by a Square attack update (ART default).
 
 ## statistics_column_id
 

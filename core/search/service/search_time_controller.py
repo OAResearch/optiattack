@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import deque
-from typing import Tuple, TypeVar, Callable
+from typing import Tuple, TypeVar, Callable, Optional
 
 from core.config_parser import ConfigParser
 from core.search.fitness_value import FitnessValue
@@ -30,6 +30,7 @@ class SearchTimeController:
         self.executed_individual_time: deque[Tuple[int, int]] = deque(maxlen=100)
         self.current_fitness_value = FitnessValue(1.0, list())
         self.pruned_fitness_value = FitnessValue(1.0, list())
+        self.first_success_eval: Optional[int] = None
 
         self.listeners: list[SearchListener] = []
 
@@ -60,6 +61,12 @@ class SearchTimeController:
     def set_current_fitness(self, value):
         """Set the best individual found so far."""
         self.current_fitness_value = value
+        if self.first_success_eval is None and self.is_solution(value):
+            self.first_success_eval = self.evaluated_individuals
+
+    def get_first_success_eval(self) -> Optional[int]:
+        """Get the evaluation number at which the first solution was found, or None."""
+        return self.first_success_eval
 
     def get_pruned_fitness(self):
         """Get the best individual found so far."""

@@ -197,3 +197,56 @@ def test_extract_solution_reproduces_evaluated_image(archive):
     assert np.array_equal(archive.get_mutated_image(solution.actions), archive.get_mutated_image())
 
 
+def test_replace_with_keeps_only_the_new_individual_and_sets_fitness(archive):
+    old = Individual()
+    old.add_action(Action((0, 0), 1, 2, 3))
+    archive.populations = [EvaluatedIndividual(old, FitnessValue(0.5, [])), MagicMock(spec=EvaluatedIndividual)]
+
+    new = Individual()
+    new.add_action(Action((1, 1), 4, 5, 6))
+    new_ei = EvaluatedIndividual(new, FitnessValue(-0.2, []))
+    archive.replace_with(new_ei)
+
+    assert archive.populations == [new_ei]
+    assert archive.stc.get_current_fitness() is new_ei.fitness
+    assert archive.stc.get_current_fitness_value() == -0.2
+
+
+
+def test_set_pending_sets_fitness_now_and_builds_individual_only_when_read(archive):
+    calls = []
+
+    def builder(location):
+        def build():
+            calls.append(location)
+            individual = Individual()
+            individual.add_action(Action(location, 1, 2, 3))
+            return EvaluatedIndividual(individual, FitnessValue(-0.1, []))
+        return build
+
+    archive.set_pending(builder((0, 0)), FitnessValue(0.3, []))
+    archive.set_pending(builder((1, 1)), FitnessValue(-0.1, []))
+    assert calls == []
+    assert archive.stc.get_current_fitness_value() == -0.1
+
+    assert [a.get_location() for a in archive.extract_solution().actions] == [(1, 1)]
+    assert [a.get_location() for a in archive.get_actions()] == [(1, 1)]
+    assert len(archive.populations) == 1
+    assert calls == [(1, 1)]
+
+
+def test_replace_with_discards_pending_individual(archive):
+    archive.set_pending(lambda: pytest.fail("pending individual must not be built"), FitnessValue(0.3, []))
+    individual = Individual()
+    individual.add_action(Action((2, 2), 4, 5, 6))
+    archive.replace_with(EvaluatedIndividual(individual, FitnessValue(0.2, [])))
+    assert [a.get_location() for a in archive.get_actions()] == [(2, 2)]
+
+
+def test_pending_individual_is_visible_in_population_reads(archive):
+    individual = Individual()
+    individual.add_action(Action((3, 3), 7, 8, 9))
+    ei = EvaluatedIndividual(individual, FitnessValue(0.4, []))
+    archive.set_pending(lambda: ei, ei.fitness)
+    assert not archive.is_empty()
+    assert archive.populations.copy() == [ei]

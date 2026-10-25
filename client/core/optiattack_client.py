@@ -1,5 +1,5 @@
 import base64
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 import uvicorn
@@ -22,7 +22,8 @@ class MatrixModel(BaseModel):
 
 
 def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
-                 port: int = constants.DEFAULT_CONTROLLER_PORT):
+                 port: int = constants.DEFAULT_CONTROLLER_PORT,
+                 labels: Optional[List[str]] = None):
     """
     Decorator generator that:
     - Tracks method calls.
@@ -31,6 +32,7 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
     Args:
         host (str): Host where the FastAPI app will run.
         port (int): Port where the FastAPI app will run.
+        labels (Optional[List[str]]): Class names in model output order (reported to OptiAttack).
     """
 
     def decorator(func):
@@ -44,6 +46,8 @@ def collect_info(host: str = constants.DEFAULT_CONTROLLER_HOST,
             "stop_nut": constants.STOP_NUT_PATH,
             "info_nut": constants.INFO_NUT_PATH,
             "new_action": constants.NEW_ACTION,
+            "labels": labels,
+            "capabilities": ["scores"],
         }
         app = FastAPI()
 

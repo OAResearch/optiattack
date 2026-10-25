@@ -69,3 +69,32 @@ def test_evaluate_with_non_matching_labels(fitness_function):
     # Assert that the fitness value is 0 (labels do not match)
     assert isinstance(result, FitnessValue)
     assert result.value == -0.8
+
+
+def test_fitness_from_result_original_label_on_top(fitness_function):
+    result = MagicMock(
+        max_score=MagicMock(value=0.7, label="original_label"),
+        second_max_score=MagicMock(value=0.2),
+        predictions=[0.7, 0.2],
+    )
+    assert fitness_function.fitness_from_result(result) == pytest.approx(0.5)  # max - second
+
+
+def test_fitness_from_result_label_changed(fitness_function):
+    result = MagicMock(
+        max_score=MagicMock(value=0.7, label="different_label"),
+        second_max_score=MagicMock(value=0.2),
+        predictions=[0.7, 0.2],
+    )
+    assert fitness_function.fitness_from_result(result) == pytest.approx(-0.5)  # second - max
+
+
+def test_evaluate_matches_fitness_from_result(fitness_function):
+    result = MagicMock(
+        max_score=MagicMock(value=0.6, label="different_label"),
+        second_max_score=MagicMock(value=0.3),
+        predictions=[0.6, 0.3],
+    )
+    fitness_function.remote_controller.new_action = MagicMock(return_value=result)
+    value = fitness_function.evaluate(MockIndividual())
+    assert value.value == fitness_function.fitness_from_result(result)
