@@ -51,4 +51,4 @@ class ShuffleMutator(ShuffleBlockMixin, Mutator):
 
     def add_shuffle_mutation(self) -> Individual:
         """Create initial shuffled block at random non-colliding position."""
-        return self.sample_shuffled_block()
+        return self.sample_shuffled_block(self.archive)

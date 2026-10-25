@@ -1,4 +1,5 @@
 """Abstract class for pruners."""
+from typing import Optional
 
 from core.search.service.archive import Archive
 from core.search.service.fitness_function.fitness_function import FitnessFunction
@@ -9,7 +10,8 @@ class Pruner:
 
     """Abstract class for pruners."""
 
-    def __init__(self, archive: Archive, ff: FitnessFunction, ssu: SearchStatusUpdater, config: dict = None):
+    def __init__(self, archive: Archive, ff: FitnessFunction, ssu: SearchStatusUpdater,
+                 config: Optional[dict] = None):
         """Initialize the pruner."""
         self.archive = archive
         self.ff = ff

@@ -10,4 +10,4 @@ class ShuffleSampler(ShuffleBlockMixin, Sampler):
 
     def sample(self):
         """Sample an individual with a shuffled block."""
-        return self.sample_shuffled_block()
+        return self.sample_shuffled_block(self.archive)

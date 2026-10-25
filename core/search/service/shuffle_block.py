@@ -1,13 +1,20 @@
 """Shared block logic of the shuffle sampler and the shuffle mutator."""
+from typing import Optional
 
 import numpy as np
 from core.search.action import Action
 from core.search.individual import Individual
+from core.search.service.archive import Archive
+from core.search.service.randomness import Randomness
 
 
 class ShuffleBlockMixin:
 
-    """Block helpers for classes that provide `config`, `randomness` and `archive`."""
+    """Block helpers for classes that provide `config` and `randomness`."""
+
+    # Provided by the sampler or mutator this mixin is combined with
+    config: dict
+    randomness: Randomness
 
     def _get_block_size(self) -> int:
         """Get block size from config, default is 3."""
@@ -100,14 +107,14 @@ class ShuffleBlockMixin:
                     )
                 )
 
-    def sample_shuffled_block(self) -> Individual:
+    def sample_shuffled_block(self, archive: Optional[Archive]) -> Individual:
         """Create a shuffled block at a random position that does not collide with archived block centers."""
         individual = Individual()
 
-        if self.archive is None:
+        if archive is None:
             raise ValueError("Archive is required for shuffle mutation")
 
-        seed = self.archive.image.array.copy()
+        seed = archive.image.array.copy()
         max_h = self.config["image_height"]
         max_w = self.config["image_width"]
         half = self._get_half_size()
@@ -119,8 +126,8 @@ class ShuffleBlockMixin:
         row, col = 0, 0
 
         archive_actions = []
-        if self.archive and not self.archive.is_empty():
-            archive_actions = self.archive.get_actions()
+        if not archive.is_empty():
+            archive_actions = archive.get_actions()
 
         while collision and attempts < 100:
             collision = False
