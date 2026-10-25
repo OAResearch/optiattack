@@ -94,6 +94,10 @@ class SearchTimeController:
         """Get the number of evaluated individuals."""
         return self.evaluated_individuals
 
+    def get_evaluated_individuals_in_pruning(self):
+        """Get the number of individuals evaluated during pruning, which are outside the search budget."""
+        return self.evaluated_individuals_in_pruning
+
     def new_action_improvement(self):
         """Update the timestamp of the last action improvement."""
         self.last_action_improvement_timestamp = int(time.time() * 1000)
@@ -120,10 +124,13 @@ class SearchTimeController:
         else:
             raise ValueError("Not supported stopping criterion")
 
+    def is_solution(self, fitness_value):
+        """Check if a fitness value reaches the fitness threshold, i.e. the attack is successful."""
+        return fitness_value.value <= self.config.get('fitness_threshold', 0.0)
+
     def should_continue_search(self):
         """Check if the search should continue."""
-        fitness_threshold = self.config.get('fitness_threshold', 0.0)
-        return self.percentage_used_budget() < 1.0 and self.get_current_fitness_value() > fitness_threshold
+        return self.percentage_used_budget() < 1.0 and not self.is_solution(self.get_current_fitness())
 
     def add_listener(self, listener):
         """Add a listener to the search time controller."""

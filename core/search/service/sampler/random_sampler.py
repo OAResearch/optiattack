@@ -12,8 +12,9 @@ class RandomSampler(Sampler):
     def sample(self):
         """Sample an individual randomly."""
         individual = Individual()
+        # next_int excludes the upper bound; max_action_size is inclusive
         number_of_actions = self.randomness.next_int(self.config.get("min_action_size"),
-                                                     self.config.get("max_action_size"))
+                                                     self.config.get("max_action_size") + 1)
         for _ in range(number_of_actions):
             action = self.sample_random_action()
             while not individual.add_action(action, replace=False):
@@ -22,7 +23,7 @@ class RandomSampler(Sampler):
 
     def sample_random_action(self):
         """Return a random action."""
-        location = (self.randomness.next_int(0, self.config.get("image_width")),
-                    self.randomness.next_int(0, self.config.get("image_height")))
+        location = (self.randomness.next_int(0, self.config.get("image_height")),
+                    self.randomness.next_int(0, self.config.get("image_width")))
         color = self.randomness.next_int(0, 255), self.randomness.next_int(0, 255), self.randomness.next_int(0, 255)
         return Action(location, color[0], color[1], color[2])

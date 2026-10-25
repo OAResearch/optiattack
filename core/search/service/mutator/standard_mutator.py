@@ -32,9 +32,9 @@ class StandardMutator(Mutator):
         action.set_color(mutated_pixels)
 
         sigma = self.apc.get_location_apc()
-        mutated_width = self.randomness.random_gaussian(action.get_location()[0], sigma)
-        mutated_height = self.randomness.random_gaussian(action.get_location()[1], sigma)
-        mutated_width, mutated_height = self.check_location_limits(mutated_width, mutated_height)
-        action.set_location(mutated_width, mutated_height)
+        mutated_row = self.randomness.random_gaussian(action.get_location()[0], sigma)
+        mutated_col = self.randomness.random_gaussian(action.get_location()[1], sigma)
+        mutated_row, mutated_col = self.check_location_limits(mutated_row, mutated_col)
+        action.set_location(mutated_row, mutated_col)
 
         return action

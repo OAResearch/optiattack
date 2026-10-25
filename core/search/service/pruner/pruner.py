@@ -9,11 +9,12 @@ class Pruner:
 
     """Abstract class for pruners."""
 
-    def __init__(self, archive: Archive, ff: FitnessFunction, ssu: SearchStatusUpdater):
+    def __init__(self, archive: Archive, ff: FitnessFunction, ssu: SearchStatusUpdater, config: dict = None):
         """Initialize the pruner."""
         self.archive = archive
         self.ff = ff
         self.ssu = ssu
+        self.fitness_threshold = (config or {}).get("fitness_threshold", 0.0)
 
     def pruner_type(self):
         """Return the type of the pruner."""

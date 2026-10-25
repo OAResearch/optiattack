@@ -40,18 +40,18 @@ class Mutator:
         # convert to integer
         return np.round(value).astype(int)
 
-    def check_location_limits(self, width, height):
-        """Checks the limit values of the location."""
-        max_height = self.config.get("image_height")
-        max_width = self.config.get("image_width")
+    def check_location_limits(self, row, col):
+        """Checks the limit values of the location. Locations are (row, col) indices of the image array."""
+        max_row = self.config.get("image_height")
+        max_col = self.config.get("image_width")
 
-        if height < 0:
-            height = 0
-        if height >= max_height:
-            height = max_height - 1
-        if width < 0:
-            width = 0
-        if width >= max_width:
-            width = max_width - 1
+        if row < 0:
+            row = 0
+        if row >= max_row:
+            row = max_row - 1
+        if col < 0:
+            col = 0
+        if col >= max_col:
+            col = max_col - 1
 
-        return int(width), int(height)
+        return int(row), int(col)

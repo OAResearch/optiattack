@@ -58,6 +58,7 @@ def test_evaluate_with_non_matching_labels(fitness_function):
     fitness_function.remote_controller.new_action = MagicMock()
     fitness_function.remote_controller.new_action.return_value = MagicMock(
         max_score=MagicMock(value=0.5, label="target_label"),
+        second_max_score=MagicMock(value=0.3, label="other_label"),
         target_score=MagicMock(value=0.5, label="target_label")
     )
 
@@ -67,6 +68,6 @@ def test_evaluate_with_non_matching_labels(fitness_function):
     # Call the evaluate method
     result = fitness_function.evaluate(individual)
 
-    # Assert that the fitness value is 0 (labels do not match)
+    # The target is on top: fitness is the negative margin to the runner-up
     assert isinstance(result, FitnessValue)
-    assert result.value == 0
+    assert result.value == pytest.approx(-0.2)  # 0.3 (second) - 0.5 (target)

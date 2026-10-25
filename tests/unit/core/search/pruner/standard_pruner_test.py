@@ -125,3 +125,38 @@ def test_minimize_actions_in_archive_counter_adjustment(standard_pruner):
     # Then increments to 1 to process third action
     standard_pruner.ssu.remove_action.assert_called_once_with(2, 3, original_actions[1])
     assert standard_pruner.ssu.kept_action.call_count == 2
+
+
+def test_minimize_actions_removes_action_when_fitness_stays_negative(standard_pruner):
+    # A successful attack has a negative fitness (e.g. -0.3), not exactly 0
+    original_actions = [MagicMock(), MagicMock(), MagicMock()]
+    solution = Solution(original_actions.copy(), MagicMock(value=-0.3))
+    standard_pruner.archive.extract_solution.return_value = solution
+
+    # The attack stays successful as long as the first action is present
+    def mock_calculate_fitness(actions):
+        return MagicMock(value=-0.3 if original_actions[0] in actions else 0.4)
+
+    standard_pruner.ff.calculate_fitness_with_actions.side_effect = mock_calculate_fitness
+
+    result = standard_pruner.minimize_actions_in_archive()
+
+    assert result.actions == [original_actions[0]]
+    assert standard_pruner.ssu.remove_action.call_count == 2
+
+
+def test_minimize_actions_respects_fitness_threshold():
+    # With a stricter threshold, a removal that leaves fitness above it is rejected
+    pruner = StandardPruner(MagicMock(), MagicMock(), MagicMock(), config={"fitness_threshold": -0.1})
+    original_actions = [MagicMock(), MagicMock()]
+    pruner.archive.extract_solution.return_value = Solution(original_actions.copy(), MagicMock(value=-0.2))
+
+    def mock_calculate_fitness(actions):
+        return MagicMock(value=-0.2 if len(actions) == 2 else -0.05)
+
+    pruner.ff.calculate_fitness_with_actions.side_effect = mock_calculate_fitness
+
+    result = pruner.minimize_actions_in_archive()
+
+    assert result.actions == original_actions
+    pruner.ssu.remove_action.assert_not_called()

@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from core.config_parser import ConfigParser
+from core.search.fitness_value import FitnessValue
 from core.search.phase_controller import PhaseController
 from core.search.service.search_time_controller import SearchTimeController
 from main import OptiAttack
@@ -81,6 +82,24 @@ def test_new_individual_evaluation(search_time_controller):
     search_time_controller.new_individual_evaluation()
     assert search_time_controller.evaluated_individuals == 1
     mock_listener.new_action_evaluated.assert_called_once()
+
+def test_pruning_evaluations_are_counted_outside_the_search_budget(search_time_controller):
+    """Evaluations during pruning are counted separately and do not consume the search budget."""
+    search_time_controller.pc.start()
+    search_time_controller.new_individual_evaluation()
+    search_time_controller.pc.prune()
+    search_time_controller.new_individual_evaluation()
+    search_time_controller.new_individual_evaluation()
+
+    assert search_time_controller.get_evaluated_individuals() == 1
+    assert search_time_controller.get_evaluated_individuals_in_pruning() == 2
+
+def test_is_solution_uses_the_fitness_threshold():
+    """A fitness value is a solution when it is at or below the configured threshold."""
+    stc = SearchTimeController({"fitness_threshold": -0.1}, pc=PhaseController())
+
+    assert stc.is_solution(FitnessValue(-0.1, []))
+    assert not stc.is_solution(FitnessValue(-0.05, []))
 
 def test_new_action_improvement(search_time_controller):
     """Test that the last action improvement timestamp is updated."""

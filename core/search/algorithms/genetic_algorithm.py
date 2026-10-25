@@ -38,6 +38,8 @@ class GeneticAlgorithm(SearchAlgorithm):
         self.population: list[EvaluatedIndividual] = []
 
         for _ in range(self.population_size):
+            if not self.stc.should_continue_search():
+                return
             individual = self.sampler.sample()
             ei = self.ff.calculate_fitness(individual)
             self.archive.add_archive_if_needed(ei)
@@ -47,28 +49,37 @@ class GeneticAlgorithm(SearchAlgorithm):
         """Return the type of the search algorithm."""
         return ConfigParser.Algorithms.GENETIC
 
-    def selection(self, parent1: EvaluatedIndividual):
-        """Roullette wheel selection to select a parent for crossover."""
+    def selection(self, parent_index: int):
+        """Roulette wheel selection of a crossover partner other than the parent at parent_index."""
+        if len(self.population) == 1:
+            return self.population[0].copy()
+
         all_fitnesses = np.array([ind.fitness.value for ind in self.population])
-        scaled_fitness = 1.0 - all_fitnesses
-        selection_probs = np.exp(scaled_fitness) / np.sum(np.exp(scaled_fitness))
+        weights = np.exp(1.0 - all_fitnesses)
+        weights[parent_index] = 0.0
+        selection_probs = weights / np.sum(weights)
         selected = self.randomness.get_random_element(self.population, selection_probs=selection_probs)
-        while parent1 == selected:
-            selected = self.randomness.get_random_element(self.population, selection_probs=selection_probs)
         return selected.copy()
 
     def search_once(self):
         """Search for a solution."""
 
         for i in range(self.population_size):
+            # Check before every evaluation so that the budget is never exceeded
+            if not self.stc.should_continue_search():
+                return
             parent1 = self.population[i].copy()
-            parent2 = self.selection(parent1)
+            parent2 = self.selection(i)
 
             self.crossover.apply_crossover(parent1.individual, parent2.individual)
             child1 = self.mutator.mutate(parent1.individual)
             child2 = self.mutator.mutate(parent2.individual)
 
             fitness1 = self.ff.calculate_fitness(child1)
+            if self.stc.is_solution(fitness1.fitness) or not self.stc.should_continue_search():
+                self.archive.add_archive_if_needed(fitness1)
+                self.population[i] = fitness1
+                return
             fitness2 = self.ff.calculate_fitness(child2)
 
             final_fitness = fitness1 if fitness1.fitness.value < fitness2.fitness.value else fitness2

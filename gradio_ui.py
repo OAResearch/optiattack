@@ -144,7 +144,7 @@ class WebApp:
         app.startup()
         folders = app.run()
         image_folder = folders["images_folder"]
-        final_image_path = f"{image_folder}/final_image.jpg"
+        final_image_path = f"{image_folder}/final_image.png"
         line_image_path = f"{image_folder}/line.png"
         matrix_overlay_path = f"{image_folder}/matrix_overlay.png"
 
