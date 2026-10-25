@@ -1,0 +1,2 @@
+adversarial-robustness-toolbox==1.20.1
+packaging

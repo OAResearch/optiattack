@@ -57,7 +57,17 @@ def predict(image_array):
     return {"predictions": ...}
 ```
 
-2. **Start your script**. The FastAPI server will automatically run and expose endpoints for OptiAttack to communicate with.
+2. **(Optional) Report the class list** with `labels=`, in the same order as the model's output scores:
+
+```python
+@collect_info(host="localhost", port=38000, labels=["zebra", "horse"])
+def predict(image_array):
+    ...
+```
+
+   `labels` is required for OptiAttack baseline attacks (`--algorithm baseline`), which need the full class list to build probability vectors. Without it the client behaves as before and reports `labels: null`. `infoNUT` also reports `capabilities` (currently `["scores"]`).
+
+3. **Start your script**. The FastAPI server will automatically run and expose endpoints for OptiAttack to communicate with.
 
 ---
 

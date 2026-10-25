@@ -20,6 +20,7 @@ OptiAttack (OA) is an optimization-based framework for adversarial example gener
 - [Quick Start](#quick-start)
 - [Web UI](#web-ui)
 - [Client Usage](#client-usage)
+- [Baselines](#baselines)
 - [Configuration](#configuration)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
@@ -115,6 +116,108 @@ def predict(image_array):
 
 - The client exposes endpoints for running attacks, getting info, and managing state.
 - See `client/optiattack_client.py` for details.
+
+---
+
+## Baselines
+
+OptiAttack can run attacks of the [Adversarial Robustness Toolbox (ART)](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
+against the same NUT, through the same HTTP client, so that they can be compared with OptiAttack's own algorithms.
+
+### Installation
+
+ART is an optional dependency:
+
+```bash
+pip install -r requirements-baselines.txt
+```
+
+Without it, `--algorithm baseline` stops with an error asking you to install `requirements-baselines.txt`.
+The other algorithms are not affected. `--pixel_es 0` (CMA-ES) additionally needs the `cma` package.
+ART is not installed in the PyPy tox environments, so the baseline tests are skipped on PyPy.
+The installed ART version is logged when a baseline starts; report it in papers.
+
+### The NUT must report its labels
+
+Baselines need the full class list, so the NUT has to pass `labels=` (in the model's output order) to `collect_info`:
+
+```python
+@collect_info(host="localhost", port=38000, labels=["zebra", "horse", "dog"])
+def predict(image_array, additional_data=None):
+    return {"predictions": [{"label": "zebra", "score": 0.7}, {"label": "horse", "score": 0.2},
+                            {"label": "dog", "score": 0.1}]}
+```
+
+Class names in `labels` must be unique (use e.g. WordNet synset IDs if names repeat, as in ImageNet's two
+"crane" classes), and a result must not list the same label twice. Scores must be in [0, 1] and sum to at most 1;
+labels outside `labels` are an error. Classes the NUT does not
+return (e.g. only the top-5) share the remaining probability mass equally.
+
+### Example commands
+
+```bash
+python main.py --algorithm baseline --baseline_attack square --max_evaluations 1000   # Square, L-inf
+python main.py --algorithm baseline --baseline_attack hsj    --max_evaluations 1000   # HopSkipJump, label-only
+python main.py --algorithm baseline --baseline_attack simba  --max_evaluations 1000   # SimBA
+python main.py --algorithm baseline --baseline_attack pixel  --max_evaluations 1000 --pixel_th 10   # PixelAttack, L0
+```
+
+Per-attack parameters are `square_*`, `hsj_*`, `simba_*` and `pixel_*` (see [docs/parameters.md](docs/parameters.md)).
+
+- **Stop policy.** Score-based attacks (Square, SimBA, PixelAttack) stop at the first success, like OptiAttack's
+  algorithms. HopSkipJump uses the whole budget and keeps the successful image with the smallest perturbation.
+  `--baseline_stop_at_success auto|true|false` overrides this per run for Square and HopSkipJump. SimBA and
+  PixelAttack stop by themselves on a label flip inside ART, so `false` has no effect for them (a warning is logged).
+- `--hsj_init_image <path>` gives HopSkipJump an initial adversarial image (e.g. an image of the target class);
+  otherwise it starts from a random image drawn with OptiAttack's seeded randomness.
+- **Comparison metrics.** Every algorithm writes `first_success_eval` (number of the first successful query, empty if
+  none) to `statistics.csv/json`; compare it together with the perturbation (L0/L2/Linf) at an equal budget.
+  `config_*` columns (e.g. `config_algorithm`, `config_baseline_attack`) record the settings.
+
+### Fairness
+
+- Same NUT, over HTTP, through `RemoteController.new_action`; the baseline sees only what the NUT returns, the same
+  top-k information as OptiAttack's algorithms.
+- Every NUT query is counted and the budget (`max_evaluations`, or the time budget) is never exceeded.
+- Success uses OptiAttack's fitness formula (`stc.is_solution`), on the image rounded to uint8 that is actually sent.
+- Output goes to the usual files (`statistics.csv/json`, final image, overlay, line plot).
+
+### Known limitations
+
+- **Query cache.** Identical images are answered from a cache and are neither re-sent nor counted. This assumes a
+  deterministic NUT (ART's Square otherwise spends about 3 queries per iteration on duplicates). The original image
+  is answered from OptiAttack's initial NUT call, which is not counted for any algorithm.
+- `--square_max_iter 0` means auto: `max_evaluations` for evaluation budgets, 10000 for time budgets, because Square's
+  schedule is relative to `max_iter`. In auto mode Square can finish a few queries under the budget when candidate
+  images repeat (cache hits do not use budget).
+- On very small images Square uses a capped square size (ART workaround). L2 Square rejects portrait images, where
+  ART's initialisation breaks; use `--square_norm inf`.
+- SimBA uses the pixel basis (`px`) by default. The `dct` basis (ART's default) spreads each step over the whole
+  image, so on large images the steps vanish when the image is rounded to uint8 for the NUT unless `simba_epsilon`
+  is large. `dct` and `diag` also need square images.
+- An attack that only produces images that were already scored (1000 predictions in a row without a new query) is
+  stopped with a warning, since it cannot spend the rest of the budget.
+- Only queries that improve on the original image become the reported best; if none does, the original prediction
+  is reported and the attack counts as failed.
+- HopSkipJump may stop before the budget when its own `hsj_max_iter` / `hsj_max_eval` are reached.
+- HopSkipJump gets its start image as `x_adv_init`, so ART skips its own initial L2 binary search; the first
+  iteration still binary-searches in `hsj_norm`. This is a small difference from stock ART.
+- SimBA and PixelAttack stop on a label flip internally, so a non-zero `fitness_threshold` triggers a warning. The
+  same warning is given for HopSkipJump, which only sees labels: a negative threshold is practically unreachable.
+- ART's SimBA queries both x-εq and x+εq in every iteration (2 queries per iteration), while the SimBA paper queries
+  the second only if the first fails. SimBA query counts are therefore higher than in the paper.
+
+### Fair comparison protocol (for papers)
+
+- Report different threat models in separate tables (L0: OptiAttack, PixelAttack; L-inf/L2: Square, SimBA as reference).
+- Report HopSkipJump (label-only) in its own information-level category.
+- Give both metrics together: success rate and perturbation at equal budget, and queries to first success
+  (`first_success_eval`); never give a median over successes without the success rate.
+- Show success versus budget curves instead of a single budget point.
+- Use default hyperparameters for everyone, or the same tuning budget for everyone, and list the values used.
+- State the ART version (it is logged at start); use several seeds and identical images, with Wilcoxon and
+  Vargha-Delaney A12 tests.
+- State that ART's implementations were used (e.g. ART's SimBA variant, which spends 2 queries per iteration).
 
 ---
 

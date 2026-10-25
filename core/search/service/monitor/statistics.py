@@ -166,6 +166,7 @@ class Statistics(SearchListener):
         data = {}
         data['execution_time'] = self.stc.get_elapsed_seconds()
         data['eval_count'] = self.stc.get_evaluated_individuals()
+        data['first_success_eval'] = self.stc.get_first_success_eval()
         data['interval_count'] = self.snapshots_interval
         data['current_fitness'] = self.stc.current_fitness_value.value
 

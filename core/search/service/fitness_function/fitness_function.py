@@ -9,6 +9,7 @@ from core.search.individual import Individual
 from core.search.service.archive import Archive
 from core.search.service.search_time_controller import SearchTimeController
 from core.remote.remote_controller import RemoteController
+from core.utils.nut_request import NutRequest
 
 T = TypeVar('T', bound=Individual)
 
@@ -25,6 +26,10 @@ class FitnessFunction:
 
     def evaluate(self, individual: Optional[T] = None, actions: Optional[list[Action]] = None) -> FitnessValue:
         """Evaluate the fitness of the provided individual and return a fitness value."""
+        raise NotImplementedError("This method should be implemented by subclasses")
+
+    def fitness_from_result(self, result: NutRequest) -> float:
+        """Compute the fitness value from a NUT result."""
         raise NotImplementedError("This method should be implemented by subclasses")
 
     def calculate_fitness(self, individual: T) -> EvaluatedIndividual:

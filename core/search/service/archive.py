@@ -1,9 +1,10 @@
 """Module contains the Archive class, which is a base class for the archives used in the search service."""
-from typing import Optional
+from typing import Callable, List, Optional
 
 import numpy as np
 
 from core.search.evaluated_individual import EvaluatedIndividual
+from core.search.fitness_value import FitnessValue
 from core.search.service.randomness import Randomness
 from core.search.service.search_time_controller import SearchTimeController
 from core.search.solution import Solution
@@ -19,13 +20,28 @@ class Archive:
         """Initialize the archive."""
 
         self.original_predication_results = None
-        self.populations: list[EvaluatedIndividual] = []
+        self._populations: List[EvaluatedIndividual] = []
+        self._pending: Optional[Callable[[], EvaluatedIndividual]] = None
         self.last_chosen: list[EvaluatedIndividual] = []
         self.stc = stc
         self.randomness = randomness
         self.config = config
         self.image: ProcessedImage = ProcessedImage(None, None, None)
         self.minimized_solution: Optional[Solution] = None
+
+    @property
+    def populations(self) -> List[EvaluatedIndividual]:
+        """Individuals of the archive; a pending individual (see `set_pending`) is built on this first read."""
+        if self._pending is not None:
+            builder, self._pending = self._pending, None
+            self._populations = [builder()]
+        return self._populations
+
+    @populations.setter
+    def populations(self, value: List[EvaluatedIndividual]) -> None:
+        """Replace the individuals of the archive, discarding a pending individual."""
+        self._pending = None
+        self._populations = value
 
     def clean_population(self):
         """Clean the populations list."""
@@ -43,6 +59,24 @@ class Archive:
                 parent.sampling_counter = 0
             return True
         return False
+
+    def replace_with(self, ei: EvaluatedIndividual) -> None:
+        """Replace the whole population with a single individual and make its fitness the current one."""
+        self.populations = [ei]
+        self.stc.set_current_fitness(ei.fitness)
+        self.stc.new_action_improvement()
+
+    def set_pending(self, builder: Callable[[], EvaluatedIndividual], fitness: FitnessValue) -> None:
+        """
+        Lazy `replace_with`: make `fitness` the current one now, but build the individual only when the archive is read.
+
+        `builder` must return an individual with this fitness. It replaces the whole population on the next read of
+        `populations` (and so of `get_actions`, `get_mutated_image` or `extract_solution`); a later `set_pending` or
+        `replace_with` discards it unbuilt. Used by the baseline, whose new bests can be costly to convert to actions.
+        """
+        self.stc.set_current_fitness(fitness)
+        self.stc.new_action_improvement()
+        self._pending = builder
 
     def sample_individual(self):
         """Sample an individual from the archive."""

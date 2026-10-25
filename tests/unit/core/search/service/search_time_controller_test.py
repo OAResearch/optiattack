@@ -101,6 +101,26 @@ def test_is_solution_uses_the_fitness_threshold():
     assert stc.is_solution(FitnessValue(-0.1, []))
     assert not stc.is_solution(FitnessValue(-0.05, []))
 
+def test_first_success_eval_records_the_evaluation_of_the_first_solution(search_time_controller):
+    """The evaluation count is recorded the first time a solution fitness is set and never overwritten."""
+    for _ in range(3):
+        search_time_controller.new_individual_evaluation()
+    search_time_controller.set_current_fitness(FitnessValue(0.4, []))
+    for _ in range(2):
+        search_time_controller.new_individual_evaluation()
+    search_time_controller.set_current_fitness(FitnessValue(-0.1, []))
+    search_time_controller.new_individual_evaluation()
+    search_time_controller.set_current_fitness(FitnessValue(-0.3, []))
+
+    assert search_time_controller.get_first_success_eval() == 5
+
+def test_first_success_eval_is_none_without_solution(search_time_controller):
+    """No first success evaluation is reported when no solution was found."""
+    search_time_controller.new_individual_evaluation()
+    search_time_controller.set_current_fitness(FitnessValue(0.4, []))
+
+    assert search_time_controller.get_first_success_eval() is None
+
 def test_new_action_improvement(search_time_controller):
     """Test that the last action improvement timestamp is updated."""
     search_time_controller.start_search()
