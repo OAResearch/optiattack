@@ -24,7 +24,7 @@ def make_estimator():
 
 
 def test_all_attacks_are_registered():
-    assert set(ATTACKS) == {"square", "hsj", "simba", "pixel"}
+    assert set(ATTACKS) == {"square", "hsj", "simba", "pixel", "sparse_rs"}
     assert all(isinstance(spec, AttackSpec) for spec in ATTACKS.values())
     assert all(spec.name == name for name, spec in ATTACKS.items())
 
@@ -33,6 +33,7 @@ def test_requirements():
     assert ATTACKS["square"].requirement == NutRequirement.SCORES
     assert ATTACKS["simba"].requirement == NutRequirement.SCORES
     assert ATTACKS["pixel"].requirement == NutRequirement.SCORES
+    assert ATTACKS["sparse_rs"].requirement == NutRequirement.SCORES
     assert ATTACKS["hsj"].requirement == NutRequirement.LABEL
 
 

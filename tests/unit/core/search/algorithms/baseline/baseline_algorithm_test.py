@@ -23,7 +23,7 @@ from core.utils.nut_request import NutRequest
 LABELS = ["dark", "bright", "mid"]
 HEIGHT, WIDTH = 16, 24
 THRESHOLD = 128.0
-ATTACK_NAMES = ["square", "hsj", "simba", "pixel"]
+ATTACK_NAMES = ["square", "hsj", "simba", "pixel", "sparse_rs"]
 
 
 def brightness_scores(image):
@@ -188,6 +188,33 @@ def test_targeted_mode_passes_target_to_attack(art, monkeypatch):
     algorithm.search()
     assert captured["targeted"] is False
     np.testing.assert_array_equal(captured["y"], [[1, 0, 0]])
+
+
+def test_baseline_estimator_cannot_query_gradients(art, monkeypatch):
+    from core.search.algorithms.baseline import attacks
+
+    captured = {}
+
+    class NoOpAttack:
+        def generate(self, x, y=None, **kwargs):
+            return x
+
+    def fake_build(estimator, config, targeted):
+        captured["estimator"] = estimator
+        return NoOpAttack()
+
+    spec = attacks.ATTACKS["hsj"]
+    monkeypatch.setitem(attacks.ATTACKS, "hsj", attacks.AttackSpec(spec.name, spec.requirement,
+                                                                    spec.stop_at_success_default,
+                                                                    spec.norm_fn, fake_build))
+    algorithm, _ = make_algorithm("hsj")
+    algorithm.search()
+    estimator = captured["estimator"]
+    x = make_image()[np.newaxis].astype(np.float32)
+    with pytest.raises(RuntimeError, match="white-box"):
+        estimator.loss_gradient(x, np.array([0]))
+    with pytest.raises(RuntimeError, match="white-box"):
+        estimator.class_gradient(x, label=0)
 
 
 def test_targeted_square_reaches_the_target(art):
@@ -532,3 +559,26 @@ def test_attack_repeating_known_images_is_stopped_with_warning(art, caplog, monk
 
 def test_simba_default_basis_is_px():
     assert ConfigParser().default_params()["simba_attack"] == "px"
+
+
+@pytest.mark.parametrize("attack", ["square", "simba", "hsj"])
+def test_dense_attacks_reject_max_pixels(attack):
+    algorithm, nut = make_algorithm(attack, max_pixels=5)
+    with pytest.raises(ValueError, match="max_pixels"):
+        algorithm.search()
+    assert nut.images == []
+
+
+def test_pixel_attack_rejects_th_above_max_pixels():
+    algorithm, nut = make_algorithm("pixel", pixel_th=10, max_pixels=5)
+    with pytest.raises(ValueError, match="pixel_th"):
+        algorithm.search()
+    assert nut.images == []
+
+
+@pytest.mark.parametrize("pixel_th", [3, 5])
+def test_pixel_attack_within_max_pixels_runs(art, pixel_th):
+    algorithm, nut = make_algorithm("pixel", max_evaluations=5, scores_fn=constant_scores,
+                                    pixel_th=pixel_th, max_pixels=5)
+    algorithm.search()
+    assert algorithm.stc.get_evaluated_individuals() == 5

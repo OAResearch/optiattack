@@ -1,6 +1,6 @@
-"""Definitions of the ART baseline attacks: what they need from the NUT, their norm and how they are built."""
+"""Definitions of the baseline attacks (ART and Sparse-RS): NUT requirement, norm and how they are built."""
 from dataclasses import dataclass
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from core.search.algorithms.baseline.nut_interface import NutRequirement
 _NORMS = {"inf": np.inf, "2": 2}
 
 
-def _parse_norm(config: dict, key: str) -> float:
+def parse_norm(config: dict, key: str) -> float:
     """Converts a norm parameter ('inf' or '2') to the value used by ART and the query tracker."""
     value = str(config.get(key)).strip().lower()
     if value not in _NORMS:
@@ -21,13 +21,15 @@ def _parse_norm(config: dict, key: str) -> float:
 @dataclass(frozen=True)
 class AttackSpec:
 
-    """Describes one ART baseline attack."""
+    """Describes one ART baseline (or white-box) attack."""
 
     name: str
     requirement: NutRequirement
     stop_at_success_default: bool
     norm_fn: Callable[[dict], float]
     build_fn: Callable[[Any, dict, bool], Any]
+    # White-box attacks: lower estimate of the gradient queries the configured iterations need (budget warning).
+    gradient_calls_fn: Optional[Callable[[dict], int]] = None
 
     def norm(self, config: dict) -> float:
         """Norm in which the attack measures the perturbation (0 means number of changed pixels)."""
@@ -36,6 +38,10 @@ class AttackSpec:
     def build(self, estimator, config: dict, targeted: bool):
         """Builds the ART attack (an `art.attacks.EvasionAttack`) for the given estimator."""
         return self.build_fn(estimator, config, targeted)
+
+    def gradient_calls(self, config: dict) -> Optional[int]:
+        """Estimated number of gradient queries of a full run (None when the attack queries no gradients)."""
+        return None if self.gradient_calls_fn is None else int(self.gradient_calls_fn(config))
 
 
 def resolve_stop_at_success(spec: AttackSpec, config: dict) -> bool:
@@ -125,7 +131,7 @@ def _square_max_iter(config: dict) -> int:
 
 def _build_square(estimator, config: dict, targeted: bool):
     """Builds ART's SquareAttack; targeted mode uses a target margin loss since ART has no `targeted` flag."""
-    norm = _parse_norm(config, "square_norm")
+    norm = parse_norm(config, "square_norm")
     _check_square_image_size(norm, estimator.input_shape[0], estimator.input_shape[1])
     return _square_attack_class()(
         estimator,
@@ -148,7 +154,7 @@ def _build_hsj(estimator, config: dict, targeted: bool):
         estimator,
         batch_size=1,
         targeted=targeted,
-        norm=_parse_norm(config, "hsj_norm"),
+        norm=parse_norm(config, "hsj_norm"),
         max_iter=int(config["hsj_max_iter"]),
         max_eval=int(config["hsj_max_eval"]),
         init_eval=int(config["hsj_init_eval"]),
@@ -191,11 +197,35 @@ def _build_pixel(estimator, config: dict, targeted: bool):
     )
 
 
+def resolve_sparse_rs_k(config: dict) -> int:
+    """Number of pixels Sparse-RS changes: `sparse_rs_k`, else `max_pixels`, else 10."""
+    return int(config.get("sparse_rs_k", 0) or 0) or int(config.get("max_pixels", 0) or 0) or 10
+
+
+def _sparse_rs_max_iter(config: dict) -> int:
+    """Length of Sparse-RS's p schedule: the evaluation budget (or 10000 for a time budget), like Square's auto mode."""
+    if config.get("stopping_criterion") == ConfigParser.StoppingCriterion.TIME:
+        return 10000
+    return int(config["max_evaluations"])
+
+
+def _build_sparse_rs(estimator, config: dict, targeted: bool):
+    """Builds the numpy Sparse-RS L0 attack; its random numbers are seeded from the global np.random."""
+    from core.search.algorithms.baseline.sparse_rs import SparseRS
+    k = resolve_sparse_rs_k(config)
+    n_pixels = estimator.input_shape[0] * estimator.input_shape[1]
+    if k >= n_pixels:
+        raise ValueError("sparse_rs_k=%d must be below the number of pixels of the image (%d)." % (k, n_pixels))
+    return SparseRS(estimator, k=k, p_init=float(config["sparse_rs_p_init"]), max_iter=_sparse_rs_max_iter(config),
+                    targeted=targeted, randomness_seed=int(np.random.randint(0, 2 ** 31 - 1)))
+
+
 ATTACKS: Dict[str, AttackSpec] = {
     "square": AttackSpec("square", NutRequirement.SCORES, True,
-                         lambda config: _parse_norm(config, "square_norm"), _build_square),
+                         lambda config: parse_norm(config, "square_norm"), _build_square),
     "hsj": AttackSpec("hsj", NutRequirement.LABEL, False,
-                      lambda config: _parse_norm(config, "hsj_norm"), _build_hsj),
+                      lambda config: parse_norm(config, "hsj_norm"), _build_hsj),
     "simba": AttackSpec("simba", NutRequirement.SCORES, True, lambda config: 2, _build_simba),
     "pixel": AttackSpec("pixel", NutRequirement.SCORES, True, lambda config: 0, _build_pixel),
+    "sparse_rs": AttackSpec("sparse_rs", NutRequirement.SCORES, True, lambda config: 0, _build_sparse_rs),
 }

@@ -53,7 +53,7 @@
 ## baseline_attack
 
 - **Default Value**: square
-- **Description**: ART baseline attack used by the 'baseline' algorithm. Options: 'square', 'hsj', 'simba', 'pixel'.
+- **Description**: Baseline attack used by the 'baseline' algorithm. Options: 'square', 'hsj', 'simba', 'pixel' (ART), 'sparse_rs' (Sparse-RS L0, numpy port).
 
 ## baseline_stop_at_success
 
@@ -64,6 +64,41 @@
 
 - **Default Value**: single_point_crossover
 - **Description**: Crossover operator for the search.
+
+## cw_binary_search_steps
+
+- **Default Value**: 10
+- **Description**: Binary search steps of the C&W L2 attack over its constant (ART default).
+
+## cw_confidence
+
+- **Default Value**: 0.0
+- **Description**: Confidence (logit margin) of the C&W L2 attack (ART default).
+
+## cw_initial_const
+
+- **Default Value**: 650.25
+- **Description**: Initial constant of the C&W L2 attack on the 0-255 scale (ART default 0.01 on 0-1, times 255^2).
+
+## cw_learning_rate
+
+- **Default Value**: 0.01
+- **Description**: Initial learning rate of the C&W L2 attack (ART default 0.01; chosen by measurement on the 0-255 scale, see README).
+
+## cw_max_doubling
+
+- **Default Value**: 5
+- **Description**: Maximum doubling steps of the C&W L2 line search per iteration (ART default; each can cost a prediction query).
+
+## cw_max_halving
+
+- **Default Value**: 5
+- **Description**: Maximum halving steps of the C&W L2 line search per iteration (ART default; each can cost a prediction query).
+
+## cw_max_iter
+
+- **Default Value**: 10
+- **Description**: Iterations of the C&W L2 attack per binary search step (ART default). Each costs two gradient queries and up to cw_max_halving + cw_max_doubling + 1 prediction queries.
 
 ## enable_pruning
 
@@ -79,6 +114,11 @@
 
 - **Default Value**: experiment
 - **Description**: Experiment label.
+
+## fgsm_eps
+
+- **Default Value**: 8.0
+- **Description**: FGSM (L-inf) step size on the 0-255 scale.
 
 ## final_image_name
 
@@ -155,6 +195,11 @@
 - **Default Value**: 1000
 - **Description**: Maximum number of evaluations for the search.
 
+## max_pixels
+
+- **Default Value**: 0
+- **Description**: Maximum number of changed pixels (0: no limit). A pixel counts as changed when at least one channel differs from the original. Candidates that would exceed it are repaired before the NUT query by moving random actions on new pixels onto already-changed pixels; a candidate without actions is not queried. Works for all OptiAttack algorithms; the dense baselines (square, simba, hsj) reject it, and sparse_rs uses it as k.
+
 ## min_action_size
 
 - **Default Value**: 1
@@ -194,6 +239,26 @@
 
 - **Default Value**: overlay_matrix
 - **Description**: Overlay matrix image name.
+
+## pgd_eps
+
+- **Default Value**: 8.0
+- **Description**: Maximum perturbation of the PGD attack in pgd_norm on the 0-255 scale (8/255 on the 0-1 scale for L-inf; use a larger value for L2).
+
+## pgd_eps_step
+
+- **Default Value**: 2.0
+- **Description**: Step size of a PGD iteration in pgd_norm on the 0-255 scale.
+
+## pgd_max_iter
+
+- **Default Value**: 100
+- **Description**: Number of PGD iterations; each costs one gradient query (ART default 100).
+
+## pgd_norm
+
+- **Default Value**: inf
+- **Description**: Norm of the PGD attack. Options: 'inf' or '2'.
 
 ## pixel_es
 
@@ -290,6 +355,16 @@
 - **Default Value**: 5
 - **Description**: Snapshot interval for the search.
 
+## sparse_rs_k
+
+- **Default Value**: 0
+- **Description**: Number of pixels changed by Sparse-RS (L0). 0: use max_pixels, or 10 when max_pixels is 0 as well. Must not exceed max_pixels when that is set.
+
+## sparse_rs_p_init
+
+- **Default Value**: 0.3
+- **Description**: Initial fraction of the k pixels that Sparse-RS moves per iteration; it shrinks with the official schedule. Default 0.3 is the official L0 default (eval.py, README for untargeted runs; README suggests 0.1 for targeted runs).
+
 ## square_eps
 
 - **Default Value**: 8.0
@@ -334,6 +409,16 @@
 
 - **Default Value**: None
 - **Description**: Target class for the targeted attack. If not specified, any misclassification is considered successful.
+
+## use_gradients
+
+- **Default Value**: False
+- **Description**: Allow OptiAttack algorithms to use gradients of a gradient-capable NUT (GradientOracle). Must stay false for black-box results; no algorithm uses it yet. Needs a NUT that declares 'gradients'.
+
+## whitebox_attack
+
+- **Default Value**: pgd
+- **Description**: White-box attack used by the 'whitebox' algorithm (ART, needs a NUT with 'gradients' and 'logits'). Options: 'fgsm', 'pgd', 'cw' (Carlini-Wagner L2). Gradient queries count towards max_evaluations.
 
 ## write_statistics
 

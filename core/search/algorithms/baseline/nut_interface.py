@@ -1,4 +1,4 @@
-"""Declares what an attack needs from the NUT and converts NUT results to probability vectors."""
+"""Declares what an attack needs from the NUT and converts NUT results to probability or logit vectors."""
 from enum import Enum
 from typing import List
 
@@ -24,6 +24,11 @@ class NutCapabilityError(ValueError):
 class InvalidScoresError(ValueError):
 
     """Raised when the scores returned by the NUT are not usable."""
+
+
+class InvalidGradientError(ValueError):
+
+    """Raised when a gradient returned by the NUT has the wrong shape or non-finite values."""
 
 
 _PROVIDED_BY = {
@@ -81,6 +86,26 @@ def to_probability_vector(result: NutRequest, labels: List[str], tolerance: floa
         for i in range(len(labels)):
             if i not in reported:
                 vector[i] = remaining
+    return vector
+
+
+def to_logit_vector(result: NutRequest, labels: List[str]) -> np.ndarray:
+    """Returns the NUT's logits of all classes (in label order); raises NutCapabilityError if they are missing."""
+    logits = result.logits
+    if logits is None:
+        raise NutCapabilityError(
+            "White-box mode needs the NUT's 'logits' (one value per class, in 'labels' order) next to its "
+            "'predictions', but the NUT did not return them. Return them from the NUT function, e.g. with "
+            "optiattack_client's torch_predict_fn."
+        )
+    if len(logits) != len(labels):
+        raise NutCapabilityError(
+            "The NUT returned %d 'logits' but has %d classes ('labels'); one logit per class is required."
+            % (len(logits), len(labels))
+        )
+    vector = np.asarray(logits, dtype=float)
+    if not np.all(np.isfinite(vector)):
+        raise InvalidScoresError("The NUT returned non-finite logits %s." % list(logits))
     return vector
 
 

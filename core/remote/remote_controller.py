@@ -1,9 +1,16 @@
 """remote_controller.py - RemoteController class to interact with the NUT server."""
 import base64
 import logging
+import numpy as np
 import requests
 
+from core.search.algorithms.baseline.nut_interface import InvalidGradientError
 from core.utils.nut_request import NutRequest
+
+
+class NutGradientError(RuntimeError):
+
+    """Raised when the NUT rejects a gradient request (e.g. it has no gradient_fn)."""
 
 
 class RemoteController:
@@ -21,7 +28,8 @@ class RemoteController:
             "run": f"{base_url}/runNUT",
             "stop": f"{base_url}/stopNUT",
             "testResults": f"{base_url}/testResults",
-            "newAction": f"{base_url}/newAction"
+            "newAction": f"{base_url}/newAction",
+            "gradient": f"{base_url}/gradientNut"
         }
 
         # Create a session to keep the connection alive
@@ -83,3 +91,38 @@ class RemoteController:
         except requests.exceptions.ConnectionError:
             logging.error("Connection Error")
             raise ConnectionError("Connection Error")
+
+    def gradient(self, image_array, label: str, kind: str) -> np.ndarray:
+        """Asks the NUT for the gradient of `kind` ("loss" or "class") for `label` at the float32 image."""
+        image = np.ascontiguousarray(image_array, dtype=np.float32)
+        body = {"image": base64.b64encode(image.tobytes()).decode(), "shape": list(image.shape),
+                "label": label, "kind": kind}
+        try:
+            logging.info("Requesting %s gradient for label %s", kind, label)
+            # A gradient query costs one evaluation of the shared budget and is also counted on its own
+            self.stc.new_individual_evaluation()
+            self.stc.new_gradient_evaluation()
+            response = self.connection.post(self.NUT_ENDPOINTS["gradient"], json=body)
+        except requests.exceptions.ConnectionError:
+            logging.error("Connection Error")
+            raise ConnectionError("Connection Error")
+        if response.status_code >= 400:
+            raise NutGradientError(
+                "The NUT rejected the '%s' gradient request for label '%s' (HTTP %s): %s"
+                % (kind, label, response.status_code, self._error_detail(response)))
+        payload = response.json()
+        values = np.frombuffer(base64.b64decode(payload["gradient"]), dtype=np.float32)
+        shape = tuple(payload.get("shape") or image.shape)
+        if values.size != int(np.prod(shape)):
+            raise InvalidGradientError(
+                "The NUT returned %d gradient values for label '%s' (kind '%s') but declared shape %s."
+                % (values.size, label, kind, shape))
+        return values.reshape(shape).copy()
+
+    @staticmethod
+    def _error_detail(response) -> str:
+        """Extracts the 'detail' message of an error response, falling back to its text."""
+        try:
+            return str(response.json().get("detail"))
+        except Exception:
+            return str(getattr(response, "text", ""))

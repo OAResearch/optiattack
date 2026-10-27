@@ -9,6 +9,7 @@ from core.search.algorithms.genetic_algorithm import GeneticAlgorithm
 from core.search.algorithms.mabc_algorithm import ModifiedArtificialBeeColonyAlgorithm
 from core.search.algorithms.mio_algorithm import MioAlgorithm
 from core.search.algorithms.random_algorithm import RandomAlgorithm
+from core.search.algorithms.whitebox.whitebox_algorithm import WhiteboxAlgorithm
 from core.search.service.crossover.single_point_crossover import SinglePointCrossover
 from core.search.service.mutator.one_zero_mutator import OneZeroMutator
 from core.search.service.mutator.standard_mutator import StandardMutator
@@ -87,13 +88,15 @@ def configure_container(container):
                                                   archive=container.archive,
                                                   remote_controller=container.remote_controller,
                                                   stc=container.stc,
-                                                  target=container.config.get("target")
+                                                  target=container.config.get("target"),
+                                                  pixel_budget=container.pixel_budget
                                                   ))
     else:
         container.ff.override(providers.Singleton(UntargetedFitnessFunction,
                                                   archive=container.archive,
                                                   remote_controller=container.remote_controller,
-                                                  stc=container.stc))
+                                                  stc=container.stc,
+                                                  pixel_budget=container.pixel_budget))
 
     if container.config.get("pruning_method") == ConfigParser.PruningTypes.STANDARD:
         container.pruner.override(providers.Singleton(StandardPruner,
@@ -120,6 +123,8 @@ def configure_container(container):
         algorithm = ModifiedArtificialBeeColonyAlgorithm
     elif current_algorithm == ConfigParser.Algorithms.BASELINE:
         algorithm = BaselineAlgorithm
+    elif current_algorithm == ConfigParser.Algorithms.WHITEBOX:
+        algorithm = WhiteboxAlgorithm
     else:
         raise ValueError(f"Algorithm {current_algorithm} not supported")
 

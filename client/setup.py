@@ -11,12 +11,13 @@ setup(
     url="https://github.com/OAResearch/optiattack",
     package_dir={"": "core"},
     packages=find_packages(where="core"),
-    py_modules=["optiattack_client", "constants"],
+    py_modules=["optiattack_client", "constants", "torch_support"],
     install_requires=[
         "fastapi",
         "uvicorn",
         "python-multipart"
     ],
+    extras_require={"torch": ["torch"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",

@@ -15,9 +15,9 @@ class TargetedFitnessFunction(FitnessFunction):
 
     """Targeted fitness function that attempts to change classification to a specific target."""
 
-    def __init__(self, archive, remote_controller, stc, target):
+    def __init__(self, archive, remote_controller, stc, target, *, pixel_budget=None):
         """Initialize the targeted fitness function with a model."""
-        super().__init__(archive, remote_controller, stc)
+        super().__init__(archive, remote_controller, stc, pixel_budget=pixel_budget)
         self.target = target
 
     def evaluate(self, individual: Optional[T] = None, actions: Optional[list[Action]] = None) -> FitnessValue:

@@ -94,6 +94,15 @@ def test_pruning_evaluations_are_counted_outside_the_search_budget(search_time_c
     assert search_time_controller.get_evaluated_individuals() == 1
     assert search_time_controller.get_evaluated_individuals_in_pruning() == 2
 
+def test_gradient_counter(search_time_controller):
+    """Gradient queries are counted separately; the caller also counts them as individual evaluations."""
+    assert search_time_controller.get_gradient_evaluations() == 0
+    search_time_controller.new_gradient_evaluation()
+    search_time_controller.new_gradient_evaluation()
+
+    assert search_time_controller.get_gradient_evaluations() == 2
+    assert search_time_controller.get_evaluated_individuals() == 0
+
 def test_is_solution_uses_the_fitness_threshold():
     """A fitness value is a solution when it is at or below the configured threshold."""
     stc = SearchTimeController({"fitness_threshold": -0.1}, pc=PhaseController())

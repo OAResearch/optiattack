@@ -39,6 +39,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install -r requirements-baselines.txt
+          pip install -r requirements-experiments.txt
       - name: Run tests and collect coverage
         run: pytest --cov=core --cov-report=json
       - name: Upload coverage to Codecov (arg token)

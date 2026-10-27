@@ -11,6 +11,7 @@ from core.search.service.archive import Archive
 from core.search.service.monitor.search_listener import SearchListener
 from core.search.service.search_time_controller import SearchTimeController
 from core.search.solution import Solution
+from core.utils import perturbation
 
 
 class Statistics(SearchListener):
@@ -161,6 +162,17 @@ class Statistics(SearchListener):
         if self.config.get("show_plots"):
             plt.show()
 
+    def _perturbation_columns(self, solution, prefix=''):
+        """Compute the perturbation metrics of a solution from the in-memory images; empty values for None."""
+        values = dict.fromkeys(perturbation.metrics_keys())
+        image = getattr(self.archive, 'image', None)
+        original = getattr(image, 'array', None)
+        if solution is not None and isinstance(original, np.ndarray):
+            adversarial = self.archive.get_mutated_image(solution.actions)
+            if isinstance(adversarial, np.ndarray):
+                values = perturbation.metrics(original, adversarial)
+        return {f"{prefix}{key}": value for key, value in values.items()}
+
     def save_statistics(self):
         """Save the data as a json file."""
         data = {}
@@ -228,6 +240,12 @@ class Statistics(SearchListener):
             data['not_minimized_changes'] = []
             data['pruning_eval_count'] = 0
             data['pruned_fitness'] = None
+
+        data.update(self._perturbation_columns(self.archive.extract_solution()))
+        data.update(self._perturbation_columns(
+            self.archive.extract_solution(not_minimized=True) if self.config.get("enable_pruning") else None,
+            prefix='not_minimized_'))
+        data['gradient_eval_count'] = self.stc.get_gradient_evaluations()
 
         data['config'] = self.config
 

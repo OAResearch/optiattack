@@ -187,6 +187,7 @@ class ConfigParser:
         ABC = "abc"
         MABC = "mabc"
         BASELINE = "baseline"
+        WHITEBOX = "whitebox"
 
     @cfg("Search algorithm for the optimization.")
     def algorithm(self):
@@ -403,9 +404,25 @@ class ConfigParser:
         """Fitness threshold for stopping the search."""
         return 0.0
 
-    @cfg("ART baseline attack used by the 'baseline' algorithm. Options: 'square', 'hsj', 'simba', 'pixel'.")
+    @cfg("Maximum number of changed pixels (0: no limit). A pixel counts as changed when at least one channel "
+         "differs from the original. Candidates that would exceed it are repaired before the NUT query by "
+         "moving random actions on new pixels onto already-changed pixels; a candidate without actions is not "
+         "queried. Works for all "
+         "OptiAttack algorithms; the dense baselines (square, simba, hsj) reject it, and sparse_rs uses it as k.")
+    def max_pixels(self):
+        """Maximum number of changed pixels (0: no limit)."""
+        return 0
+
+    @cfg("Allow OptiAttack algorithms to use gradients of a gradient-capable NUT (GradientOracle). Must stay false "
+         "for black-box results; no algorithm uses it yet. Needs a NUT that declares 'gradients'.")
+    def use_gradients(self):
+        """Allow OptiAttack algorithms to use NUT gradients (GradientOracle)."""
+        return False
+
+    @cfg("Baseline attack used by the 'baseline' algorithm. Options: 'square', 'hsj', 'simba', 'pixel' (ART), "
+         "'sparse_rs' (Sparse-RS L0, numpy port).")
     def baseline_attack(self):
-        """ART baseline attack used by the 'baseline' algorithm."""
+        """Baseline attack used by the 'baseline' algorithm."""
         return "square"
 
     @cfg("Stop the baseline attack at the first successful query. 'auto' uses the attack default (square, "
@@ -517,6 +534,90 @@ class ConfigParser:
     def pixel_max_iter(self):
         """Maximum number of optimiser iterations of the PixelAttack (ART default)."""
         return 100
+
+    @cfg("Number of pixels changed by Sparse-RS (L0). 0: use max_pixels, or 10 when max_pixels is 0 as well. "
+         "Must not exceed max_pixels when that is set.")
+    def sparse_rs_k(self):
+        """Number of pixels changed by Sparse-RS (0: max_pixels, else 10)."""
+        return 0
+
+    @cfg("Initial fraction of the k pixels that Sparse-RS moves per iteration; it shrinks with the official schedule. "
+         "Default 0.3 is the official L0 default (eval.py, README for untargeted runs; README suggests 0.1 for "
+         "targeted runs).")
+    def sparse_rs_p_init(self):
+        """Initial fraction of the k pixels moved per Sparse-RS iteration (official L0 default)."""
+        return 0.3
+
+    @cfg("White-box attack used by the 'whitebox' algorithm (ART, needs a NUT with 'gradients' and 'logits'). "
+         "Options: 'fgsm', 'pgd', 'cw' (Carlini-Wagner L2). Gradient queries count towards max_evaluations.")
+    def whitebox_attack(self):
+        """White-box attack used by the 'whitebox' algorithm."""
+        return "pgd"
+
+    @cfg("FGSM (L-inf) step size on the 0-255 scale.")
+    def fgsm_eps(self):
+        """FGSM (L-inf) step size on the 0-255 scale."""
+        return 8.0
+
+    @cfg("Norm of the PGD attack. Options: 'inf' or '2'.")
+    def pgd_norm(self):
+        """Norm of the PGD attack."""
+        return "inf"
+
+    @cfg("Maximum perturbation of the PGD attack in pgd_norm on the 0-255 scale (8/255 on the 0-1 scale for L-inf; "
+         "use a larger value for L2).")
+    def pgd_eps(self):
+        """Maximum perturbation of the PGD attack on the 0-255 scale."""
+        return 8.0
+
+    @cfg("Step size of a PGD iteration in pgd_norm on the 0-255 scale.")
+    def pgd_eps_step(self):
+        """Step size of a PGD iteration on the 0-255 scale."""
+        return 2.0
+
+    @cfg("Number of PGD iterations; each costs one gradient query (ART default 100).")
+    def pgd_max_iter(self):
+        """Number of PGD iterations."""
+        return 100
+
+    @cfg("Confidence (logit margin) of the C&W L2 attack (ART default).")
+    def cw_confidence(self):
+        """Confidence of the C&W L2 attack."""
+        return 0.0
+
+    @cfg("Initial learning rate of the C&W L2 attack (ART default 0.01; chosen by measurement on the 0-255 scale, "
+         "see README).")
+    def cw_learning_rate(self):
+        """Initial learning rate of the C&W L2 attack."""
+        return 0.01
+
+    @cfg("Iterations of the C&W L2 attack per binary search step (ART default). Each costs two gradient queries "
+         "and up to cw_max_halving + cw_max_doubling + 1 prediction queries.")
+    def cw_max_iter(self):
+        """Iterations of the C&W L2 attack per binary search step."""
+        return 10
+
+    @cfg("Binary search steps of the C&W L2 attack over its constant (ART default).")
+    def cw_binary_search_steps(self):
+        """Binary search steps of the C&W L2 attack."""
+        return 10
+
+    @cfg("Initial constant of the C&W L2 attack on the 0-255 scale (ART default 0.01 on 0-1, times 255^2).")
+    def cw_initial_const(self):
+        """Initial constant of the C&W L2 attack on the 0-255 scale."""
+        return 650.25
+
+    @cfg("Maximum halving steps of the C&W L2 line search per iteration (ART default; each can cost a prediction "
+         "query).")
+    def cw_max_halving(self):
+        """Maximum halving steps of the C&W L2 line search."""
+        return 5
+
+    @cfg("Maximum doubling steps of the C&W L2 line search per iteration (ART default; each can cost a prediction "
+         "query).")
+    def cw_max_doubling(self):
+        """Maximum doubling steps of the C&W L2 line search."""
+        return 5
 
 
 if __name__ == "__main__":

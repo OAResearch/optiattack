@@ -1,0 +1,36 @@
+# Example experiment for `python -m core.experiment run examples/experiment.yaml`.
+# Needs `pip install -r requirements-experiments.txt`. Every run is a separate main.py process.
+# Edit the paths and the NUT address below; the output folder must be outside the repository.
+# Relative paths (images, output) are resolved against the folder of this YAML file.
+
+name: dermamnist-l0                   # experiment name (stored in run_info.json)
+
+images: path/to/folder                # folder with the images; searched recursively for *.png, *.jpg, *.jpeg, *.bmp
+nut: {host: localhost, port: 38000}   # address of the remote NUT (network under test)
+attack_type: untargeted               # untargeted, or targeted (then also: target: <class name>)
+
+# For several NUTs (each with its own image folder), replace images/nut/attack_type above with a list:
+# targets:
+#   - {name: dermamnist, images: path/to/derma, nut: {host: localhost, port: 38000}}
+#   - {name: pneumonia, images: path/to/pneumonia, nut: {host: localhost, port: 38001},
+#      attack_type: targeted, target: pneumonia}
+
+budget: {max_evaluations: 1000}       # main.py parameters shared by all runs (lowest priority)
+seeds: [1, 2, 3, 4, 5]                # one run per seed, for every image and method
+output: path/to/output_dir            # results go to <output>/<target>/<method>/<image>/seed_<n>/
+
+common: {save_images: true}           # main.py parameters added to every run (overrides budget)
+
+# One entry per method; keys are main.py parameters (see docs/parameters.md) and override common.
+# Pruning is enabled per L0 method only: pruning the dense baselines (square, simba, hsj) or a white-box
+# attack is very expensive and makes their L0 meaningless, so the validator warns if you enable it there.
+methods:
+  mio: {algorithm: mio, enable_pruning: true}                                    # OptiAttack, no pixel limit
+  mio_k20: {algorithm: mio, max_pixels: 20, enable_pruning: true}                # OptiAttack, at most 20 pixels
+  sparse_rs_k20: {algorithm: baseline, baseline_attack: sparse_rs, sparse_rs_k: 20}   # Sparse-RS, 20 pixels
+  square: {algorithm: baseline, baseline_attack: square}                         # Square attack (L-inf), dense
+
+# Used for the summary that `run` writes at the end, and by `summarize --yaml`.
+analysis:
+  k_values: [10, 20, 50, 100]                                  # pixel budgets of the success-versus-k curve
+  threat_models: {l0: [mio, mio_k20, sparse_rs_k20], linf: [square]}   # methods compared with each other

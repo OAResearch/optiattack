@@ -23,6 +23,7 @@ class SearchTimeController:
         self.logger = logging.getLogger(__name__)
         self.evaluated_individuals = 0
         self.evaluated_individuals_in_pruning = 0
+        self.gradient_evaluations = 0
         self.last_action_improvement_timestamp = 0
         self.start_time = 0
         self.search_started = False
@@ -104,6 +105,14 @@ class SearchTimeController:
     def get_evaluated_individuals_in_pruning(self):
         """Get the number of individuals evaluated during pruning, which are outside the search budget."""
         return self.evaluated_individuals_in_pruning
+
+    def new_gradient_evaluation(self):
+        """Count a gradient query; the caller also counts it as an individual evaluation (shared budget)."""
+        self.gradient_evaluations += 1
+
+    def get_gradient_evaluations(self) -> int:
+        """Get the number of gradient queries sent to the NUT."""
+        return self.gradient_evaluations
 
     def new_action_improvement(self):
         """Update the timestamp of the last action improvement."""

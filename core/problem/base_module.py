@@ -11,9 +11,11 @@ from core.search.service.adaptive_parameter_control import AdaptiveParameterCont
 from core.search.service.archive import Archive
 from core.search.service.crossover.crossover import Crossover
 from core.search.service.fitness_function.fitness_function import FitnessFunction
+from core.search.service.gradient_oracle import GradientOracle
 from core.search.service.monitor.search_status_updater import SearchStatusUpdater
 from core.search.service.monitor.statistics import Statistics
 from core.search.service.mutator.mutator import Mutator
+from core.search.service.pixel_budget import PixelBudget
 from core.search.service.pruner.pruner import Pruner
 from core.search.service.randomness import Randomness
 from core.search.service.sampler.sampler import Sampler
@@ -55,7 +57,11 @@ class BaseModule(containers.DeclarativeContainer):
                                                 stc=stc,
                                                 config=config,
                                                 archive=archive)
-    ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc)
+    pixel_budget = providers.Singleton(PixelBudget, config=config, randomness=randomness, archive=archive)
+    ff = providers.Singleton(FitnessFunction, archive=archive, remote_controller=remote_controller, stc=stc,
+                             pixel_budget=pixel_budget)
+    gradient_oracle = providers.Singleton(GradientOracle, config=config, remote_controller=remote_controller,
+                                          archive=archive)
     mutator = providers.Singleton(Mutator, randomness=randomness, stc=stc, config=config, apc=apc)
     crossover = providers.Singleton(Crossover, randomness=randomness, stc=stc, config=config, apc=apc)
     statistics = providers.Singleton(Statistics, stc=stc, archive=archive, config=config)

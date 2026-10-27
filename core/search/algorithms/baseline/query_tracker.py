@@ -3,6 +3,7 @@ from typing import Callable, Optional
 
 import numpy as np
 
+from core.config_parser import ConfigParser
 from core.search.fitness_value import FitnessValue
 from core.utils.nut_request import NutRequest
 
@@ -35,7 +36,8 @@ class QueryTracker:
     """Watches NUT queries made by an ART attack and tracks the best image found."""
 
     def __init__(self, stc, fitness_from_result: Callable[[NutRequest], float], original: np.ndarray,
-                 norm: float, stop_at_success: bool, on_new_best: Callable[[np.ndarray, FitnessValue], None]):
+                 norm: float, stop_at_success: bool, on_new_best: Callable[[np.ndarray, FitnessValue], None],
+                 reserved_queries: int = 0):
         """Initializes the tracker with the budget controller, fitness function and the original image."""
         self.stc = stc
         self.fitness_from_result = fitness_from_result
@@ -48,6 +50,8 @@ class QueryTracker:
         self._best_distance = float("inf")
         self._best_is_success = False
         self._cache_hits_in_a_row = 0
+        # Queries of an evaluation budget kept back from the attack (e.g. for a final check); 0 to release them.
+        self.reserved_queries = reserved_queries
 
     def start_from_original(self, result: NutRequest) -> None:
         """Makes the original image the best so far, so only queries that improve on it become the best."""
@@ -61,9 +65,22 @@ class QueryTracker:
             raise AttackStalled()
 
     def before_query(self) -> None:
-        """Raises BudgetExhausted if the budget is already used up."""
-        if self.stc.percentage_used_budget() >= 1.0:
+        """Raises BudgetExhausted if the budget is already used up, or only the reserved queries are left."""
+        if self.stc.percentage_used_budget() >= 1.0 or self._only_reserve_left():
             raise BudgetExhausted()
+
+    def _only_reserve_left(self) -> bool:
+        """True when an evaluation budget has no queries left besides the reserved ones (time budgets: never)."""
+        if self.reserved_queries <= 0:
+            return False
+        config = self.stc.config
+        if config.get("stopping_criterion") != ConfigParser.StoppingCriterion.INDIVIDUAL_EVALUATIONS:
+            return False
+        return self.stc.get_evaluated_individuals() + self.reserved_queries >= config.get("max_evaluations")
+
+    def after_gradient_query(self) -> None:
+        """Records a real gradient query as NUT activity (resets the stall count); the best image is not changed."""
+        self._cache_hits_in_a_row = 0
 
     def distance(self, image: np.ndarray) -> float:
         """Perturbation size of the image w.r.t. the original in the attack's norm."""

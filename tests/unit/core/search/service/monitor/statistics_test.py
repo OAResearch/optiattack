@@ -1,5 +1,6 @@
 import pytest
 import os
+import csv
 import json
 import numpy as np
 from unittest.mock import MagicMock
@@ -288,6 +289,18 @@ def test_save_statistics_writes_first_success_eval(statistics):
     assert data["first_success_eval"] == 17
 
 
+def test_gradient_eval_count_written(statistics):
+    _prepare_statistics_for_saving(statistics)
+    statistics.stc.get_gradient_evaluations.return_value = 7
+
+    statistics.save_statistics()
+
+    assert _load_saved_statistics(statistics)["gradient_eval_count"] == 7
+    with open(f"{statistics.output_dir}/{statistics.statistics_file_name}.csv", newline="") as file:
+        header = next(csv.reader(file))
+    assert header.index("gradient_eval_count") < header.index("config_seed")
+
+
 def test_save_statistics_has_same_pruning_columns_when_pruning_disabled(statistics):
     statistics.config["enable_pruning"] = False
     _prepare_statistics_for_saving(statistics)
@@ -298,3 +311,69 @@ def test_save_statistics_has_same_pruning_columns_when_pruning_disabled(statisti
     assert data["pruning_eval_count"] == 0
     assert data["pruned_fitness"] is None
     assert data["not_minimized_size"] is None
+
+
+def _statistics_with_real_archive(tmp_path, enable_pruning, save_images=True):
+    archive = Archive(MagicMock(), MagicMock(), {})
+    archive.set_image(MagicMock(array=np.full((8, 8, 3), 100, dtype=np.uint8)))
+    kept = Action((1, 1), 7, 200, 13)
+    pruned = Action((5, 5), 255, 255, 255)
+    individual = Individual()
+    individual.add_action(kept)
+    individual.add_action(pruned)
+    archive.populations.append(EvaluatedIndividual(individual, MagicMock(spec=FitnessValue)))
+    if enable_pruning:
+        archive.set_minimized_solution(Solution([kept], MagicMock(spec=FitnessValue)))
+    config = {"snapshot_interval": 10, "output_dir": str(tmp_path), "show_plots": False,
+              "enable_pruning": enable_pruning, "save_images": save_images}
+    statistics = Statistics(MagicMock(spec=SearchTimeController), archive, config)
+    _prepare_statistics_for_saving(statistics)
+    return statistics
+
+
+def test_statistics_write_perturbation_metrics(tmp_path):
+    statistics = _statistics_with_real_archive(tmp_path, enable_pruning=False)
+
+    statistics.save_statistics()
+
+    data = _load_saved_statistics(statistics)
+    assert data["l0_pixels"] == 2
+    assert data["linf"] == 155.0
+    assert data["l2"] > 0
+    assert {"ssim", "psnr"} <= set(data)
+    assert data["not_minimized_l0_pixels"] is None
+    with open(f"{statistics.output_dir}/{statistics.statistics_file_name}.csv", newline="") as csvfile:
+        header = next(csv.reader(csvfile))
+    assert header.index("psnr") < header.index("config_snapshot_interval")
+
+
+def test_statistics_write_not_minimized_metrics_with_pruning(tmp_path):
+    statistics = _statistics_with_real_archive(tmp_path, enable_pruning=True)
+
+    statistics.save_statistics()
+
+    data = _load_saved_statistics(statistics)
+    assert data["l0_pixels"] == 1
+    assert data["not_minimized_l0_pixels"] == 2
+    assert data["not_minimized_l0_pixels"] >= data["l0_pixels"]
+    assert data["not_minimized_l2"] >= data["l2"]
+    assert data["not_minimized_linf"] >= data["linf"]
+    assert {"not_minimized_ssim", "not_minimized_psnr"} <= set(data)
+
+
+def test_metrics_written_when_save_images_false(tmp_path):
+    statistics = _statistics_with_real_archive(tmp_path, enable_pruning=True, save_images=False)
+    statistics.config.update({"write_statistics": True, "final_image_name": "final_image",
+                              "overlay_image_name": "overlay", "line_plot_name": "line_plot",
+                              "statistics_file_name": "statistics"})
+    statistics.statistics_file_name = "statistics"
+    statistics.snapshots_interval = -1
+
+    statistics.write_statistics()
+
+    with open(tmp_path / "statistics.csv", newline="") as csvfile:
+        row = next(csv.DictReader(csvfile))
+    assert row["l0_pixels"] == "1"
+    assert row["not_minimized_l0_pixels"] == "2"
+    assert float(row["l2"]) > 0 and float(row["psnr"]) > 0
+    assert list(tmp_path.glob("*.png")) == []

@@ -7,6 +7,7 @@ from core.search.evaluated_individual import EvaluatedIndividual
 from core.search.fitness_value import FitnessValue
 from core.search.individual import Individual
 from core.search.service.archive import Archive
+from core.search.service.pixel_budget import PixelBudget
 from core.search.service.search_time_controller import SearchTimeController
 from core.remote.remote_controller import RemoteController
 from core.utils.nut_request import NutRequest
@@ -18,11 +19,13 @@ class FitnessFunction:
 
     """Abstract class for fitness functions that evaluate individuals in the search space."""
 
-    def __init__(self, archive: Archive, remote_controller: RemoteController, stc: SearchTimeController) -> None:
+    def __init__(self, archive: Archive, remote_controller: RemoteController, stc: SearchTimeController,
+                 pixel_budget: Optional[PixelBudget] = None) -> None:
         """Initialize the fitness function."""
         self.archive = archive
         self.remote_controller = remote_controller
         self.stc = stc
+        self.pixel_budget = pixel_budget
 
     def evaluate(self, individual: Optional[T] = None, actions: Optional[list[Action]] = None) -> FitnessValue:
         """Evaluate the fitness of the provided individual and return a fitness value."""
@@ -33,7 +36,13 @@ class FitnessFunction:
         raise NotImplementedError("This method should be implemented by subclasses")
 
     def calculate_fitness(self, individual: T) -> EvaluatedIndividual:
-        """Calculate the fitness of an individual."""
+        """Calculate the fitness of an individual; with a pixel budget, the individual is repaired first (in place)."""
+
+        if self.pixel_budget is not None and self.pixel_budget.limit > 0 and not self.pixel_budget.repair(individual):
+            # Nothing is left after the repair: the image is the archive image, which is not queried again.
+            original = self.archive.get_original_prediction_results()
+            return EvaluatedIndividual(individual, FitnessValue(self.fitness_from_result(original),
+                                                                original.predictions))
 
         fitness_value = SearchTimeController.measure_time_millis(
             self.log_execution_time,
